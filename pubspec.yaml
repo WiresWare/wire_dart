@@ -1,6 +1,6 @@
 name: wire
 description: Wire is a publish-subscribe library, with static layer beneath, where responses associated with "keys" called - signals. Simplest possible API - add, remove and send.
-version: 0.1.5
+version: 0.1.6
 homepage: https://github.com/DQvsRA/Wire
 author: Vladimir Cores (Minkin) <vladimir.cores@gmail.com>
 
