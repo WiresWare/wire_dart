@@ -1,13 +1,12 @@
-# Wire
-Dart publish-subscribe library, with static layer beneath, where responses associated with "keys" called - signals. Simplest possible API - add, remove and send.
+import 'package:wire/wire.dart';
 
-```
-const String
+main() {
+  /// SUBSCRIBER EXAMPLE ======================================
+  const String
     SIGNAL_1 = "SIGNAL_1",
     SIGNAL_ONCE = "SIGNAL_1_ONCE",
     SIGNAL_2 = "SIGNAL_2";
-    
-  /// SUBSCRIBER EXAMPLE ======================================
+
   Wire.add(SIGNAL_1, (data) {
     print("> SIGNAL 1 (subscriber 1) -> Hello: " + data);
   });
@@ -45,4 +44,4 @@ const String
   print("\tNo ends: " + Wire.send(SIGNAL_2, "Eat (sometimes)").toString());
   print("\tNo ends: " + Wire.send(SIGNAL_2, "Sleep").toString());
   print("\tNo ends: " + Wire.send(SIGNAL_2, "Repeat").toString());
-  ```
+}
