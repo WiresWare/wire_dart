@@ -12,7 +12,7 @@ part 'layer.dart';
 class Wire
 {
   static int _INDEX = 0;
-  static WireLayer _layer = WireLayer();
+  static WireLayer _LAYER = WireLayer();
 
   ///
   /// The number of times that this item will respond.
@@ -54,7 +54,7 @@ class Wire
     this.replies = replies;
 
     _hash = ++_INDEX << 0x08;
-    _layer.add(this);
+    _LAYER.add(this);
   }
 
   ///**********************************************************************************************************
@@ -66,10 +66,10 @@ class Wire
   { return Wire(signal, listener, replies); }
 
   static bool send(String signal, [args])
-  { return _layer.send(signal, args); }
+  { return _LAYER.send(signal, args); }
 
   static bool remove(String signal)
-  { return _layer.remove(signal); }
+  { return _LAYER.remove(signal); }
 
   ///**********************************************************************************************************
   ///
