@@ -1,7 +1,7 @@
 import 'package:wire/wire.dart';
 
 main() {
-  /// SUBSCRIBER EXAMPLE ======================================
+  /// SUBSCRIBER and API EXAMPLE ======================================
   const String
     SIGNAL_1 = "SIGNAL_1",
     SIGNAL_ONCE = "SIGNAL_1_ONCE",
@@ -44,4 +44,17 @@ main() {
   print("\tNo ends: " + Wire.send(SIGNAL_2, "Eat (sometimes)").toString());
   print("\tNo ends: " + Wire.send(SIGNAL_2, "Sleep").toString());
   print("\tNo ends: " + Wire.send(SIGNAL_2, "Repeat").toString());
+
+  String param1 = "SUPER_PARAM";
+  Wire.data(param1).listen((data) => {
+    print("\t Listener 1: " + data)
+  });
+
+  Wire.data(param1).listen((data) => {
+    print("\t Listener 2: " + data)
+  });
+
+  print("> Wire.data Listeners: where initial data = " + Wire.data(param1).value.toString());
+  Wire.data(param1, "VALUE");
+  Wire.data(param1, (value) => value + " NEW");
 }

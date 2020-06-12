@@ -1,8 +1,11 @@
 library wire;
 
+import 'dart:async';
 import 'dart:collection';
 
+part 'store.dart';
 part 'layer.dart';
+part 'data.dart';
 
 ///
 /// Created by Vladimir Cores (Minkin) on 07/10/19.
@@ -13,12 +16,13 @@ class Wire
 {
   static int _INDEX = 0;
   static WireLayer _LAYER = WireLayer();
+  static WireStore _STORE = WireStore();
 
   ///
   /// The number of times that this item will respond.
   /// Default is 0 that means infinity times.
   ///
-  int replies;
+  int replies = 0;
 
   ///**************************************************
   ///  Protected / Private Properties
@@ -59,6 +63,17 @@ class Wire
 
   ///**********************************************************************************************************
   ///
+  ///  Public Methods
+  ///
+  ///**********************************************************************************************************
+  void transfer([params])
+  {
+    // Call a listener in this Wire.
+    _listener(params);
+  }
+
+  ///**********************************************************************************************************
+  ///
   ///  Public Static Methods
   ///
   ///**********************************************************************************************************
@@ -71,15 +86,10 @@ class Wire
   static bool remove(String signal)
   { return _LAYER.remove(signal); }
 
-  ///**********************************************************************************************************
-  ///
-  ///  Public Methods
-  ///
-  ///**********************************************************************************************************
-  void perform([params])
+  static WireData data(String param, [dynamic value])
   {
-    // Call a listener in this Wire.
-    if (params != null) { _listener(params); }
-    else { _listener(null); }
+    var wd = _STORE.get(param);
+    if (value != null) wd.value = value is Function ? value(wd.value) : value;
+    return wd;
   }
 }

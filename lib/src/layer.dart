@@ -24,22 +24,22 @@ class WireLayer
 
   bool send(String signal, [args])
   {
-    bool noMoreSignals = true;
+    var noSubscribers = true;
 
     if (_hashesBySignal.containsKey(signal))
     {
-      List<Wire>ToRemove = [];
+      var WiresToRemove = <Wire>[];
       _hashesBySignal[signal].forEach((hash) {
         Wire wire = _wireByHash[hash];
         int replies = wire.replies;
-        noMoreSignals = replies > 0 && --replies == 0;
-        if (noMoreSignals)ToRemove.add(wire);
+        noSubscribers = replies > 0 && --replies == 0;
+        if (noSubscribers) WiresToRemove.add(wire);
         wire.replies = replies;
-        wire.perform(args);
+        wire.transfer(args);
       });
-      ToRemove.forEach((r) => noMoreSignals = _removeSignal(r));
+      WiresToRemove.forEach((r) => noSubscribers = _removeSignal(r));
     }
-    return noMoreSignals;
+    return noSubscribers;
   }
 
   bool remove(String signal)

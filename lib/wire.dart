@@ -3,6 +3,6 @@
 /// More dartdocs go here.
 library wire;
 
-export 'src/wire.dart';
+export 'src/main.dart';
 
 // TODO: Export any libraries intended for clients of this package.

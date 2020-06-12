@@ -1,48 +1,23 @@
-# Wire
+# Wire (WIP) - Pub/Sub on Strings "signals" with data container
 Dart publish-subscribe library, with static layer beneath, where responses associated with "keys" called - signals. Simplest possible API - add, remove and send.
+Also it has data layer,  universal container (Map) with key-value, where value is a wrapper - WireData - hold dynamic value and can be listened for updates.
 
+## API
 ```
-const String
-    SIGNAL_1 = "SIGNAL_1",
-    SIGNAL_ONCE = "SIGNAL_1_ONCE",
-    SIGNAL_2 = "SIGNAL_2";
-    
-  /// SUBSCRIBER EXAMPLE ======================================
-  Wire.add(SIGNAL_1, (data) {
-    print("> SIGNAL 1 (subscriber 1) -> Hello: " + data);
-  });
+Wire Wire.add(String signal, Function listener, [int replies = 0])
+bool Wire.send(String signal, [args])
+bool Wire.remove(String signal)
+WireData Wire.data(String param, [dynamic value]) - optional value update object it can be function that return value
+```
 
-  Wire.add(SIGNAL_1, (data) {
-    print("> SIGNAL 1 (subscriber 2) -> Hello: " + data);
-  });
+## Examples
+1. Counter (web):
+- Open IDEA
+- Select build target - Dart Web, point to example/counter/index.html
+- Run Debug
 
-  Wire.send(SIGNAL_1, "World");
-  Wire.send(SIGNAL_1, "Dart");
-  Wire.send(SIGNAL_1, "Vladimir");
-  Wire.remove(SIGNAL_1);
-  /// SUBSCRIBER END =========================================
+2. API calls variations (console):
+- Open IDEA
+- Select build target - Dart Command Line App, point to example/simple/wire_api_example.dart
+- Run Debug
 
-  /// ONCE EXAMPLE ===========================================
-  Wire.add(SIGNAL_ONCE, (data) {
-    print("> SIGNAL 1 (limit 1) -> Goodbye: " + data);
-  }, 1);
-
-  print("\tNo ends: " + Wire.send(SIGNAL_ONCE, "World").toString());
-  print("\tNo ends: " + Wire.send(SIGNAL_ONCE, "Dart").toString());
-  print("\tNo ends: " + Wire.send(SIGNAL_ONCE, "Vladimir").toString());
-  /// ONCE END ===============================================
-
-  Wire.add(SIGNAL_2, (data) {
-    print("> SIGNAL 2 -> I do: " + data);
-  });
-
-  Wire.add(SIGNAL_2, (data) {
-    print("> SIGNAL 2 (limit 2) -> I do: " + data);
-  }, 2);
-
-  print("\tNo ends: " + Wire.send(SIGNAL_2, "Code").toString());
-  print("\tNo ends: " + Wire.send(SIGNAL_2, "Gym").toString());
-  print("\tNo ends: " + Wire.send(SIGNAL_2, "Eat (sometimes)").toString());
-  print("\tNo ends: " + Wire.send(SIGNAL_2, "Sleep").toString());
-  print("\tNo ends: " + Wire.send(SIGNAL_2, "Repeat").toString());
-  ```
