@@ -7,7 +7,9 @@ import 'base/dom_element.dart';
 
 class CounterDisplay extends DomElement {
   CounterDisplay():super(DivElement()) {
-    dom.text = 'EMPTY';
+    dom
+      ..text = 'EMPTY'
+      ..className = 'coral-Body--XL';
     Wire.data(CounterParams.COUNT).listen((value) => {
       dom.text = value.toString()
     });

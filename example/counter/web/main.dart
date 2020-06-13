@@ -14,7 +14,7 @@ main() {
   processor = Processor();
   application = Application(document.querySelector('#root'));
   Wire.data(CounterParams.COUNT, 0);
-  print('Main Ready: initial value = ' + Wire.data(CounterParams.COUNT).value.toString());
+  print('Init Ready: initial value = ' + Wire.data(CounterParams.COUNT).value.toString());
 }
 
 class Processor {

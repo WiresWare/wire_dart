@@ -1,5 +1,5 @@
 name: wire
-description: Wire is a publish-subscribe library, with static layer beneath, where responses associated with "keys" called - signals. Simplest possible API - add, remove and send.
+description: Wire is a pub/sub library with data container - it's static layer where responses associated with "keys" called - signals. Simplest possible API - add, remove and send.
 version: 0.2.0
 homepage: https://github.com/DQvsRA/Wire
 

@@ -3,8 +3,24 @@
 <head>
     <title>Wire Counter Example</title>
 </head>
-<script src="web/main.dart.js"></script>
-<body>
-    <div id="root"></div>
+<link rel="stylesheet" href="https://opensource.adobe.com/coral-spectrum/dist/playground/dist/css/coral.css"/>
+<script src="https://opensource.adobe.com/coral-spectrum/dist/playground/dist/js/coral.js"></script>
+<style>
+    .container {
+        text-align: center;
+    }
+</style>
+<body class="coral--light coral--large">
+<coral-shell>
+    <coral-shell-header>
+        <coral-shell-header-home>
+            <a is="coral-shell-homeanchor" href="#">Wire Counter Example</a>
+        </coral-shell-header-home>
+    </coral-shell-header>
+    <coral-shell-content>
+        <div class="u-coral-padding container" id="root"></div>
+    </coral-shell-content>
+</coral-shell>
 </body>
+<script src="web/main.dart.js"></script>
 </html>

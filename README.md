@@ -1,5 +1,6 @@
 # Wire (WIP) - Pub/Sub on Strings "signals" with data container
 Dart publish-subscribe library, with static layer beneath, where responses associated with "keys" called - signals. Simplest possible API - add, remove and send.
+
 Also it has data layer,  universal container (Map) with key-value, where value is a wrapper - WireData - hold dynamic value and can be listened for updates.
 
 ## API
