@@ -1,6 +1,6 @@
 name: wire
-description: Wire is a pub/sub library with data container - it's static layer where responses associated with "keys" called - signals. Simplest possible API - add, remove and send.
-version: 0.2.0
+description: Wire is a pub/sub library with data container (like Redis) - it's static layer where responses associated with "keys" called - signals. Simplest possible API - add, remove and send.
+version: 0.2.1
 homepage: https://github.com/DQvsRA/Wire
 
 environment:
@@ -8,10 +8,8 @@ environment:
 
 dependencies:
   uuid: ^2.1.0
-  json_annotation:
 
 dev_dependencies:
   test: ^1.6.0
   build_web_compilers:
   build_runner:
-  json_serializable:

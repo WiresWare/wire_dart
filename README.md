@@ -4,11 +4,18 @@ Dart publish-subscribe library, with static layer beneath, where responses assoc
 Also it has data layer,  universal container (Map) with key-value, where value is a wrapper - WireData - hold dynamic value and can be listened for updates.
 
 ## API
+Wire:
 ```
-Wire Wire.add(String signal, Function listener, [int replies = 0])
+Wire Wire.add(Object scope, String signal, Function listener, [int replies = 0])
 bool Wire.send(String signal, [args])
 bool Wire.remove(String signal)
 WireData Wire.data(String param, [dynamic value]) - optional value update object it can be function that return value
+```
+WireData:
+```
+void remove() // emit null value before remove all subscribers
+WireData subscribe(Object scope, Function listener)
+WireData unsubscribe(Object scope)
 ```
 
 ## Examples

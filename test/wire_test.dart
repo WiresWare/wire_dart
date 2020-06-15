@@ -4,14 +4,15 @@ import 'package:test/test.dart';
 void main() {
   group('A group of tests', () {
 
-    String SIGNAL_SUBSCRIPTION = "SIGNAL_subscription";
+    var SIGNAL_SUBSCRIPTION = 'SIGNAL_subscription';
+    var SCOPE = Object();
 
     setUp(() {
-      Wire.add(SIGNAL_SUBSCRIPTION, (params) => { print("SUBSCRIBED with params: ${params}") });
+      Wire.add(SCOPE, SIGNAL_SUBSCRIPTION, (params) => { print('SUBSCRIBED with params: ${params}') });
     });
 
     test('First Test', () {
-      expect(Wire.send(SIGNAL_SUBSCRIPTION, "signal"), isFalse);
+      expect(Wire.send(SIGNAL_SUBSCRIPTION, 'signal'), isFalse);
     });
   });
 }

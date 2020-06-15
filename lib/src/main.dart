@@ -92,7 +92,7 @@ class Wire
   static bool send(String signal, [args])
   { return _LAYER.send(signal, args); }
 
-  static bool remove(String signal, [Function listener])
+  static bool remove(String signal)
   { return _LAYER.remove(signal); }
 
   static WireData data(String param, [dynamic value])

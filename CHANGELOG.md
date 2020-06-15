@@ -1,3 +1,7 @@
+## 0.2.1
+- Implementation of SCOPE for signals, data viewers subscribers. Counter example changed to use Specter CSS instead of Coral components.
+- WireData.remove implementation. Todo MVC with Wire: only basic operations create and delete.
+
 ## 0.2.0
 - Data "layer" implemented. It's a container, universal container (Map) with key-value, where value is a wrapper - WireData - hold dynamic value and can be listened for updates.
 - Counter example was added based on web (Using idea - create build target Dart Web with HTML file - example/counter/index.html, then debug)
