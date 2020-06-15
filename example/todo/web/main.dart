@@ -25,14 +25,14 @@ void init() {
 
 class Processor {
   Processor() {
-    Wire.add(this, CounterSignal.INCREASE, ([opt]) {
+    Wire.add(CounterSignal.INCREASE, ([opt]) {
       Wire.data(CounterParams.COUNT, (value) {
         print('> Processor: INCREASE -> handle: ' + value.toString());
         return value + 1;
       });
     });
 
-    Wire.add(this, CounterSignal.DECREASE, ([opt]) {
+    Wire.add(CounterSignal.DECREASE, ([opt]) {
       Wire.data(CounterParams.COUNT, (value) {
         print('> Processor: DECREASE -> handle: ' + value.toString());
         return value > 0 ? value - 1 : 0;
@@ -49,12 +49,12 @@ class Application {
   {
     try {
 
-      var group = DivElement()..className = 'spectrum-ButtonGroup';
-
       root.append(CounterDisplay().dom);
-      group.append(CounterButton('Increase', CounterSignal.INCREASE).dom);
-      group.append(CounterButton('Decrease', CounterSignal.DECREASE).dom);
-      root.append(group);
+      var buttonsGroup = DivElement();
+      buttonsGroup.className = 'spectrum-ButtonGroup';
+      buttonsGroup.append(CounterButton('Increase', CounterSignal.INCREASE).dom);
+      buttonsGroup.append(CounterButton('Decrease', CounterSignal.DECREASE).dom);
+      root.append(buttonsGroup);
 
     } catch(e) {
       print(e);

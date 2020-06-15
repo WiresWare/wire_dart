@@ -1,0 +1,14 @@
+{
+  "name": "wire",
+  "version": "0.2.0",
+  "description": "Dart publish-subscribe library, with static layer beneath, where responses associated with \"keys\" called - signals. Simplest possible API - add, remove and send.",
+  "author": "Vladimir Cores (Minkin)",
+  "license": "MIT",
+  "dependencies": {
+    "@spectrum-css/button": "^3.0.0-beta.2",
+    "@spectrum-css/icon": "^2.1.1",
+    "@spectrum-css/page": "^2.0.7",
+    "@spectrum-css/typography": "^2.1.3",
+    "@spectrum-css/vars": "^2.3.0"
+  }
+}

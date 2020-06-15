@@ -51,8 +51,17 @@ class Wire
   int _hash;
   int get hash => _hash;
 
-  Wire(String signal, Function listener, int replies)
+  ///
+  /// [read-only] [internal use]
+  /// Scope to which wire is belong to
+  ///
+  /// @private
+  Object _scope;
+  Object get scope => _scope;
+
+  Wire(Object scope, String signal, Function listener, int replies)
   {
+    _scope = scope;
     _signal = signal;
     _listener = listener;
     this.replies = replies;
@@ -77,13 +86,13 @@ class Wire
   ///  Public Static Methods
   ///
   ///**********************************************************************************************************
-  static Wire add(String signal, Function listener, [int replies = 0])
-  { return Wire(signal, listener, replies); }
+  static Wire add(Object scope, String signal, Function listener, [int replies = 0])
+  { return Wire(scope, signal, listener, replies); }
 
   static bool send(String signal, [args])
   { return _LAYER.send(signal, args); }
 
-  static bool remove(String signal)
+  static bool remove(String signal, [Function listener])
   { return _LAYER.remove(signal); }
 
   static WireData data(String param, [dynamic value])

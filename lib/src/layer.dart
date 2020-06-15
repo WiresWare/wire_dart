@@ -42,12 +42,16 @@ class WireLayer
     return noSubscribers;
   }
 
-  bool remove(String signal)
+  bool remove(String signal, [Object scope])
   {
     bool exists = _hashesBySignal.containsKey(signal);
     if (exists) {
       var toRemove = List<Wire>();
-      _hashesBySignal[signal].forEach((hash) => toRemove.add(_wireByHash[hash]));
+      _hashesBySignal[signal].forEach((hash) {
+        Wire wire = _wireByHash[hash];
+        if (scope == null || scope == wire.scope)
+          toRemove.add(wire);
+      });
       toRemove.forEach((r) => _removeSignal(r));
     }
     return exists;

@@ -7,19 +7,26 @@ part of wire;
 ///
 class WireData
 {
-  final _controller = StreamController.broadcast();
+  final _listeners = <Object, List<Function>>{};
 
   dynamic _value;
   dynamic get value => _value;
   set value(dynamic value) {
     _value = value;
-//    print('> Wire: WireData -> set: ' + value.toString());
-    _controller.sink.add(_value);
+    _listeners.forEach((scope, listeners) =>
+      listeners.forEach((lnr) => lnr(value)));
   }
 
-  WireData listen(Function listener) {
+  WireData subscribe(Object scope, Function listener) {
 //    print('> Wire: WireData -> listen');
-    _controller.stream.listen(listener);
+    _listeners.putIfAbsent(scope, () => <Function>[]);
+    _listeners[scope].add(listener);
+    return this;
+  }
+
+  WireData unsubscribe(Object scope) {
+//    print('> Wire: WireData -> listen');
+    _listeners.remove(scope);
     return this;
   }
 }
