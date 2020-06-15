@@ -26,6 +26,11 @@ WireData unsubscribe(Object scope)
 
 2. API calls variations (console):
 - Open IDEA
-- Select build target - Dart Command Line App, point to example/simple/wire_api_example.dart
+- Select build target - Dart Command Line App, point to example/api/wire_api_example.dart
+- Run Debug
+
+3. Todo MVC (web):
+- Open IDEA
+- Select build target - Dart Web, point to example/todo/index.html
 - Run Debug
 
