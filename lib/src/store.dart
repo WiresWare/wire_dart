@@ -10,7 +10,7 @@ class WireStore
   Map<dynamic, WireData> _map = Map<dynamic, WireData>();
   dynamic get(dynamic param) {
     if (!_map.containsKey(param)) {
-      _map[param] = WireData();
+      _map[param] = WireData(param, _map.remove);
     }
 
     return _map[param];

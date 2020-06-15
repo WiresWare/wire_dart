@@ -6,7 +6,12 @@ homepage: https://github.com/DQvsRA/Wire
 environment:
   sdk: '>=2.4.0 <3.0.0'
 
+dependencies:
+  uuid: ^2.1.0
+  json_annotation:
+
 dev_dependencies:
   test: ^1.6.0
   build_web_compilers:
   build_runner:
+  json_serializable:

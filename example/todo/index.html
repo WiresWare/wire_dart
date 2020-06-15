@@ -4,35 +4,39 @@
     <title>Wire Counter Example</title>
 </head>
 <!-- Include global variables first -->
-<link rel="stylesheet" href="assets/styles/@spectrum-css/vars/dist/spectrum-global.css">
-
-<!-- Include only the scales your application needs -->
-<link rel="stylesheet" href="assets/styles/@spectrum-css/vars/dist/spectrum-medium.css">
-<link rel="stylesheet" href="assets/styles/@spectrum-css/vars/dist/spectrum-large.css">
-
-<!-- Include only the colorstops your application needs -->
-<link rel="stylesheet" href="assets/styles/@spectrum-css/vars/dist/spectrum-light.css">
-
-<!-- Include index-vars.css for all components you need -->
-<link rel="stylesheet" href="assets/styles/@spectrum-css/page/dist/index-vars.css">
-<link rel="stylesheet" href="assets/styles/@spectrum-css/typography/dist/index-vars.css">
-<link rel="stylesheet" href="assets/styles/@spectrum-css/icon/dist/index-vars.css">
-<link rel="stylesheet" href="assets/styles/@spectrum-css/button/dist/index-vars.css">
-<style>
-    .container {
-        margin-top: 1rem;
-        text-align: center;
-    }
-    .spectrum-ButtonGroup {
-        margin-top: 1rem;
-    }
-    .spectrum-ButtonGroup button:not(:first-child) {
-        margin-left: 0.5rem;
-    }
-</style>
+<link rel="stylesheet" href="assets/styles/index.css">
 <body>
-    <h1 class="spectrum-Heading spectrum-Heading--L">Wire Counter Example</h1>
-    <div class="container" id="root"></div>
+<section class="todoapp">
+    <header class="header">
+        <h1>todos</h1>
+        <input class="new-todo" placeholder="What needs to be done?" autofocus>
+    </header>
+    <section class="main">
+        <input id="toggle-all" class="toggle-all" type="checkbox">
+        <label for="toggle-all">Mark all as complete</label>
+        <ul class="todo-list"></ul>
+    </section>
+    <footer class="footer">
+        <span class="todo-count"><strong>0</strong> item left</span>
+        <ul class="filters">
+            <li>
+                <a class="selected" href="#/">All</a>
+            </li>
+            <li>
+                <a href="#/active">Active</a>
+            </li>
+            <li>
+                <a href="#/completed">Completed</a>
+            </li>
+        </ul>
+        <button class="clear-completed">Clear completed</button>
+    </footer>
+</section>
+<footer class="info">
+    <p>Double-click to edit a todo</p>
+    <p>Created by <a href="http://mlorber.net">Vladimir Cores (Minkin)</a></p>
+    <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+</footer>
 </body>
 <script src="web/main.dart.js"></script>
 </html>

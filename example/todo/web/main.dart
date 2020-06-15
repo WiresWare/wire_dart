@@ -3,59 +3,34 @@ import 'dart:async';
 import 'package:wire/wire.dart';
 import 'dart:html';
 
-import 'components/counter_button.dart';
-import 'components/counter_display.dart';
-import 'const/counter_params.dart';
-import 'const/counter_signals.dart';
+import 'controller/TodoController.dart';
+import 'model/TodoModel.dart';
+import 'view/TodoInputView.dart';
+import 'view/TodoListView.dart';
 
-var processor;
-var application;
+var todoModel;
+var todoProcessor;
+var todoApplication;
 
 main() {
   /// COUNTER EXAMPLE ======================================
-  Wire.data(CounterParams.COUNT, 0);
-  print('Init Ready: initial value = ' + Wire.data(CounterParams.COUNT).value.toString());
+//  Wire.data(CounterParams.COUNT, 0);
+//  print('Init Ready: initial value = ' + Wire.data(CounterParams.COUNT).value.toString());
   init();
 }
 
 void init() {
-  processor = Processor();
-  application = Application(document.querySelector('#root'));
+  todoModel = TodoModel();
+  todoProcessor = TodoController(todoModel);
+  todoApplication = TodoApplication();
 }
 
-class Processor {
-  Processor() {
-    Wire.add(CounterSignal.INCREASE, ([opt]) {
-      Wire.data(CounterParams.COUNT, (value) {
-        print('> Processor: INCREASE -> handle: ' + value.toString());
-        return value + 1;
-      });
-    });
-
-    Wire.add(CounterSignal.DECREASE, ([opt]) {
-      Wire.data(CounterParams.COUNT, (value) {
-        print('> Processor: DECREASE -> handle: ' + value.toString());
-        return value > 0 ? value - 1 : 0;
-      });
-    });
-
-    print('Processor Ready');
-  }
-}
-
-class Application {
-  DivElement root;
-  Application(this.root)
+class TodoApplication {
+  TodoApplication()
   {
     try {
-
-      root.append(CounterDisplay().dom);
-      var buttonsGroup = DivElement();
-      buttonsGroup.className = 'spectrum-ButtonGroup';
-      buttonsGroup.append(CounterButton('Increase', CounterSignal.INCREASE).dom);
-      buttonsGroup.append(CounterButton('Decrease', CounterSignal.DECREASE).dom);
-      root.append(buttonsGroup);
-
+        TodoInputView(document.querySelector('.new-todo'));
+        TodoListView(document.querySelector('.todo-list'));
     } catch(e) {
       print(e);
     }
