@@ -1,6 +1,5 @@
 library wire;
 
-import 'dart:async';
 import 'dart:collection';
 
 part 'store.dart';
@@ -12,11 +11,14 @@ part 'data.dart';
 /// Github: https://github.com/DQvsRA
 /// License: MIT
 ///
+
+typedef WireListener = void Function(String signal, dynamic data);
+
 class Wire
 {
   static int _INDEX = 0;
-  static WireLayer _LAYER = WireLayer();
-  static WireStore _STORE = WireStore();
+  static final WireLayer _LAYER = WireLayer();
+  static final WireStore _STORE = WireStore();
 
   ///
   /// The number of times that this item will respond.
@@ -41,7 +43,8 @@ class Wire
   /// The closure method that this item was associated.
   ///
   /// @private
-  Function _listener;
+  WireListener _listener;
+  WireListener get listener => _listener;
 
   ///
   /// [read-only] [internal use]
@@ -59,15 +62,13 @@ class Wire
   Object _scope;
   Object get scope => _scope;
 
-  Wire(Object scope, String signal, Function listener, int replies)
+  Wire(Object scope, String signal, WireListener listener, int replies)
   {
     _scope = scope;
     _signal = signal;
     _listener = listener;
     this.replies = replies;
-
     _hash = ++_INDEX << 0x08;
-    _LAYER.add(this);
   }
 
   ///**********************************************************************************************************
@@ -75,10 +76,10 @@ class Wire
   ///  Public Methods
   ///
   ///**********************************************************************************************************
-  void transfer([params])
+  void transfer(params)
   {
     // Call a listener in this Wire.
-    _listener(params);
+    _listener(_signal, params);
   }
 
   ///**********************************************************************************************************
@@ -86,14 +87,14 @@ class Wire
   ///  Public Static Methods
   ///
   ///**********************************************************************************************************
-  static Wire add(Object scope, String signal, Function listener, [int replies = 0])
-  { return Wire(scope, signal, listener, replies); }
+  static Wire add(Object scope, String signal, WireListener listener, [int replies = 0])
+  { return _LAYER.add(Wire(scope, signal, listener, replies)); }
 
-  static bool send(String signal, [args])
-  { return _LAYER.send(signal, args); }
+  static bool send(String signal, [params])
+  { return _LAYER.send(signal, params); }
 
-  static bool remove(String signal)
-  { return _LAYER.remove(signal); }
+  static bool remove(String signal, {Object scope, WireListener listener})
+  { return _LAYER.remove(signal, scope, listener); }
 
   static WireData data(String param, [dynamic value])
   {

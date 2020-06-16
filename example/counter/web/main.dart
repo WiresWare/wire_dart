@@ -25,14 +25,14 @@ void init() {
 
 class Processor {
   Processor() {
-    Wire.add(this, CounterSignal.INCREASE, ([opt]) {
+    Wire.add(this, CounterSignal.INCREASE, (signal, data) {
       Wire.data(CounterParams.COUNT, (value) {
         print('> Processor: INCREASE -> handle: ' + value.toString());
         return value + 1;
       });
     });
 
-    Wire.add(this, CounterSignal.DECREASE, ([opt]) {
+    Wire.add(this, CounterSignal.DECREASE, (signal, data) {
       Wire.data(CounterParams.COUNT, (value) {
         print('> Processor: DECREASE -> handle: ' + value.toString());
         return value > 0 ? value - 1 : 0;

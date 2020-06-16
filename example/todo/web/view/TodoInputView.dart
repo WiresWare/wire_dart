@@ -1,14 +1,11 @@
 import 'dart:html';
-
 import 'package:wire/wire.dart';
-
 import '../const/TodoViewSignal.dart';
-
 import 'base/DomElementView.dart';
 
 class TodoInputView extends DomElement {
   TodoInputView(InputElement dom):super(dom) {
-    Wire.add(this, TodoViewSignal.CLEAR, (_) => dom.value = '');
+    Wire.add(this, TodoViewSignal.CLEAR_INPUT, (s, d) => dom.value = '');
     dom
       ..text = ''
       ..onKeyPress.listen((e) =>

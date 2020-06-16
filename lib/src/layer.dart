@@ -30,8 +30,8 @@ class WireLayer
     {
       var WiresToRemove = <Wire>[];
       _hashesBySignal[signal].forEach((hash) {
-        Wire wire = _wireByHash[hash];
-        int replies = wire.replies;
+        var wire = _wireByHash[hash];
+        var replies = wire.replies;
         noSubscribers = replies > 0 && --replies == 0;
         if (noSubscribers) WiresToRemove.add(wire);
         wire.replies = replies;
@@ -42,15 +42,17 @@ class WireLayer
     return noSubscribers;
   }
 
-  bool remove(String signal, [Object scope])
+  bool remove(String signal, [Object scope, Function listener])
   {
-    bool exists = _hashesBySignal.containsKey(signal);
+    var exists = _hashesBySignal.containsKey(signal);
     if (exists) {
-      var toRemove = List<Wire>();
+      var toRemove = <Wire>[];
       _hashesBySignal[signal].forEach((hash) {
-        Wire wire = _wireByHash[hash];
-        if (scope == null || scope == wire.scope)
-          toRemove.add(wire);
+        var wire = _wireByHash[hash];
+        var isWrongScope = scope != null && scope != wire.scope;
+        var isWrongListener = listener != null && listener != wire.listener;
+        if (isWrongScope || isWrongListener) return;
+        toRemove.add(wire);
       });
       toRemove.forEach((r) => _removeSignal(r));
     }

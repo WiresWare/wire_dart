@@ -1,38 +1,37 @@
-import 'dart:async';
-
-import 'package:wire/wire.dart';
 import 'dart:html';
-
+import 'controller/RouteController.dart';
 import 'controller/TodoController.dart';
 import 'model/TodoModel.dart';
+import 'view/ClearCompletedView.dart';
+import 'view/TodoCountView.dart';
+import 'view/TodoFilterView.dart';
 import 'view/TodoInputView.dart';
 import 'view/TodoListView.dart';
 
 var todoModel;
-var todoProcessor;
-var todoApplication;
+var todoView;
+var todoController;
+var routeController;
 
 main() {
   /// COUNTER EXAMPLE ======================================
-//  Wire.data(CounterParams.COUNT, 0);
-//  print('Init Ready: initial value = ' + Wire.data(CounterParams.COUNT).value.toString());
   init();
 }
 
 void init() {
   todoModel = TodoModel();
-  todoProcessor = TodoController(todoModel);
-  todoApplication = TodoApplication();
+  todoView = TodoView();
+  todoController = TodoController(todoModel);
+  routeController = RouteController();
 }
 
-class TodoApplication {
-  TodoApplication()
+class TodoView {
+  TodoView()
   {
-    try {
-        TodoInputView(document.querySelector('.new-todo'));
-        TodoListView(document.querySelector('.todo-list'));
-    } catch(e) {
-      print(e);
-    }
+    TodoInputView(document.querySelector('.new-todo'));
+    TodoListView(document.querySelector('.todo-list'));
+    TodoCountView(document.querySelector('.todo-count'));
+    TodoFilterView(document.querySelector('.filters'));
+    ClearCompletedView(document.querySelector('.clear-completed'));
   }
 }

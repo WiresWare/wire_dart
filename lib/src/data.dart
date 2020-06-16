@@ -5,23 +5,31 @@ part of wire;
 /// Github: https://github.com/DQvsRA
 /// License: MIT
 ///
+typedef WireDataListener = void Function(dynamic value);
+
 class WireData
 {
   Function _onRemove;
 
   WireData(this._key, this._onRemove);
 
-  var _listeners = <Object, List<Function>>{};
+  var _listeners = <Object, List<WireDataListener>>{};
+
+  /// This property needed to distinguish between newly created and not set WireData which has value of null at the beginning
+  /// And with WireData at time when it's removed, because when removing the value also set to null
+  bool _isSet = false;
+  bool get isSet => _isSet;
 
   dynamic _key;
   dynamic get key => _key;
 
-  dynamic _value;
+  dynamic _value; // initial value is null
   dynamic get value => _value;
   set value(dynamic value) {
     _value = value;
+    if (_isSet == false) _isSet = true;
     _listeners.forEach((scope, listeners) =>
-      listeners.forEach((lnr) => lnr(value)));
+      listeners.forEach((func) => func(value)));
   }
 
   void remove() {
@@ -30,23 +38,28 @@ class WireData
 
     _key = null;
     value = null; // null value means remove element that listening on change (unsubscribe)
-    _listeners.forEach((key, value) {
+
+    while(_listeners.isNotEmpty) {
+      var value = _listeners.remove(_listeners.keys.last);
       while(value.isNotEmpty) {
         value.removeLast();
       }
-      _listeners.remove(key);
-    });
+    }
     _listeners = null;
   }
 
-  WireData subscribe(Object scope, Function listener) {
-    _listeners.putIfAbsent(scope, () => <Function>[]);
+  WireData subscribe(Object scope, WireDataListener listener) {
+    _listeners.putIfAbsent(scope, () => <WireDataListener>[]);
     _listeners[scope].add(listener);
     return this;
   }
 
-  WireData unsubscribe(Object scope) {
+  WireData unsubscribe(Object scope, [WireDataListener listener]) {
     if (_listeners != null && _listeners.containsKey(scope)) {
+      if (listener != null) {
+        _listeners[scope].remove(listener);
+        if (_listeners[scope].isNotEmpty) return this;
+      }
       _listeners.remove(scope);
     }
     return this;

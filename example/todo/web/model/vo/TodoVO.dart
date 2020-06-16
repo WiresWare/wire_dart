@@ -3,6 +3,8 @@ class TodoVO {
   String text;
   String id;
 
+  bool visible = true;
+
   TodoVO(this.id, this.text, this.completed);
 
   TodoVO.fromJson(Map<String, dynamic> json):
