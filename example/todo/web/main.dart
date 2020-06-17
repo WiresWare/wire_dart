@@ -2,6 +2,7 @@ import 'dart:html';
 import 'controller/RouteController.dart';
 import 'controller/TodoController.dart';
 import 'model/TodoModel.dart';
+import 'model/service/WebDatabaseService.dart';
 import 'view/ClearCompletedView.dart';
 import 'view/TodoCountView.dart';
 import 'view/TodoFilterView.dart';
@@ -16,13 +17,18 @@ var routeController;
 main() {
   /// COUNTER EXAMPLE ======================================
   init();
+  ready();
 }
 
 void init() {
-  todoModel = TodoModel();
+  todoModel = TodoModel(WebDatabaseService());
   todoView = TodoView();
   todoController = TodoController(todoModel);
   routeController = RouteController();
+}
+
+void ready() {
+  document.querySelector('#loading').remove();
 }
 
 class TodoView {

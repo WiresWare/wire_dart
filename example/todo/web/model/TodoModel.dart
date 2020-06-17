@@ -4,17 +4,20 @@ import 'package:wire/wire.dart';
 import '../const/TodoDataParams.dart';
 import '../const/TodoFilterValues.dart';
 import 'ITodoModel.dart';
+import 'service/IDatabaseService.dart';
 import 'vo/TodoVO.dart';
 
 class TodoModel implements ITodoModel {
   static const String LOCAL_STORAGE_KEY = 'todo-mvc-dart-wire';
 
-  TodoModel() {
+  IDatabaseService _dbService;
+
+  TodoModel(this._dbService) {
     var idsList = <String>[];
     var notCompletedCount = 0;
-    if (window.localStorage.containsKey(LOCAL_STORAGE_KEY)) {
+    if (_dbService.exist(LOCAL_STORAGE_KEY)) {
       try {
-        jsonDecode(window.localStorage[LOCAL_STORAGE_KEY]).forEach((obj){
+        _dbService.retrieve(LOCAL_STORAGE_KEY).forEach((obj){
           if (obj != null) {
             var todoVO = TodoVO.fromJson(obj);
             Wire.data(todoVO.id, todoVO);
@@ -141,6 +144,6 @@ class TodoModel implements ITodoModel {
     (Wire.data(TodoDataParams.LIST).value as List).forEach((id) =>
       listToSave.add(Wire.data(id).value)
     );
-    window.localStorage[LOCAL_STORAGE_KEY] = jsonEncode(listToSave);
+    _dbService.save(LOCAL_STORAGE_KEY, listToSave);
   }
 }
