@@ -1,6 +1,6 @@
 name: wire
 description: Wire is a pub/sub library, event bus with data container, utilize only String key
-version: 0.2.2
+version: 0.3.0
 homepage: https://github.com/DQvsRA/Wire
 
 environment:

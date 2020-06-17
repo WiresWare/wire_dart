@@ -3,16 +3,16 @@ part of wire;
 ///
 /// Created by Vladimir Cores (Minkin) on 12/06/20.
 /// Github: https://github.com/DQvsRA
-/// License: MIT
+/// License: APACHE LICENSE, VERSION 2.0
 ///
 class WireStore
 {
-  final Map<dynamic, WireData> _map = <dynamic, WireData>{};
-  dynamic get(dynamic param) {
-    if (!_map.containsKey(param)) {
-      _map[param] = WireData(param, _map.remove);
+  final Map<String, WireData> _map = <String, WireData>{};
+  dynamic get(String key) {
+    if (!_map.containsKey(key)) {
+      _map[key] = WireData(key, _map.remove);
     }
 
-    return _map[param];
+    return _map[key];
   }
 }

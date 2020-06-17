@@ -1,0 +1,56 @@
+@startuml
+set namespaceSeparator ::
+
+class "wire::src::main.dart::Wire" {
+  {static} -int _INDEX
+  {static} -WireLayer _LAYER
+  {static} -WireStore _STORE
+  -String _signal
+  -void Function(String, dynamic) _listener
+  -int _hash
+  -Object _scope
+  +int replies
+  +String signal
+  +void Function(String, dynamic) listener
+  +int hash
+  +Object scope
+  +void transfer()
+  {static} +Wire add()
+  {static} +bool send()
+  {static} +bool remove()
+  {static} +WireData data()
+}
+
+"wire::src::main.dart::Wire" o-- "wire::src::main.dart::WireLayer"
+"wire::src::main.dart::Wire" o-- "wire::src::main.dart::WireStore"
+
+class "wire::src::main.dart::WireStore" {
+  -Map<String, WireData> _map
+  +dynamic get()
+}
+
+class "wire::src::main.dart::WireLayer" {
+  -Map<int, Wire> _wireByHash
+  -Map<String, List<int>> _hashesBySignal
+  +Wire add()
+  +bool send()
+  +bool remove()
+  -bool _removeSignal()
+}
+
+class "wire::src::main.dart::WireData" {
+  -Function _onRemove
+  -Map<Object, List<void Function(dynamic)>> _listeners
+  -bool _isSet
+  -dynamic _key
+  -dynamic _value
+  +bool isSet
+  +dynamic key
+  +dynamic value
+  +void remove()
+  +WireData subscribe()
+  +WireData unsubscribe()
+}
+
+
+@enduml

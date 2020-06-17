@@ -3,23 +3,27 @@ part of wire;
 ///
 /// Created by Vladimir Cores (Minkin) on 07/10/19.
 /// Github: https://github.com/DQvsRA
-/// License: MIT
+/// License: APACHE LICENSE, VERSION 2.0
 ///
 class WireLayer
 {
-  LinkedHashMap<int, Wire> _wireByHash = Map<int, Wire>();
-  Map<String, List<int>> _hashesBySignal = Map<String, List<int>>();
+  final Map<int, Wire> _wireByHash = <int, Wire>{};
+  final Map<String, List<int>> _hashesBySignal = <String, List<int>>{};
 
-  add(Wire wire)
+  Wire add(Wire wire)
   {
-    int hash = wire.hash;
-    String signal = wire.signal;
+    var hash = wire.hash;
+    var signal = wire.signal;
 
     _wireByHash[hash] = wire;
 
     if (_hashesBySignal.containsKey(signal)) {
       _hashesBySignal[signal].add(hash);
-    } else { _hashesBySignal[signal] = [hash]; }
+    } else {
+      _hashesBySignal[signal] = [hash];
+    }
+
+    return wire;
   }
 
   bool send(String signal, [args])
@@ -67,17 +71,17 @@ class WireLayer
   ///
   bool _removeSignal(Wire wire)
   {
-    int hash = wire.hash;
-    String signal = wire.signal;
+    var hash = wire.hash;
+    var signal = wire.signal;
 
     // Remove Wire by hash
     _wireByHash.remove(hash);
 
     // Remove hash for Wire signal
-    List<int> hashesForSignal = _hashesBySignal[signal];
+    var hashesForSignal = _hashesBySignal[signal];
     hashesForSignal.remove(hash);
 
-    bool noMoreSignals = hashesForSignal.isEmpty;
+    var noMoreSignals = hashesForSignal.isEmpty;
     if (noMoreSignals) _hashesBySignal.remove(signal);
 
     return noMoreSignals;

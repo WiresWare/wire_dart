@@ -3,17 +3,14 @@ part of wire;
 ///
 /// Created by Vladimir Cores (Minkin) on 12/06/20.
 /// Github: https://github.com/DQvsRA
-/// License: MIT
+/// License: APACHE LICENSE, VERSION 2.0
 ///
 typedef WireDataListener = void Function(dynamic value);
 
 class WireData
 {
   Function _onRemove;
-
-  WireData(this._key, this._onRemove);
-
-  var _listeners = <Object, List<WireDataListener>>{};
+  final _listeners = <Object, List<WireDataListener>>{};
 
   /// This property needed to distinguish between newly created and not set WireData which has value of null at the beginning
   /// And with WireData at time when it's removed, because when removing the value also set to null
@@ -32,6 +29,8 @@ class WireData
       listeners.forEach((func) => func(value)));
   }
 
+  WireData(this._key, this._onRemove);
+
   void remove() {
     _onRemove(_key);
     _onRemove = null;
@@ -45,7 +44,6 @@ class WireData
         value.removeLast();
       }
     }
-    _listeners = null;
   }
 
   WireData subscribe(Object scope, WireDataListener listener) {

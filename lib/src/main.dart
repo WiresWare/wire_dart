@@ -1,7 +1,5 @@
 library wire;
 
-import 'dart:collection';
-
 part 'store.dart';
 part 'layer.dart';
 part 'data.dart';
@@ -9,7 +7,7 @@ part 'data.dart';
 ///
 /// Created by Vladimir Cores (Minkin) on 07/10/19.
 /// Github: https://github.com/DQvsRA
-/// License: MIT
+/// License: APACHE LICENSE, VERSION 2.0
 ///
 
 typedef WireListener = void Function(String signal, dynamic data);
@@ -19,12 +17,6 @@ class Wire
   static int _INDEX = 0;
   static final WireLayer _LAYER = WireLayer();
   static final WireStore _STORE = WireStore();
-
-  ///
-  /// The number of times that this item will respond.
-  /// Default is 0 that means infinity times.
-  ///
-  int replies = 0;
 
   ///**************************************************
   ///  Protected / Private Properties
@@ -62,6 +54,12 @@ class Wire
   Object _scope;
   Object get scope => _scope;
 
+  ///
+  /// The number of times that this item will respond.
+  /// Default is 0 that means infinity times.
+  ///
+  int replies = 0;
+
   Wire(Object scope, String signal, WireListener listener, int replies)
   {
     _scope = scope;
@@ -84,10 +82,10 @@ class Wire
 
   ///**********************************************************************************************************
   ///
-  ///  Public Static Methods
+  ///  Public Static Methods - API
   ///
   ///**********************************************************************************************************
-  static Wire add(Object scope, String signal, WireListener listener, [int replies = 0])
+  static Wire add(Object scope, String signal, WireListener listener, {int replies = 0})
   { return _LAYER.add(Wire(scope, signal, listener, replies)); }
 
   static bool send(String signal, [params])

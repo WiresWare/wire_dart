@@ -1,8 +1,7 @@
-import 'dart:async';
-
 import 'package:wire/wire.dart';
 import 'dart:html';
 
+import 'CounterProcessor.dart';
 import 'components/counter_button.dart';
 import 'components/counter_display.dart';
 import 'const/counter_params.dart';
@@ -19,28 +18,8 @@ main() {
 }
 
 void init() {
-  processor = Processor();
+  processor = CounterProcessor();
   application = Application(document.querySelector('#root'));
-}
-
-class Processor {
-  Processor() {
-    Wire.add(this, CounterSignal.INCREASE, (signal, data) {
-      Wire.data(CounterParams.COUNT, (value) {
-        print('> Processor: INCREASE -> handle: ' + value.toString());
-        return value + 1;
-      });
-    });
-
-    Wire.add(this, CounterSignal.DECREASE, (signal, data) {
-      Wire.data(CounterParams.COUNT, (value) {
-        print('> Processor: DECREASE -> handle: ' + value.toString());
-        return value > 0 ? value - 1 : 0;
-      });
-    });
-
-    print('Processor Ready');
-  }
 }
 
 class Application {
@@ -50,10 +29,10 @@ class Application {
     try {
 
       var group = DivElement()..className = 'spectrum-ButtonGroup';
-
-      root.append(CounterDisplay().dom);
       group.append(CounterButton('Increase', CounterSignal.INCREASE).dom);
       group.append(CounterButton('Decrease', CounterSignal.DECREASE).dom);
+
+      root.append(CounterDisplay().dom);
       root.append(group);
 
     } catch(e) {

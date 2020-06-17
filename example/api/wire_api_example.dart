@@ -50,7 +50,7 @@ main() {
   /// ONCE EXAMPLE ===========================================
   Wire.add(SCOPE, SIGNAL_ONCE, (signal, data) {
     print('> SIGNAL 1 (limit 1) -> Goodbye: ' + data);
-  }, 1);
+  }, replies: 1);
 
   print('\tNo ends: ' + Wire.send(SIGNAL_ONCE, 'World').toString());
   print('\tNo ends: ' + Wire.send(SIGNAL_ONCE, 'Dart').toString());
@@ -63,7 +63,7 @@ main() {
 
   Wire.add(SCOPE, SIGNAL_2, (signal, data) {
     print('> SIGNAL 2 (limit 2) -> I do: ' + data);
-  }, 2);
+  }, replies: 2);
 
   print('\tSend ends: ' + Wire.send(SIGNAL_2, 'Code').toString());
   print('\tSend ends: ' + Wire.send(SIGNAL_2, 'Gym').toString());

@@ -1,3 +1,9 @@
+## 0.3.0
+- In method Wire.add replies parameter is named
+- APACHE LICENSE, VERSION 2.0
+- UML diagram from StartUML
+- Examples correction
+
 ## 0.2.2
 - Introduction of WireListener and WireDataListener to force correct listeners method's params signature 
 - Implementation of "remove" from Wire by scope or/and by listener
