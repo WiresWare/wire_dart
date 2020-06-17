@@ -11,7 +11,7 @@ bool Wire.send(String signal, [args])
 bool Wire.remove(String signal, {Object scope, WireListener listener})
 WireData Wire.data(String param, [dynamic value]) - optional value update object it can be function that return value
 ```
-`WireListener = void Function(String signal, dynamic data)`
+`WireListener = void Function(Wire wire, dynamic data)`
 
 WireData:
 ```
@@ -21,8 +21,9 @@ WireData unsubscribe(Object scope, [WireDataListener listener])
 ```
 `WireDataListener = void Function(dynamic value)`
 
-![](uml/configuration.png)
-Generate UML with dcdg: pub global run dcdg -o ./uml/configuration
+![UML](uml/configuration.png)
+
+Generate UML with dcdg (PlantUML): pub global run dcdg -o ./uml/configuration
 
 ## Examples
 1. Counter (web):

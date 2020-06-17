@@ -9,11 +9,11 @@ main() {
 
   var SCOPE = Object();
 
-  Wire.add(SCOPE, SIGNAL_1, (signal, data) {
+  Wire.add(SCOPE, SIGNAL_1, (Wire wire, dynamic data) {
     print('> SIGNAL 1 (subscriber 1) -> Hello: ' + data);
   });
 
-  var listener1 = (signal, data) {
+  var listener1 = (Wire wire, dynamic data) {
     print('> SIGNAL 1 (subscriber 2) -> Hello: ' + data);
   };
 
@@ -26,7 +26,7 @@ main() {
   /// SUBSCRIBER END =========================================
   ///
   /// REMOVE EXAMPLE ===========================================
-  WireListener listener2 = (signal, data) {
+  WireListener listener2 = (Wire wire, dynamic data) {
     print('> Remove: SIGNAL (listener 2) -> data: ' + data);
   };
   var SCOPE_2 = Object();
@@ -36,7 +36,7 @@ main() {
   /* 1 */ Wire.add(SCOPE, SIGNAL_3, listener2); // Will be removed
   /* 2 */ Wire.add(SCOPE, SIGNAL_4, listener2);
   /* 3 */ Wire.add(SCOPE_2, SIGNAL_3, listener2); // Will be removed
-  /* 4 */ Wire.add(SCOPE_2, SIGNAL_4, (signal, data) => print('> Remove: SIGNAL 2 -> data: ' + data));
+  /* 4 */ Wire.add(SCOPE_2, SIGNAL_4, (Wire wire, dynamic data) => print('> Remove: SIGNAL 2 -> data: ' + data));
 
   /* 1 */ Wire.remove(SIGNAL_3, listener: listener2);
   /* 3 */ Wire.remove(SIGNAL_3, scope: SCOPE_2);
@@ -48,7 +48,7 @@ main() {
   /* 4 */ Wire.remove(SIGNAL_2, scope: SCOPE_2);
 
   /// ONCE EXAMPLE ===========================================
-  Wire.add(SCOPE, SIGNAL_ONCE, (signal, data) {
+  Wire.add(SCOPE, SIGNAL_ONCE, (Wire wire, dynamic data) {
     print('> SIGNAL 1 (limit 1) -> Goodbye: ' + data);
   }, replies: 1);
 
@@ -57,11 +57,11 @@ main() {
   print('\tNo ends: ' + Wire.send(SIGNAL_ONCE, 'Vladimir').toString());
   /// ONCE END ===============================================
 
-  Wire.add(SCOPE, SIGNAL_2, (signal, data) {
+  Wire.add(SCOPE, SIGNAL_2, (Wire wire, dynamic data) {
     print('> SIGNAL 2 -> I do: ' + data);
   });
 
-  Wire.add(SCOPE, SIGNAL_2, (signal, data) {
+  Wire.add(SCOPE, SIGNAL_2, (Wire wire, dynamic data) {
     print('> SIGNAL 2 (limit 2) -> I do: ' + data);
   }, replies: 2);
 

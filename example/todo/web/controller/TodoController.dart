@@ -36,9 +36,9 @@ class TodoController {
     print('Processor Ready');
   }
 
-  void _SignalProcessor(String signal, dynamic data) {
-    print('> TodoProcessor -> ${signal}: data = ' + data.toString());
-    switch (signal) {
+  void _SignalProcessor(Wire wire, dynamic data) {
+    print('> TodoProcessor -> ${wire.signal}: data = ' + data.toString());
+    switch (wire.signal) {
       case TodoViewSignal.INPUT:
         var text = data as String;
         if (text != null && text.isNotEmpty) {

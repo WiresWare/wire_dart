@@ -26,7 +26,7 @@ class WireLayer
     return wire;
   }
 
-  bool send(String signal, [args])
+  bool send(String signal, [data])
   {
     var noSubscribers = true;
 
@@ -39,7 +39,7 @@ class WireLayer
         noSubscribers = replies > 0 && --replies == 0;
         if (noSubscribers) WiresToRemove.add(wire);
         wire.replies = replies;
-        wire.transfer(args);
+        wire.transfer(data);
       });
       WiresToRemove.forEach((r) => noSubscribers = _removeSignal(r));
     }

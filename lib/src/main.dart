@@ -10,7 +10,7 @@ part 'data.dart';
 /// License: APACHE LICENSE, VERSION 2.0
 ///
 
-typedef WireListener = void Function(String signal, dynamic data);
+typedef WireListener = void Function(Wire wire, dynamic data);
 
 class Wire
 {
@@ -74,10 +74,10 @@ class Wire
   ///  Public Methods
   ///
   ///**********************************************************************************************************
-  void transfer(params)
+  void transfer(data)
   {
     // Call a listener in this Wire.
-    _listener(_signal, params);
+    _listener(this, data);
   }
 
   ///**********************************************************************************************************
@@ -88,8 +88,8 @@ class Wire
   static Wire add(Object scope, String signal, WireListener listener, {int replies = 0})
   { return _LAYER.add(Wire(scope, signal, listener, replies)); }
 
-  static bool send(String signal, [params])
-  { return _LAYER.send(signal, params); }
+  static bool send(String signal, [data])
+  { return _LAYER.send(signal, data); }
 
   static bool remove(String signal, {Object scope, WireListener listener})
   { return _LAYER.remove(signal, scope, listener); }

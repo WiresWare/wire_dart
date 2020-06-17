@@ -6,12 +6,12 @@ class "wire::src::main.dart::Wire" {
   {static} -WireLayer _LAYER
   {static} -WireStore _STORE
   -String _signal
-  -void Function(String, dynamic) _listener
+  -void Function(Wire, dynamic) _listener
   -int _hash
   -Object _scope
   +int replies
   +String signal
-  +void Function(String, dynamic) listener
+  +void Function(Wire, dynamic) listener
   +int hash
   +Object scope
   +void transfer()
@@ -23,6 +23,7 @@ class "wire::src::main.dart::Wire" {
 
 "wire::src::main.dart::Wire" o-- "wire::src::main.dart::WireLayer"
 "wire::src::main.dart::Wire" o-- "wire::src::main.dart::WireStore"
+"wire::src::main.dart::Wire" o-- "wire::src::main.dart::void Function(Wire, dynamic)"
 
 class "wire::src::main.dart::WireStore" {
   -Map<String, WireData> _map

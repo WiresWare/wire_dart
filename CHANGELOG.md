@@ -1,3 +1,6 @@
+## 0.3.1
+- WireListener has first parameter Wire that holds signal, scope, listener itself and replies  
+
 ## 0.3.0
 - In method Wire.add replies parameter is named
 - APACHE LICENSE, VERSION 2.0
