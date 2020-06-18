@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'dart:html';
 import 'package:wire/wire.dart';
 import '../../const/TodoViewSignal.dart';
-import '../../model/dto/EditDTO.dart';
-import '../../model/vo/TodoVO.dart';
+import '../../data/dto/EditDTO.dart';
+import '../../data/vo/TodoVO.dart';
 import '../base/DomElementView.dart';
 
 class TodoItemView extends DomElement {
@@ -76,7 +76,7 @@ class TodoItemView extends DomElement {
     }
   }
 
-  EditDTO getEditData() => EditDTO(dom.id, inpEdit.value.trim());
+  EditDTO getEditData() => EditDTO(dom.id, inpEdit.value.trim(), '');
 
   void _OnTodoDataChanged (dynamic todoVO) =>
     todoVO != null ? update(todoVO as TodoVO) : remove();

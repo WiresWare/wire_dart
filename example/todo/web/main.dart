@@ -2,7 +2,7 @@ import 'dart:html';
 import 'controller/RouteController.dart';
 import 'controller/TodoController.dart';
 import 'model/TodoModel.dart';
-import 'model/service/WebDatabaseService.dart';
+import 'service/WebDatabaseService.dart';
 import 'view/ClearCompletedView.dart';
 import 'view/TodoCountView.dart';
 import 'view/TodoFilterView.dart';

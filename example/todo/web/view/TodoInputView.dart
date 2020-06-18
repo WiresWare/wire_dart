@@ -1,6 +1,7 @@
 import 'dart:html';
 import 'package:wire/wire.dart';
 import '../const/TodoViewSignal.dart';
+import '../data/dto/CreateDTO.dart';
 import 'base/DomElementView.dart';
 
 class TodoInputView extends DomElement {
@@ -10,7 +11,7 @@ class TodoInputView extends DomElement {
       ..text = ''
       ..onKeyPress.listen((e) =>
         e.keyCode == KeyCode.ENTER &&
-          Wire.send(TodoViewSignal.INPUT, dom.value));
+          Wire.send(TodoViewSignal.INPUT, CreateDTO(dom.value, '')));
   }
 }
 

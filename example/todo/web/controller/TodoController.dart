@@ -2,11 +2,12 @@ import 'package:wire/wire.dart';
 
 import '../const/TodoFilterValues.dart';
 import '../const/TodoViewSignal.dart';
-import '../model/ITodoModel.dart';
-import '../model/dto/EditDTO.dart';
+import '../data/dto/CreateDTO.dart';
+import '../model/TodoModel.dart';
+import '../data/dto/EditDTO.dart';
 
 class TodoController {
-  ITodoModel todoModel;
+  TodoModel todoModel;
   TodoController(this.todoModel) {
 
     /*
@@ -40,20 +41,23 @@ class TodoController {
     print('> TodoProcessor -> ${wire.signal}: data = ' + data.toString());
     switch (wire.signal) {
       case TodoViewSignal.INPUT:
-        var text = data as String;
+        var createDTO = data as CreateDTO;
+        var text = createDTO.text;
+        var note = createDTO.note;
         if (text != null && text.isNotEmpty) {
-          todoModel.create(text);
+          todoModel.create(text, note);
           Wire.send(TodoViewSignal.CLEAR_INPUT);
         }
         break;
       case TodoViewSignal.EDIT:
         var editTodoDTO = data as EditDTO;
         var todoText = editTodoDTO.text;
+        var todoNote = editTodoDTO.note;
         var todoId = editTodoDTO.id;
         if (todoText.isEmpty) {
           todoModel.remove(todoId);
         } else {
-          todoModel.update(todoId, todoText);
+          todoModel.update(todoId, todoText, todoNote);
         }
         break;
       case TodoViewSignal.TOGGLE:

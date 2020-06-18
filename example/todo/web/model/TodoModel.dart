@@ -1,16 +1,13 @@
-import 'dart:convert';
-import 'dart:html';
 import 'package:wire/wire.dart';
 import '../const/TodoDataParams.dart';
 import '../const/TodoFilterValues.dart';
-import 'ITodoModel.dart';
-import 'service/IDatabaseService.dart';
-import 'vo/TodoVO.dart';
+import '../service/IDatabaseService.dart';
+import '../data/vo/TodoVO.dart';
 
-class TodoModel implements ITodoModel {
+class TodoModel {
   static const String LOCAL_STORAGE_KEY = 'todo-mvc-dart-wire';
 
-  IDatabaseService _dbService;
+  final IDatabaseService _dbService;
 
   TodoModel(this._dbService) {
     var idsList = <String>[];
@@ -34,10 +31,10 @@ class TodoModel implements ITodoModel {
   }
 
   @override
-  TodoVO create(String text) {
+  TodoVO create(String text, String note) {
     final time = DateTime.now().millisecondsSinceEpoch;
     final id = time.toString();
-    final todoVO = TodoVO(id, text, false);
+    final todoVO = TodoVO(id, text, note, false);
     final listData = Wire.data(TodoDataParams.LIST);
     final todoList = listData.value as List;
     final count = Wire.data(TodoDataParams.COUNT).value as int;
@@ -74,10 +71,11 @@ class TodoModel implements ITodoModel {
   }
 
   @override
-  TodoVO update(String id, String text) {
+  TodoVO update(String id, String text, String note) {
     final todoWireData = Wire.data(id);
     final todoVO = todoWireData.value as TodoVO;
     todoVO.text = text;
+    todoVO.note = note;
     Wire.data(id, todoVO);
     _save();
 
