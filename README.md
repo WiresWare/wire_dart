@@ -1,7 +1,8 @@
 # Wire (WIP) - Pub/Sub on Strings "signals" with data container
-Dart pub/sub library - communication layer (or bus) where responses associated with "keys" called - signals. Simplest possible API - add, remove and send.
+Dart pub/sub library - communication layer or "bus" to which you can attach a wire and listen for signal associated with it. 
+Wire has simplest possible API - add, remove and send. Also it has data layer, universal container with key-value, where value is an object WireData type that holds dynamic value and can be subscribed for updates. This "data container" is something like Redis.
 
-Also it has data layer,  universal container (Map) with key-value, where value is a wrapper - WireData - hold dynamic value and can be subscribed for updates, something like Redis.
+Wire also has Flutter Widget that allows to subscribe to data changes: https://pub.dev/packages/wire_flutter
 
 ## API
 Wire:
