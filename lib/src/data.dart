@@ -24,12 +24,16 @@ class WireData
   dynamic get value => _value;
   set value(dynamic value) {
     _value = value;
-    if (_isSet == false) _isSet = true;
-    _listeners.forEach((scope, listeners) =>
-      listeners.forEach((func) => func(value)));
+    _isSet = true;
+    refresh();
   }
 
   WireData(this._key, this._onRemove);
+
+  void refresh() {
+    _listeners.forEach((scope, listeners) =>
+      listeners.forEach((func) => func(_value)));
+  }
 
   void remove() {
     _onRemove(_key);

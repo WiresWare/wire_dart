@@ -33,6 +33,7 @@ class TodoController {
     Wire.add(this, TodoViewSignal.TOGGLE, _SignalProcessor);
     Wire.add(this, TodoViewSignal.FILTER, _SignalProcessor);
     Wire.add(this, TodoViewSignal.CLEAR_COMPLETED, _SignalProcessor);
+    Wire.add(this, TodoViewSignal.COMPLETE_ALL, _SignalProcessor);
 
     print('Processor Ready');
   }
@@ -74,6 +75,10 @@ class TodoController {
         break;
       case TodoViewSignal.CLEAR_COMPLETED:
         todoModel.clearCompleted();
+        break;
+      case TodoViewSignal.COMPLETE_ALL:
+        var completed = data as bool;
+        todoModel.setCompletionToAll(completed);
         break;
     }
   }

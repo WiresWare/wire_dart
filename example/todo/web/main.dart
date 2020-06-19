@@ -4,6 +4,7 @@ import 'controller/TodoController.dart';
 import 'model/TodoModel.dart';
 import 'service/WebDatabaseService.dart';
 import 'view/ClearCompletedView.dart';
+import 'view/CompleteAllView.dart';
 import 'view/TodoCountView.dart';
 import 'view/TodoFilterView.dart';
 import 'view/TodoInputView.dart';
@@ -21,7 +22,8 @@ main() {
 }
 
 void init() {
-  todoModel = TodoModel(WebDatabaseService());
+  var databaseService = WebDatabaseService();
+  todoModel = TodoModel(databaseService);
   todoView = TodoView();
   todoController = TodoController(todoModel);
   routeController = RouteController();
@@ -38,6 +40,7 @@ class TodoView {
     TodoListView(document.querySelector('.todo-list'));
     TodoCountView(document.querySelector('.todo-count'));
     TodoFilterView(document.querySelector('.filters'));
+    CompleteAllView(document.querySelector('.toggle-all'));
     ClearCompletedView(document.querySelector('.clear-completed'));
   }
 }

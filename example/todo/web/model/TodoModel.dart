@@ -30,7 +30,6 @@ class TodoModel {
     Wire.data(TodoDataParams.COUNT, notCompletedCount);
   }
 
-  @override
   TodoVO create(String text, String note) {
     final time = DateTime.now().millisecondsSinceEpoch;
     final id = time.toString();
@@ -50,7 +49,6 @@ class TodoModel {
     return todoVO;
   }
 
-  @override
   TodoVO remove(String id) {
     final todoList = Wire.data(TodoDataParams.LIST).value as List;
     final count = Wire.data(TodoDataParams.COUNT).value as int;
@@ -70,7 +68,6 @@ class TodoModel {
     return todoVO;
   }
 
-  @override
   TodoVO update(String id, String text, String note) {
     final todoWireData = Wire.data(id);
     final todoVO = todoWireData.value as TodoVO;
@@ -83,7 +80,6 @@ class TodoModel {
     return todoVO;
   }
 
-  @override
   TodoVO toggle(String id) {
     final todoWireData = Wire.data(id);
     final todoVO = todoWireData.value as TodoVO;
@@ -100,7 +96,6 @@ class TodoModel {
     return null;
   }
 
-  @override
   void filter(TodoFilterValue filter) {
     final todoList = Wire.data(TodoDataParams.LIST).value as List;
     todoList.forEach((id) {
@@ -121,7 +116,22 @@ class TodoModel {
     print('> TodoModel -> filtered: ' + filter.toString());
   }
 
-  @override
+  void setCompletionToAll(value) {
+    final todoList = Wire.data(TodoDataParams.LIST).value as List;
+    var count = Wire.data(TodoDataParams.COUNT).value as int;
+    todoList.forEach((id) {
+      var todoWireData = Wire.data(id);
+      var todoVO = todoWireData.value as TodoVO;
+      if (todoVO.completed != value) {
+        count += value ? -1 : 1;
+        todoVO.completed = value;
+        Wire.data(id, todoVO);
+      }
+    });
+    Wire.data(TodoDataParams.COUNT, count);
+    _save();
+  }
+
   void clearCompleted() {
     final todoList = Wire.data(TodoDataParams.LIST).value as List;
     todoList.removeWhere((id) {
