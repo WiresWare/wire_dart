@@ -7,8 +7,7 @@ part of wire;
 ///
 typedef WireDataListener = void Function(dynamic value);
 
-class WireData
-{
+class WireData {
   Function _onRemove;
   final _listeners = <Object, List<WireDataListener>>{};
 
@@ -31,8 +30,8 @@ class WireData
   WireData(this._key, this._onRemove);
 
   void refresh() {
-    _listeners.forEach((scope, listeners) =>
-      listeners.forEach((func) => func(_value)));
+    _listeners.forEach(
+        (scope, listeners) => listeners.forEach((func) => func(_value)));
   }
 
   void remove() {
@@ -40,11 +39,12 @@ class WireData
     _onRemove = null;
 
     _key = null;
-    value = null; // null value means remove element that listening on change (unsubscribe)
+    // null value means remove element that listening on change (unsubscribe)
+    value = null;
 
-    while(_listeners.isNotEmpty) {
+    while (_listeners.isNotEmpty) {
       var value = _listeners.remove(_listeners.keys.last);
-      while(value.isNotEmpty) {
+      while (value.isNotEmpty) {
         value.removeLast();
       }
     }

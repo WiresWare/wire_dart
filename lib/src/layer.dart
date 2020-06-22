@@ -5,13 +5,11 @@ part of wire;
 /// Github: https://github.com/DQvsRA
 /// License: APACHE LICENSE, VERSION 2.0
 ///
-class WireLayer
-{
+class WireLayer {
   final Map<int, Wire> _wireByHash = <int, Wire>{};
   final Map<String, List<int>> _hashesBySignal = <String, List<int>>{};
 
-  Wire add(Wire wire)
-  {
+  Wire add(Wire wire) {
     var hash = wire.hash;
     var signal = wire.signal;
 
@@ -26,12 +24,10 @@ class WireLayer
     return wire;
   }
 
-  bool send(String signal, [data])
-  {
+  bool send(String signal, [data]) {
     var noSubscribers = true;
 
-    if (_hashesBySignal.containsKey(signal))
-    {
+    if (_hashesBySignal.containsKey(signal)) {
       var WiresToRemove = <Wire>[];
       _hashesBySignal[signal].forEach((hash) {
         var wire = _wireByHash[hash];
@@ -46,8 +42,7 @@ class WireLayer
     return noSubscribers;
   }
 
-  bool remove(String signal, [Object scope, Function listener])
-  {
+  bool remove(String signal, [Object scope, Function listener]) {
     var exists = _hashesBySignal.containsKey(signal);
     if (exists) {
       var toRemove = <Wire>[];
@@ -66,11 +61,10 @@ class WireLayer
   ///
   /// Exclude a Wire based on an signal.
   ///
-  /// @param	The Wire to remove.
+  /// @param    The Wire to remove.
   /// @return If there is no hashes (no Wires) for that SIGNAL stop future perform
   ///
-  bool _removeSignal(Wire wire)
-  {
+  bool _removeSignal(Wire wire) {
     var hash = wire.hash;
     var signal = wire.signal;
 

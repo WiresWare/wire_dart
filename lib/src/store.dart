@@ -5,8 +5,7 @@ part of wire;
 /// Github: https://github.com/DQvsRA
 /// License: APACHE LICENSE, VERSION 2.0
 ///
-class WireStore
-{
+class WireStore {
   final Map<String, WireData> _map = <String, WireData>{};
   dynamic get(String key) {
     if (!_map.containsKey(key)) {

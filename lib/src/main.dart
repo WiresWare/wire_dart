@@ -60,8 +60,7 @@ class Wire
   ///
   int replies = 0;
 
-  Wire(Object scope, String signal, WireListener listener, int replies)
-  {
+  Wire(Object scope, String signal, WireListener listener, int replies) {
     _scope = scope;
     _signal = signal;
     _listener = listener;
@@ -74,8 +73,7 @@ class Wire
   ///  Public Methods
   ///
   ///**********************************************************************************************************
-  void transfer(data)
-  {
+  void transfer(data) {
     // Call a listener in this Wire.
     _listener(this, data);
   }
@@ -85,17 +83,20 @@ class Wire
   ///  Public Static Methods - API
   ///
   ///**********************************************************************************************************
-  static Wire add(Object scope, String signal, WireListener listener, {int replies = 0})
-  { return _LAYER.add(Wire(scope, signal, listener, replies)); }
+  static Wire add(Object scope, String signal, WireListener listener,
+      {int replies = 0}) {
+    return _LAYER.add(Wire(scope, signal, listener, replies));
+  }
 
-  static bool send(String signal, [data])
-  { return _LAYER.send(signal, data); }
+  static bool send(String signal, [data]) {
+    return _LAYER.send(signal, data);
+  }
 
-  static bool remove(String signal, {Object scope, WireListener listener})
-  { return _LAYER.remove(signal, scope, listener); }
+  static bool remove(String signal, {Object scope, WireListener listener}) {
+    return _LAYER.remove(signal, scope, listener);
+  }
 
-  static WireData data(String param, [dynamic value])
-  {
+  static WireData data(String param, [dynamic value]) {
     var wd = _STORE.get(param);
     if (value != null) wd.value = value is Function ? value(wd.value) : value;
     return wd;

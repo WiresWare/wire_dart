@@ -1,3 +1,6 @@
+## 0.3.2
+- dartfmt style fixes  
+
 ## 0.3.1
 - WireListener has first parameter Wire that holds signal, scope, listener itself and replies  
 
