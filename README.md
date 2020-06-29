@@ -11,6 +11,8 @@ Wire Wire.add(Object scope, String signal, WireListener listener, [int replies =
 bool Wire.send(String signal, [args])
 bool Wire.remove(String signal, {Object scope, WireListener listener})
 WireData Wire.data(String param, [dynamic value]) - optional value update object it can be function that return value
+bool Wire.has({String signal, Wire wire})
+List<Wire> Wire.get({String signal, Object scope, Function listener})
 ```
 `WireListener = void Function(Wire wire, dynamic data)`
 

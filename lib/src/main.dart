@@ -12,8 +12,7 @@ part 'data.dart';
 
 typedef WireListener = void Function(Wire wire, dynamic data);
 
-class Wire
-{
+class Wire {
   static int _INDEX = 0;
   static final WireLayer _LAYER = WireLayer();
   static final WireStore _STORE = WireStore();
@@ -88,12 +87,26 @@ class Wire
     return _LAYER.add(Wire(scope, signal, listener, replies));
   }
 
+  static bool has({String signal, Wire wire}) {
+    if (signal != null) return _LAYER.hasSignal(signal);
+    if (wire != null) return _LAYER.hasWire(wire);
+    return false;
+  }
+
   static bool send(String signal, [data]) {
     return _LAYER.send(signal, data);
   }
 
   static bool remove(String signal, {Object scope, WireListener listener}) {
     return _LAYER.remove(signal, scope, listener);
+  }
+
+  static List<Wire> get({String signal, Object scope, Function listener}) {
+    var result = <Wire>[];
+    if (signal != null) result.addAll(_LAYER.getBySignal(signal));
+    if (scope != null) result.addAll(_LAYER.getByScope(scope));
+    if (listener != null) result.addAll(_LAYER.getByListener(listener));
+    return result;
   }
 
   static WireData data(String param, [dynamic value]) {

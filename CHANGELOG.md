@@ -1,3 +1,6 @@
+## 0.3.3
+- New API methods: `has` signal or wire and `get` list of wires by signal, scope or listener
+
 ## 0.3.2
 - dartfmt style fixes  
 
