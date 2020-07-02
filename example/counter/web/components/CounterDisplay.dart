@@ -2,7 +2,7 @@ import 'dart:html';
 
 import 'package:wire/wire.dart';
 
-import '../const/counter_params.dart';
+import '../const/CounterParams.dart';
 import 'base/dom_element.dart';
 
 class CounterDisplay extends DomElement {

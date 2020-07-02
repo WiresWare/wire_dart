@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:html';
 import 'package:wire/wire.dart';
-import '../../const/TodoViewSignal.dart';
-import '../../data/dto/EditDTO.dart';
-import '../../data/vo/TodoVO.dart';
-import '../base/DomElementView.dart';
+import '../const/TodoViewSignal.dart';
+import '../data/dto/EditDTO.dart';
+import '../data/vo/TodoVO.dart';
+import 'base/DomElementView.dart';
 
-class TodoItemView extends DomElement {
+class TodoListItemView extends DomElement {
 
   final inpToggle = InputElement()
     ..className = 'toggle'
@@ -27,7 +27,7 @@ class TodoItemView extends DomElement {
 
   final listeners = <StreamSubscription>[];
 
-  TodoItemView(String id):super(LIElement()) {
+  TodoListItemView(String id):super(LIElement()) {
 
     listeners.addAll([
       inpToggle.onClick.listen((e) => Wire.send(TodoViewSignal.TOGGLE, id)),

@@ -14,4 +14,11 @@ class WireStore {
 
     return _map[key];
   }
+
+  void clear() {
+    _map.forEach((key, wireData) {
+      wireData.remove();
+    });
+    _map.clear();
+  }
 }

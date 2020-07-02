@@ -2,9 +2,9 @@ import 'package:wire/wire.dart';
 
 import '../const/TodoFilterValues.dart';
 import '../const/TodoViewSignal.dart';
+import '../data/dto/EditDTO.dart';
 import '../data/dto/CreateDTO.dart';
 import '../model/TodoModel.dart';
-import '../data/dto/EditDTO.dart';
 
 class TodoController {
   TodoModel todoModel;
@@ -27,18 +27,18 @@ class TodoController {
     });
     * */
 
-    Wire.add(this, TodoViewSignal.INPUT,  _SignalProcessor);
-    Wire.add(this, TodoViewSignal.EDIT,   _SignalProcessor);
-    Wire.add(this, TodoViewSignal.DELETE, _SignalProcessor);
-    Wire.add(this, TodoViewSignal.TOGGLE, _SignalProcessor);
-    Wire.add(this, TodoViewSignal.FILTER, _SignalProcessor);
-    Wire.add(this, TodoViewSignal.CLEAR_COMPLETED, _SignalProcessor);
-    Wire.add(this, TodoViewSignal.COMPLETE_ALL, _SignalProcessor);
+    Wire.add(this, TodoViewSignal.INPUT,  _TodoSignalProcessor);
+    Wire.add(this, TodoViewSignal.EDIT,   _TodoSignalProcessor);
+    Wire.add(this, TodoViewSignal.DELETE, _TodoSignalProcessor);
+    Wire.add(this, TodoViewSignal.TOGGLE, _TodoSignalProcessor);
+    Wire.add(this, TodoViewSignal.FILTER, _TodoSignalProcessor);
+    Wire.add(this, TodoViewSignal.CLEAR_COMPLETED, _TodoSignalProcessor);
+    Wire.add(this, TodoViewSignal.COMPLETE_ALL, _TodoSignalProcessor);
 
     print('Processor Ready');
   }
 
-  void _SignalProcessor(Wire wire, dynamic data) {
+  void _TodoSignalProcessor(Wire wire, dynamic data) {
     print('> TodoProcessor -> ${wire.signal}: data = ' + data.toString());
     switch (wire.signal) {
       case TodoViewSignal.INPUT:

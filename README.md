@@ -1,50 +1,77 @@
-# Wire (WIP) - Pub/Sub on Strings "signals" with data container
-Dart pub/sub library - communication layer or "bus" to which you can attach a wire and listen for signal associated with it. 
+# Wire - communication and data container layers
+### Library aimed to decouple UI from business logic
+![Schema](assets/wire-schema.jpeg)
+
+Pub/sub library - communication layer or "bus" to which you can attach a wire and listen for signal associated with it. 
 Wire has simplest possible API - add, remove and send. Also it has data layer, universal container with key-value, where value is an object WireData type that holds dynamic value and can be subscribed for updates. This "data container" is something like Redis.
 
 Wire also has Flutter Widget that allows to subscribe to data changes: https://pub.dev/packages/wire_flutter
 
-## API
-Wire:
+# API
+### Wire:
 ```
 Wire Wire.add(Object scope, String signal, WireListener listener, [int replies = 0])
 bool Wire.send(String signal, [args])
 bool Wire.remove(String signal, {Object scope, WireListener listener})
-WireData Wire.data(String param, [dynamic value]) - optional value update object it can be function that return value
 bool Wire.has({String signal, Wire wire})
 List<Wire> Wire.get({String signal, Object scope, Function listener})
+void Wire.attach(Wire wire)
+bool Wire.detach(Wire wire)
+bool Wire.purge()
+void Wire.middleware(WireMiddleware value)
+WireData Wire.data(String param, [dynamic value]) - optional value update object it can be function that return value
 ```
-`WireListener = void Function(Wire wire, dynamic data)`
 
-WireData:
+### WireListener:
 ```
-void remove() // emit null value before remove all subscribers, use isSet property to to distinguish between newly created (false) and removed (value still maybe be null thus isSet is false)
+void Function(Wire wire, dynamic data)
+```
+
+### WireData:
+WireData is a data container to changes of which anyone can subscribe/unsubscribe. It's associated with param - string key. WireData can't be null and Wire.data(param, value) will always return WireData instance. Initial value will has null value if not present in the Wire.data call
+```
 WireData subscribe(Object scope, WireDataListener listener)
 WireData unsubscribe(Object scope, [WireDataListener listener])
+void refresh()
+void remove() // emit null value before remove all subscribers, use isSet property to to distinguish between newly created (false) and removed (value still maybe be null thus isSet is false)
 ```
-`WireDataListener = void Function(dynamic value)`
+
+### WireDataListener
+```
+void Function(dynamic value)
+```
+
+### WireMiddleware
+```
+abstract class WireMiddleware {
+  void onAdd(Wire wire);
+  void onSend(String signal, [data]);
+  void onRemove(String signal, [Object scope, WireListener listener]);
+  void onData(String param, dynamic prevValue, dynamic nextValue);
+}
+```
 
 ![UML](uml/configuration.png)
 
 Generate UML with dcdg (PlantUML): pub global run dcdg -o ./uml/configuration
 
 ## Examples
-1. Counter (web):
+### 1. Counter (web):
 - Open IDEA
 - Select build target - Dart Web, point to example/counter/index.html
 - Run Debug
 
-2. API calls variations (console):
+### 2. API calls variations (console):
 - Open IDEA
 - Select build target - Dart Command Line App, point to example/api/wire_api_example.dart
 - Run Debug
 
-3. Todo MVC (web):
+### 3. Todo MVC (web):
 - Open IDEA
 - Select build target - Dart Web, point to example/todo/index.html
 - Run Debug
 
-##Licence
+## Licence
 
 ```
 Copyright 2020 Vladimir Cores (Minkin)

@@ -1,10 +1,18 @@
 @startuml
 set namespaceSeparator ::
 
+abstract class "wire::src::main.dart::WireMiddleware" {
+  +void onAdd()
+  +void onSend()
+  +void onRemove()
+  +void onData()
+}
+
 class "wire::src::main.dart::Wire" {
   {static} -int _INDEX
   {static} -WireLayer _LAYER
   {static} -WireStore _STORE
+  {static} -List<WireMiddleware> _MIDDLEWARE_LIST
   -String _signal
   -void Function(Wire, dynamic) _listener
   -int _hash
@@ -15,9 +23,15 @@ class "wire::src::main.dart::Wire" {
   +int hash
   +Object scope
   +void transfer()
+  {static} +void attach()
+  {static} +bool detach()
   {static} +Wire add()
+  {static} +bool has()
   {static} +bool send()
+  {static} +void purge()
   {static} +bool remove()
+  {static} +void middleware()
+  {static} +List get()
   {static} +WireData data()
 }
 
@@ -28,14 +42,21 @@ class "wire::src::main.dart::Wire" {
 class "wire::src::main.dart::WireStore" {
   -Map<String, WireData> _map
   +dynamic get()
+  +void clear()
 }
 
 class "wire::src::main.dart::WireLayer" {
   -Map<int, Wire> _wireByHash
   -Map<String, List<int>> _hashesBySignal
   +Wire add()
+  +bool hasSignal()
+  +bool hasWire()
   +bool send()
   +bool remove()
+  +void clear()
+  +List getBySignal()
+  +List getByScope()
+  +List getByListener()
   -bool _removeSignal()
 }
 
@@ -48,6 +69,7 @@ class "wire::src::main.dart::WireData" {
   +bool isSet
   +dynamic key
   +dynamic value
+  +void refresh()
   +void remove()
   +WireData subscribe()
   +WireData unsubscribe()

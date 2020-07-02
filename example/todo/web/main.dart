@@ -1,4 +1,6 @@
 import 'dart:html';
+import 'package:wire/wire.dart';
+
 import 'controller/RouteController.dart';
 import 'controller/TodoController.dart';
 import 'model/TodoModel.dart';
@@ -9,6 +11,7 @@ import 'view/TodoCountView.dart';
 import 'view/TodoFilterView.dart';
 import 'view/TodoInputView.dart';
 import 'view/TodoListView.dart';
+import 'middleware/TodoMiddleware.dart';
 
 var todoModel;
 var todoView;
@@ -22,6 +25,7 @@ main() {
 }
 
 void init() {
+  Wire.middleware(TodoMiddleware());
   var databaseService = WebDatabaseService();
   todoModel = TodoModel(databaseService);
   todoView = TodoView();

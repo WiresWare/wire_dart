@@ -10,8 +10,12 @@ class WireLayer {
   final Map<String, List<int>> _hashesBySignal = <String, List<int>>{};
 
   Wire add(Wire wire) {
-    var hash = wire.hash;
-    var signal = wire.signal;
+    final hash = wire.hash;
+    final signal = wire.signal;
+
+    if (_wireByHash.containsKey(hash)) {
+      throw ERROR__WIRE_ALREADY_REGISTERED + hash.toString();
+    }
 
     _wireByHash[hash] = wire;
 
@@ -33,21 +37,20 @@ class WireLayer {
   }
 
   bool send(String signal, [data]) {
-    var noSubscribers = true;
-
+    var noMoreSubscribers = true;
     if (hasSignal(signal)) {
       var WiresToRemove = <Wire>[];
       _hashesBySignal[signal].forEach((hash) {
         var wire = _wireByHash[hash];
         var replies = wire.replies;
-        noSubscribers = replies > 0 && --replies == 0;
-        if (noSubscribers) WiresToRemove.add(wire);
+        noMoreSubscribers = replies > 0 && --replies == 0;
+        if (noMoreSubscribers) WiresToRemove.add(wire);
         wire.replies = replies;
         wire.transfer(data);
       });
-      WiresToRemove.forEach((r) => noSubscribers = _removeSignal(r));
+      WiresToRemove.forEach((r) => noMoreSubscribers = _removeSignal(r));
     }
-    return noSubscribers;
+    return noMoreSubscribers;
   }
 
   bool remove(String signal, [Object scope, Function listener]) {
@@ -66,26 +69,29 @@ class WireLayer {
     return exists;
   }
 
+  void clear() {
+    _wireByHash.forEach((h, w) => _removeSignal(w));
+    _wireByHash.clear();
+    _hashesBySignal.clear();
+  }
+
   List<Wire> getBySignal(String signal) {
-    return hasSignal(signal) ?
-      _hashesBySignal[signal].map((hash) =>
-        _wireByHash[hash])
-      : <Wire>[];
+    return hasSignal(signal)
+        ? _hashesBySignal[signal].map((hash) => _wireByHash[hash])
+        : <Wire>[];
   }
 
   List<Wire> getByScope(Object scope) {
     var result = <Wire>[];
-    _wireByHash.forEach((hash, wire) => {
-      if (wire.scope == scope) result.add(wire)
-    });
+    _wireByHash
+        .forEach((hash, wire) => {if (wire.scope == scope) result.add(wire)});
     return result;
   }
 
   List<Wire> getByListener(Function listener) {
     var result = <Wire>[];
-    _wireByHash.forEach((hash, wire) => {
-      if (wire.listener == listener) result.add(wire)
-    });
+    _wireByHash.forEach(
+        (hash, wire) => {if (wire.listener == listener) result.add(wire)});
     return result;
   }
 

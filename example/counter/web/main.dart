@@ -1,19 +1,23 @@
 import 'package:wire/wire.dart';
 import 'dart:html';
 
+import 'middleware/CounterStorageMiddleware.dart';
 import 'CounterProcessor.dart';
-import 'components/counter_button.dart';
-import 'components/counter_display.dart';
-import 'const/counter_params.dart';
-import 'const/counter_signals.dart';
+import 'components/CounterButton.dart';
+import 'components/CounterDisplay.dart';
+import 'const/CounterParams.dart';
+import 'const/CounterSignals.dart';
 
 var processor;
 var application;
 
 main() {
   /// COUNTER EXAMPLE ======================================
-  Wire.data(CounterParams.COUNT, 0);
-  print('Init Ready: initial value = ' + Wire.data(CounterParams.COUNT).value.toString());
+  final counterStorageMiddleware = CounterStorageMiddleware();
+  final initialValue = counterStorageMiddleware.getInitialValue();
+  Wire.data(CounterParams.COUNT, initialValue);
+  Wire.middleware(counterStorageMiddleware);
+  print('Init Ready: initial value = ${Wire.data(CounterParams.COUNT).value}');
   init();
 }
 

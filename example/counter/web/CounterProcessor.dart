@@ -1,7 +1,7 @@
 import 'package:wire/wire.dart';
 
-import 'const/counter_params.dart';
-import 'const/counter_signals.dart';
+import 'const/CounterParams.dart';
+import 'const/CounterSignals.dart';
 
 class CounterProcessor {
   CounterProcessor() {

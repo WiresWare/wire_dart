@@ -4,14 +4,14 @@ import 'package:test/test.dart';
 void main() {
   group('1. Subscription tests', () {
 
-    var SIGNAL_SUBSCRIPTION = 'SIGNAL_SUBSCRIPTION';
+    var SUBSCRIPTION_SIGNAL = 'SIGNAL_SUBSCRIPTION';
 
-    var SCOPE_SUBSCRIPTION = Object();
+    var SUBSCRIPTION_SCOPE = Object();
 
     setUp(() {
       Wire.add(
-        SCOPE_SUBSCRIPTION,
-        SIGNAL_SUBSCRIPTION,
+        SUBSCRIPTION_SCOPE,
+        SUBSCRIPTION_SIGNAL,
         (signal, data) => { print('Response on ${signal} with data: ${data}') });
     });
 
@@ -20,9 +20,32 @@ void main() {
     test('1.1 Unregistered Signal - Test', () {
       expect(
         Wire.send(
-          SIGNAL_SUBSCRIPTION,
+          SUBSCRIPTION_SIGNAL,
           SIGNAL_NOT_REGISTERED
       ), isFalse);
+    });
+  });
+
+  group('2. Purge tests', () {
+
+    var SUBSCRIPTION_SIGNAL = 'SIGNAL_SUBSCRIPTION';
+    var SUBSCRIPTION_SCOPE = Object();
+
+    setUp(() {
+      Wire.add(
+          SUBSCRIPTION_SCOPE,
+          SUBSCRIPTION_SIGNAL,
+              (signal, data) => { print('Response on ${signal} with data: ${data}') });
+    });
+
+    var SIGNAL_NOT_REGISTERED = 'SIGNAL_NOT_REGISTERED';
+
+    test('2.1 Purge', () {
+      expect(
+          Wire.send(
+              SUBSCRIPTION_SIGNAL,
+              SIGNAL_NOT_REGISTERED
+          ), isFalse);
     });
   });
 }

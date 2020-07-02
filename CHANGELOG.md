@@ -1,3 +1,12 @@
+## 0.4.0 (Pre-release)
+- Introduction of middleware - class that extends WireMiddleware is able to listen for things happen inside communication and data container layers
+- `Wire.attach` and `Wire.detach`. Wire instance can be created solely but it won't be included in communication layer, and `attach` method introduced to manually add Wire instance to the communication layer, and `detach` to remove it.
+- `Wire.get` modified to return instances only on one of params: signal, scope or listener
+- `Wire.purge` clear all entities on communication and data container layers
+- In code documentation for API
+- Examples update with middleware use
+- Graphics of how to use Wire in decoupled system
+
 ## 0.3.3
 - New API methods: `has` signal or wire and `get` list of wires by signal, scope or listener
 
