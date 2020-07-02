@@ -10,16 +10,18 @@ Wire also has Flutter Widget that allows to subscribe to data changes: https://p
 # API
 ### Wire:
 ```
-Wire Wire.add(Object scope, String signal, WireListener listener, [int replies = 0])
-bool Wire.send(String signal, [args])
-bool Wire.remove(String signal, {Object scope, WireListener listener})
-bool Wire.has({String signal, Wire wire})
-List<Wire> Wire.get({String signal, Object scope, Function listener})
-void Wire.attach(Wire wire)
-bool Wire.detach(Wire wire)
-bool Wire.purge()
-void Wire.middleware(WireMiddleware value)
-WireData Wire.data(String param, [dynamic value]) - optional value update object it can be function that return value
+Wire .add(Object scope, String signal, WireListener listener, [int replies = 0])
+bool .send(String signal, [args])
+bool .remove(String signal, {Object scope, WireListener listener})
+bool .has({String signal, Wire wire})
+void .attach(Wire wire)
+bool .detach(Wire wire)
+bool .purge()
+void .middleware(WireMiddleware value)
+
+WireData .data(String param, [dynamic value]) - optional value update object it can be function that return value
+
+List<Wire> .get({String signal, Object scope, Function listener})
 ```
 
 ### WireListener:
@@ -28,7 +30,7 @@ void Function(Wire wire, dynamic data)
 ```
 
 ### WireData:
-WireData is a data container to changes of which anyone can subscribe/unsubscribe. It's associated with param - string key. WireData can't be null and Wire.data(param, value) will always return WireData instance. Initial value will has null value if not present in the Wire.data call
+It is a data container to changes of which anyone can subscribe/unsubscribe. It's associated with param - string key. WireData can't be null and Wire.data(param, value) will always return WireData instance. Initial value will has null value if not present in the Wire.data call
 ```
 WireData subscribe(Object scope, WireDataListener listener)
 WireData unsubscribe(Object scope, [WireDataListener listener])
