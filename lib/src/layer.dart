@@ -48,7 +48,7 @@ class WireLayer {
         wire.replies = replies;
         wire.transfer(data);
       });
-      WiresToRemove.forEach((r) => noMoreSubscribers = _removeSignal(r));
+      WiresToRemove.forEach((r) => noMoreSubscribers = _removeWire(r));
     }
     return noMoreSubscribers;
   }
@@ -64,13 +64,15 @@ class WireLayer {
         if (isWrongScope || isWrongListener) return;
         toRemove.add(wire);
       });
-      toRemove.forEach((r) => _removeSignal(r));
+      toRemove.forEach((r) => _removeWire(r));
     }
     return exists;
   }
 
   void clear() {
-    _wireByHash.forEach((h, w) => _removeSignal(w));
+    var wireToRemove = <Wire>[];
+    _wireByHash.forEach((h, w) => wireToRemove.add(w));
+    wireToRemove.forEach(_removeWire);
     _wireByHash.clear();
     _hashesBySignal.clear();
   }
@@ -101,7 +103,7 @@ class WireLayer {
   /// @param    The Wire to remove.
   /// @return If there is no hashes (no Wires) for that SIGNAL stop future perform
   ///
-  bool _removeSignal(Wire wire) {
+  bool _removeWire(Wire wire) {
     var hash = wire.hash;
     var signal = wire.signal;
 
@@ -114,6 +116,8 @@ class WireLayer {
 
     var noMoreSignals = hashesForSignal.isEmpty;
     if (noMoreSignals) _hashesBySignal.remove(signal);
+
+    wire.clear();
 
     return noMoreSignals;
   }

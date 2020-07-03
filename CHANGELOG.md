@@ -1,4 +1,8 @@
-## 0.4.0 (Pre-release)
+## 0.5.0
+- Tests, changes according test results, documentation update
+- Implementation .clear() method in Wire instance, which is called after wire removed from communication layer
+
+## 0.4.0
 - Introduction of middleware - class that extends WireMiddleware is able to listen for things happen inside communication and data container layers
 - `Wire.attach` and `Wire.detach`. Wire instance can be created solely but it won't be included in communication layer, and `attach` method introduced to manually add Wire instance to the communication layer, and `detach` to remove it.
 - `Wire.get` modified to return instances only on one of params: signal, scope or listener

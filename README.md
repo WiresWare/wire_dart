@@ -1,14 +1,15 @@
 # Wire - communication and data container layers
-### Library aimed to decouple UI from business logic
+### Tool aimed to decouple UI from business logic
 ![Schema](assets/wire-schema.jpeg)
 
-Pub/sub library - communication layer or "bus" to which you can attach a wire and listen for signal associated with it. 
-Wire has simplest possible API - add, remove and send. Also it has data layer, universal container with key-value, where value is an object WireData type that holds dynamic value and can be subscribed for updates. This "data container" is something like Redis.
+Pub/sub library - communication layer or "bus" to which you can attach a Wire and listen for signal associated with it.
+Wire has simple API - add, send and remove. Also it has data layer (`WireData Wire.data(String param, [dynamic value]);`).
+It's a universal container with key-value, where value is an instance of WireData that holds dynamic value and can be subscribed for updates. This "data container" is something like Redis.
 
 Wire also has Flutter Widget that allows to subscribe to data changes: https://pub.dev/packages/wire_flutter
 
 # API
-### Wire:
+### Wire (static methods):
 ```
 Wire .add(Object scope, String signal, WireListener listener, [int replies = 0])
 bool .send(String signal, [args])

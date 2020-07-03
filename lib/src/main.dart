@@ -83,18 +83,28 @@ class Wire {
   /// But it wont react on signal until it is attached to the communication layer with [attach]
   /// However you still can send data through it by calling [transfer]
   ///
-  Wire(Object scope, String signal, WireListener listener, int replies) {
+  Wire(Object scope, String signal, WireListener listener, [int replies = 0])
+      : assert(scope != null),
+        assert(signal != null),
+        assert(listener != null) {
     _scope = scope;
     _signal = signal;
     _listener = listener;
     this.replies = replies;
-    _hash = ++_INDEX << 0x08;
+    _hash = ++_INDEX;
   }
 
   /// Call associated WireListener with data.
   void transfer(data) {
     // Call a listener in this Wire.
     _listener(this, data);
+  }
+
+  /// Nullify all relations
+  void clear() {
+    _scope = null;
+    _signal = null;
+    _listener = null;
   }
 
   ///**********************************************************************************************************
@@ -133,6 +143,7 @@ class Wire {
   /// Send signal through all wires has the signal string value
   /// Data is optional, default is null, passed to WireListener from [transfer]
   /// All middleware will be informed from [WireMiddleware.onSend] before signal sent on wires
+  /// Returns true when no wire for the signal has found
   static bool send(String signal, [data]) {
     _MIDDLEWARE_LIST.forEach((m) => m.onSend(signal, data));
     return _LAYER.send(signal, data);
@@ -143,8 +154,7 @@ class Wire {
   static void purge({bool withMiddleware}) {
     _LAYER.clear();
     _STORE.clear();
-    if (withMiddleware) _MIDDLEWARE_LIST.clear();
-    _INDEX = 0;
+    if (withMiddleware ?? false) _MIDDLEWARE_LIST.clear();
   }
 
   /// Remove all wires for specific signal, for more precise target to remove add scope and/or listener
