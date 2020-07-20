@@ -1,37 +1,113 @@
-# Wire - communication and data container layers
-### Tool aimed to decouple UI from business logic
+# Wire - communication and data layers
+### Library aimed to decouple UI from business logic
 ![Schema](assets/wire-schema.jpeg)
 
-Pub/sub library - communication layer or "bus" to which you can attach a Wire and listen for signal associated with it.
-Wire has simple API - add, send and remove. Also it has data layer (`WireData Wire.data(String param, [dynamic value]);`).
-It's a universal container with key-value, where value is an instance of WireData that holds dynamic value and can be subscribed for updates. This "data container" is something like Redis.
+It is a container for communication layer or a "bus" to which you can attach an instance of Wire and then listen for signal associated with it. Wire has a simple and intuitive API - `Wire.add` and `Wire.send`. Another layer a "data container" - `Wire.data`, it works as key-value in-memory storage, where value is an object, an instance of `WireData` that holds dynamic data and can be subscribed for updates. This "data container" was inspired by the idea of database Redis.
 
-Wire also has Flutter Widget that allows to subscribe to data changes: https://pub.dev/packages/wire_flutter
+WireData also has Flutter Widget - **WireDataBuilder**: https://pub.dev/packages/wire_flutter. And [Haxe](https://haxe.org/) version can help to compile or better say transpile code of the library (with business logic as shared part) in one of the following language: **JavaScript, Java, C#, C++, HL, Lua, PHP**: [Wire Haxe](https://github.com/wire-toolkit/wire_haxe) (work in progress).
+
+# Goal
+The idea of this library is to decouple business logic or any logic that makes decisions on data processing from UI - this allows to have shared code that can be reused on any platform regardless of how a UI is looked like. 
+
+# General Concepts
+A software system consists in leveraging three main concepts:
+1. Data storage and distribution.
+2. Events listening and propagation.
+3. Decision making based on that data.
+
+You find these concepts in every computer program. Basically it's called - Model-View-Controller - meta-pattern or idea of separating program on functional pieces. Understanding MVC is about understanding how programs should work.
+ 
+### Model
+Data structure and the way how to access data define how an application works and how to apply changes. Therefore data definition is the first step in software development. All starts with data. MVC and the fact that Model is in the first position emphasize it as well. Models in application play a wider role than just value objects definition, it's also a way of how these objects will be stored and retrieved, it's a place responsible for this functionality, you can think of it as a data API - create, update, delete and etc. Does it make any decisions on how to modify the data? Probably not, maybe only update related data (e.g. in-memory counter of completed todos). And don't forget that there are two types of models - active and passive, one can notify when changes have occurred (active) and another is a plain storage or database (passive) - it has to be monitored by a controller or another agent. 
+```dart
+TodoVO create(String text, String note) {
+    final todoVO = TodoVO(uuid(), text, note, false);
+    final listData = Wire.data(TodoDataParams.LIST);
+    final todoList = listData.value as List;
+    final count = Wire.data(TodoDataParams.COUNT).value as int;
+
+    todoList.add(todoVO.id);
+    Wire.data(todoVO.id, todoVO);
+    Wire.data(TodoDataParams.LIST, todoList);
+    Wire.data(TodoDataParams.COUNT, count + 1);
+
+    _save();
+
+    print('> TodoModel -> created: ' + todoVO.id + ' - ' + todoVO.text);
+    return todoVO;
+}
+```
+`Wire.data('key')` plays a role of active model, it holds `WireData` instances associated with string keys, `WireData` is a container with dynamic data (accessed from `.value` property) and it can be monitored for updates by subscribing to it - `WireData.subscribe((value) => { ... })`. To update the value and notify listeners just set the value: `Wire.data('key', value)`. That's simple. In this case passive model is everything else around `Wire.data`, and it's up to you to decide from where the value (`WireData.value`) will be updated either from separate entity, a model by calling its data API (together with physical storing in database or sending to a server) or you can do it  from controller afterwards when sub-processes will be ended.
+
+### View
+UI also could have its own state - visual state, and it might not need to be stored in persistent storage at all, only temporarily. Example - accordion’s opened tab, or button hover state, tooltips, input highlight and etc. These states might depend on domain's data and are generated in run-time based on some conditions. Yes, view could have logic inside, but it must be simple branching conditions and only depends on data passed in and not derived from multiple sources, if it’s not then it's a sign that refactoring is needed. With `Wire` view consume data from data container layer - `Wire.data(value)`, then view subscribe to updates and re-render when change will happen - `WireData.subscribe((value) => { ... })`. 
+```dart
+class TodoCountView extends DomElement {
+  TodoCountView(SpanElement dom):super(dom) {
+    var wireData = Wire.data(TodoDataParams.COUNT);
+    var update = (value) => dom.firstChild.text = value.toString();
+    wireData.subscribe(update);
+    update(wireData.value);
+  }
+}
+```
+But not every program has a view, servers might not have UI, and it all depends on the definition of the view. Saying View we mean something that can emit external events about outside world or interaction, and incoming network traffic cover this definition very well, and in this case Wire can be a distribution gate for network API calls, just call `Wire.send(signal, dto)` on network events and every part of internal system can react to it. `Wire.send` is a communication layer - a way to completely separate parts of the application. View sends signals and waits for data to be updated. Other parts of the view can listen for signals as well and update themselves accordingly. `Signal` is a basic string constant.  
+
+### Controller
+ Decision making - business logic - the rules, the controller - it's the place where data meet events mixed with other data, compared and distributed to the model for CRUD operations and views update. 
+ > We believe and promote the idea that's view is 'just' the UI layer, with the real app being the logic and data kept outside the components tree.
+
+<sub align="right">from original article [Thoughts on React Hooks, Redux, and Separation of Concerns](https://blog.isquaredsoftware.com/2019/07/blogged-answers-thoughts-on-hooks/)</sub>
+
+Based on this belief we recommend to keep all your business logic, all data processing and decision making logic outside of a view - controllers is the only right place to do that. Signal listeners placed inside controller. You register a signal by adding it to the communication layer with `Wire.add(scope, signal, listener)`. Many signals can be connected to the same listener and vice versa. The listener should follow the specification of WireListener and has two params - wire instance first and dynamic data second. 
+```dart
+class TodoController {
+    TodoModel todoModel;
+    TodoController(this.todoModel) {
+    
+    Wire.add(this, TodoViewSignal.INPUT, (Wire wire, data) {
+      var text = data as String;
+      print('> TodoProcessor -> TodoViewSignal.INPUT: ' + text);
+      if (text != null && text.isNotEmpty) {
+        todoModel.create(text);
+        Wire.send(TodoViewSignal.CLEAR);
+      }
+    });
+    
+    Wire.add(this, TodoViewSignal.DELETE, (Wire wire, data) {
+      var todoId = data as String;
+      print('> TodoProcessor -> TodoViewSignal.DELETE: ' + todoId);
+      todoModel.remove(todoId);
+    });
+  }
+}
+```
+In controller you make a decision of how to process input data, then it delegated to a model(s), stored or sent to the server, then controller might initiate reaction - send another signal or if data in data container layer was not updated in the model then controller might update them manually (from `Wire.data(key, value)`). Application might have multiple controllers each responsible to its particular data processing. You might think of them as reducers from Redux world, but more “advanced” interacting with services and models.
 
 # API
 ### Wire (static methods):
 ```
 Wire .add(Object scope, String signal, WireListener listener, [int replies = 0])
-bool .send(String signal, [args])
+bool .send(String signal, [dto]) // DTO stands for Data Transfer Object
 bool .remove(String signal, {Object scope, WireListener listener})
 bool .has({String signal, Wire wire})
 void .attach(Wire wire)
 bool .detach(Wire wire)
 bool .purge()
 void .middleware(WireMiddleware value)
-
-WireData .data(String param, [dynamic value]) - optional value update object it can be function that return value
-
 List<Wire> .get({String signal, Object scope, Function listener})
+
+WireData .data(String key, [dynamic value])
 ```
 
 ### WireListener:
+Definition of listener to a signal in `Wire.add(scope, signal, listener)`
 ```
 void Function(Wire wire, dynamic data)
 ```
 
 ### WireData:
-It is a data container to changes of which anyone can subscribe/unsubscribe. It's associated with param - string key. WireData can't be null and Wire.data(param, value) will always return WireData instance. Initial value will has null value if not present in the Wire.data call
+It is a data container that holds dynamic value. WireData can be subscribed (and unsubscribed). It's associated with string key and retrieved from internal storage with `Wire.data(key)`. WireData can't be null and `Wire.data(key)` will always return WireData instance. Initial value can null (if first call does not have value) and special property of WireData `isSet` is false until not null value is set for the first time
 ```
 WireData subscribe(Object scope, WireDataListener listener)
 WireData unsubscribe(Object scope, [WireDataListener listener])
@@ -39,12 +115,14 @@ void refresh()
 void remove() // emit null value before remove all subscribers, use isSet property to to distinguish between newly created (false) and removed (value still maybe be null thus isSet is false)
 ```
 
-### WireDataListener
+### WireDataListener:
+Definition of WireData listener in `WireData.subscribe(scope, listener)`
 ```
 void Function(dynamic value)
 ```
 
-### WireMiddleware
+### WireMiddleware:
+Class that extends WireMiddleware's methods can be added to `Wire.middleware(middleware)`
 ```
 abstract class WireMiddleware {
   void onAdd(Wire wire);

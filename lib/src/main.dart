@@ -5,7 +5,7 @@ part 'store.dart';
 part 'layer.dart';
 part 'data.dart';
 
-/// Wire (WIP) - Pub/Sub on Strings "signals" with data container
+/// Wire - communication and data layers
 ///
 /// Dart pub/sub library - communication layer or "bus" to which you can attach a wire and listen for signal associated with it.
 /// Wire has simplest possible API - add, remove and send. Also it has data layer, universal container with key-value, where value is an object WireData type that holds dynamic value and can be subscribed for updates. This "data container" is something like Redis.
@@ -21,7 +21,7 @@ abstract class WireMiddleware {
   void onAdd(Wire wire);
   void onSend(String signal, [data]);
   void onRemove(String signal, [Object scope, WireListener listener]);
-  void onData(String param, dynamic prevValue, dynamic nextValue);
+  void onData(String key, dynamic prevValue, dynamic nextValue);
 }
 
 class Wire {
@@ -33,7 +33,7 @@ class Wire {
   static int _INDEX = 0;
   static final WireLayer _LAYER = WireLayer();
   static final WireStore _STORE = WireStore();
-  static final _MIDDLEWARE_LIST = <WireMiddleware>[];
+  static final _MIDDLEWARES = <WireMiddleware>[];
 
   ///**************************************************
   ///  Protected / Private Properties
@@ -128,7 +128,7 @@ class Wire {
   static Wire add(Object scope, String signal, WireListener listener,
       {int replies = 0}) {
     final wire = Wire(scope, signal, listener, replies);
-    _MIDDLEWARE_LIST.forEach((m) => m.onAdd(wire));
+    _MIDDLEWARES.forEach((m) => m.onAdd(wire));
     attach(wire);
     return wire;
   }
@@ -145,7 +145,7 @@ class Wire {
   /// All middleware will be informed from [WireMiddleware.onSend] before signal sent on wires
   /// Returns true when no wire for the signal has found
   static bool send(String signal, [data]) {
-    _MIDDLEWARE_LIST.forEach((m) => m.onSend(signal, data));
+    _MIDDLEWARES.forEach((m) => m.onSend(signal, data));
     return _LAYER.send(signal, data);
   }
 
@@ -154,7 +154,7 @@ class Wire {
   static void purge({bool withMiddleware}) {
     _LAYER.clear();
     _STORE.clear();
-    if (withMiddleware ?? false) _MIDDLEWARE_LIST.clear();
+    if (withMiddleware ?? false) _MIDDLEWARES.clear();
   }
 
   /// Remove all wires for specific signal, for more precise target to remove add scope and/or listener
@@ -163,15 +163,15 @@ class Wire {
   static bool remove(String signal, {Object scope, WireListener listener}) {
     var existed = _LAYER.remove(signal, scope, listener);
     if (existed) {
-      _MIDDLEWARE_LIST.forEach((m) => m.onRemove(signal, scope, listener));
+      _MIDDLEWARES.forEach((m) => m.onRemove(signal, scope, listener));
     }
     return existed;
   }
 
   /// Class extending [WireMiddleware] can listen to all processes in side Wire
   static void middleware(WireMiddleware value) {
-    if (!_MIDDLEWARE_LIST.contains(value)) {
-      _MIDDLEWARE_LIST.add(value);
+    if (!_MIDDLEWARES.contains(value)) {
+      _MIDDLEWARES.add(value);
     } else {
       throw ERROR__MIDDLEWARE_EXISTS + value.toString();
     }
@@ -179,7 +179,7 @@ class Wire {
 
   /// When you need specific Wire of signal or scope or listener
   /// Returns [List<Wire>]
-  static List<Wire> get({String signal, Object scope, Function listener}) {
+  static List<Wire> get({String signal, Object scope, WireListener listener}) {
     var result = <Wire>[];
     if (signal != null && scope == null && listener == null) {
       result.addAll(_LAYER.getBySignal(signal));
@@ -196,23 +196,23 @@ class Wire {
 
   /// Access to the data container, retrieve WireData object when value is null and set when is not
   /// [WireData] is a data container to changes of which anyone can subscribe/unsubscribe.
-  /// It's associated with param - string key.
-  /// WireData can't be null and Wire.data(param, value) will always return WireData instance.
-  /// Initial value will has null value if not present in the Wire.data call
+  /// It's associated with string key.
+  /// WireData can't be null and Wire.data(key) will always return WireData instance.
+  /// Initial value will be null and special property of WireData isSet is false until not null value is set for the first time
   /// [WireData] API:
   /// ```
-  /// WireData subscribe(Object scope, WireDataListener listener)
-  /// WireData unsubscribe(Object scope, [WireDataListener listener])
+  /// WireData subscribe(WireDataListener listener)
+  /// WireData unsubscribe([WireDataListener listener])
   /// void refresh()
   /// void remove()
   /// ```
   /// Returns [WireData]
-  static WireData data(String param, [dynamic value]) {
-    var wireData = _STORE.get(param);
+  static WireData data(String key, [dynamic value]) {
+    var wireData = _STORE.get(key);
     if (value != null) {
       var prevValue = wireData.value;
-      var nextValue = value is Function ? value(wireData.value) : value;
-      _MIDDLEWARE_LIST.forEach((m) => m.onData(param, prevValue, nextValue));
+      var nextValue = value is Function ? value(prevValue) : value;
+      _MIDDLEWARES.forEach((m) => m.onData(key, prevValue, nextValue));
       wireData.value = nextValue;
     }
     return wireData;

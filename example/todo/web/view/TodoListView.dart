@@ -11,7 +11,7 @@ class TodoListView extends DomElement {
     var append = (id) => dom.append(TodoListItemView(id).dom);
     if (list != null && list.isNotEmpty) list.forEach(append);
 
-    wireData.subscribe(this, (value) {
+    wireData.subscribe((value) {
       var list = value as List;
       print('> TodoListView ${list}');
       if (list != null && list.isNotEmpty) {

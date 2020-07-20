@@ -12,15 +12,15 @@ class CounterStorageMiddleware extends WireMiddleware {
   }
 
   @override
-  void onData(String param, prevValue, nextValue) {
-    print('> CounterMiddleware -> onData: param = ${param} | ${prevValue}-${nextValue}');
-    if (param == CounterParams.COUNT) {
+  void onData(String key, prevValue, nextValue) {
+    print('> CounterMiddleware -> onData: key = ${key} | ${prevValue}-${nextValue}');
+    if (key == CounterDataKeys.COUNT) {
       if (nextValue != null) {
-        ls[CounterParams.COUNT] = nextValue.toString();
+        ls[CounterDataKeys.COUNT] = nextValue.toString();
       }
       else {
-        if (ls.containsValue(CounterParams.COUNT)) {
-          ls.remove(CounterParams.COUNT);
+        if (ls.containsValue(CounterDataKeys.COUNT)) {
+          ls.remove(CounterDataKeys.COUNT);
         }
       }
     }
@@ -37,7 +37,7 @@ class CounterStorageMiddleware extends WireMiddleware {
   }
 
   int getInitialValue() {
-    return ls.containsKey(CounterParams.COUNT) ?
-      int.parse(ls[CounterParams.COUNT]) : 0;
+    return ls.containsKey(CounterDataKeys.COUNT) ?
+      int.parse(ls[CounterDataKeys.COUNT]) : 0;
   }
 }

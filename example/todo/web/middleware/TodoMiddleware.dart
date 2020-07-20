@@ -7,8 +7,8 @@ class TodoMiddleware extends WireMiddleware {
   }
 
   @override
-  void onData(String param, prevValue, nextValue) {
-    print('> TodoMiddleware -> onData: param = ${param} | ${prevValue}-${nextValue}');
+  void onData(String key, prevValue, nextValue) {
+    print('> TodoMiddleware -> onData: key = ${key} | ${prevValue}-${nextValue}');
   }
 
   @override

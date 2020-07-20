@@ -15,9 +15,9 @@ main() {
   /// COUNTER EXAMPLE ======================================
   final counterStorageMiddleware = CounterStorageMiddleware();
   final initialValue = counterStorageMiddleware.getInitialValue();
-  Wire.data(CounterParams.COUNT, initialValue);
+  Wire.data(CounterDataKeys.COUNT, initialValue);
   Wire.middleware(counterStorageMiddleware);
-  print('Init Ready: initial value = ${Wire.data(CounterParams.COUNT).value}');
+  print('Init Ready: initial value = ${Wire.data(CounterDataKeys.COUNT).value}');
   init();
 }
 

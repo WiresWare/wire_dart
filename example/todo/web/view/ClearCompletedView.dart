@@ -14,8 +14,8 @@ class ClearCompletedView extends DomElement {
     var updateComponentVisibility = (value) => 
       setComponentVisibilityFrom(listWireData.value, countWireData.value);
 
-    listWireData.subscribe(this, updateComponentVisibility);
-    countWireData.subscribe(this, updateComponentVisibility);
+    listWireData.subscribe(updateComponentVisibility);
+    countWireData.subscribe(updateComponentVisibility);
     updateComponentVisibility(null);
 
     dom.onClick.listen((e) => Wire.send(TodoViewSignal.CLEAR_COMPLETED));

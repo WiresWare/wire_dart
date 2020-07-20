@@ -1,3 +1,9 @@
+## 0.9.1
+- In Wire.data first parameter renamed from 'param' to 'key' and related changes applied.
+- Method subscribe for WireDataListener has only listener, and scope was removed
+- New tests for "Counter Signal" and API example update
+- README update, Haxe version linked in README
+
 ## 0.5.0
 - Tests, changes according test results, documentation update
 - Implementation .clear() method in Wire instance, which is called after wire removed from communication layer

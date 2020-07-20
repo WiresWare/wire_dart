@@ -7,14 +7,14 @@ class CounterProcessor {
   CounterProcessor() {
     Wire.add(this, CounterSignal.INCREASE, (signal, data) {
       print('> Processor: INCREASE -> handle: ' + data.toString());
-      Wire.data(CounterParams.COUNT, (value) {
+      Wire.data(CounterDataKeys.COUNT, (value) {
         return value + 1;
       });
     });
 
     Wire.add(this, CounterSignal.DECREASE, (signal, data) {
       print('> Processor: DECREASE -> handle: ' + data.toString());
-      Wire.data(CounterParams.COUNT, (value) {
+      Wire.data(CounterDataKeys.COUNT, (value) {
         return value > 0 ? value - 1 : 0;
       });
     });

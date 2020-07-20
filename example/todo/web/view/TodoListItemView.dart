@@ -42,7 +42,7 @@ class TodoListItemView extends DomElement {
     ]);
 
     var todoWireData = Wire.data(id);
-    todoWireData.subscribe(this, _OnTodoDataChanged);
+    todoWireData.subscribe(_OnTodoDataChanged);
     if (todoWireData.isSet) _OnTodoDataChanged(todoWireData.value);
 
     container.append(inpToggle);
@@ -54,7 +54,7 @@ class TodoListItemView extends DomElement {
   }
 
   void remove() {
-    Wire.data(dom.id).unsubscribe(this);
+    Wire.data(dom.id).unsubscribe(_OnTodoDataChanged);
     listeners.removeWhere((element) {
       element.cancel();
       return true;

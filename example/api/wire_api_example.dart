@@ -18,6 +18,7 @@ main() {
   };
 
   Wire.add(SCOPE, SIGNAL_1, listener1);
+  Wire.middleware(TestWireMiddleware());
 
   Wire.send(SIGNAL_1, 'World');
   Wire.send(SIGNAL_1, 'Dart');
@@ -71,16 +72,39 @@ main() {
   print('\tSend ends: ' + Wire.send(SIGNAL_2, 'Sleep').toString());
   print('\tSend ends: ' + Wire.send(SIGNAL_2, 'Repeat').toString());
 
-  var param1 = 'SUPER_PARAM';
-  Wire.data(param1).subscribe(SCOPE, (data) => {
-    print('\t Listener 1: ' + data)
+  /// DATA TESTS ===============================================
+  var key1 = 'SUPER_PARAM';
+  Wire.data(key1).subscribe((data) => {
+    print('\t Listener 1 -> ' + data)
   });
 
-  Wire.data(param1).subscribe(SCOPE, (data) => {
-    print('\t Listener 2: ' + data)
+  Wire.data(key1).subscribe((data) => {
+    print('\t Listener 2 -> ' + data)
   });
 
-  print('> Wire.data Listeners: where initial data = ' + Wire.data(param1).value.toString());
-  Wire.data(param1, 'VALUE');
-  Wire.data(param1, (value) => value + ' NEW');
+  print('> Wire.data Listeners: where initial data = ' + Wire.data(key1).value.toString());
+  Wire.data(key1, 'Set VALUE to key1: ' + key1);
+  Wire.data(key1, (value) => value + ' | APPENDED from function call');
+}
+
+class TestWireMiddleware extends WireMiddleware {
+  @override
+  void onAdd(Wire wire) {
+    print('> TestWireMiddleware -> onAdd: Wire.signal = ${wire.signal}');
+  }
+
+  @override
+  void onData(String key, prevValue, nextValue) {
+    print('> TestWireMiddleware -> onData: key = ${key} | $prevValue | $nextValue');
+  }
+
+  @override
+  void onRemove(String signal, [Object scope, listener]) {
+    print('> TestWireMiddleware -> onRemove: signal = ${signal} | $scope | $listener');
+  }
+
+  @override
+  void onSend(String signal, [data]) {
+    print('> TestWireMiddleware -> onRemove: signal = ${signal} | $data');
+  }
 }

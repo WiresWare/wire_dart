@@ -7,7 +7,7 @@ part of wire;
 ///
 class WireStore {
   final Map<String, WireData> _map = <String, WireData>{};
-  dynamic get(String key) {
+  WireData get(String key) {
     if (!_map.containsKey(key)) {
       _map[key] = WireData(key, _map.remove);
     }

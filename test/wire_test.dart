@@ -1,32 +1,38 @@
 import 'package:wire/wire.dart';
 import 'package:test/test.dart';
 
-class TestMiddleware extends WireMiddleware {
+class TestWireMiddleware extends WireMiddleware {
   @override
   void onAdd(Wire wire) {
+    print('> TestWireMiddleware -> onAdd: Wire.signal = ${wire.signal}');
   }
 
   @override
-  void onData(String param, prevValue, nextValue) {
+  void onData(String key, prevValue, nextValue) {
+    print('> TestWireMiddleware -> onData: key = ${key} | $prevValue | $nextValue');
   }
 
   @override
   void onRemove(String signal, [Object scope, listener]) {
+    print('> TestWireMiddleware -> onRemove: signal = ${signal} | $scope | $listener');
   }
 
   @override
   void onSend(String signal, [data]) {
+    print('> TestWireMiddleware -> onRemove: signal = ${signal} | $data');
   }
 }
 
 void main() {
   group('1. Subscription tests', () {
 
-    var SIGNAL = 'SIGNAL_SUBSCRIPTION';
-    var SCOPE = Object();
+    const SIGNAL = 'SIGNAL_SUBSCRIPTION';
+    const SIGNAL_COUNTER = 'SIGNAL_COUNTER';
+    const CALLS_COUNTER = 2;
+    const SCOPE = Object();
 
-    WireListener listener = (signal, data) =>
-      { print('Response on ${signal} with data: ${data}') };
+    WireListener listener = (wire, data) =>
+      { print('> Response on ${wire.signal} with data: ${data}') };
 
     var testWire = Wire(SCOPE, 'wire_signal_1', listener);
 
@@ -46,7 +52,7 @@ void main() {
     test('1.1 Has Signal', () {
       expect(Wire.has(signal:SIGNAL), isTrue);
       expect(Wire.has(signal:SIGNAL_NOT_REGISTERED), isFalse);
-      expect(Wire.has(signal:'NOT_A_SIGNAL'), isFalse);
+      expect(Wire.has(signal:'RANDOM_SIGNAL'), isFalse);
       expect(Wire.has(wire:testWire), isTrue);
     });
 
@@ -58,6 +64,14 @@ void main() {
     test('1.3 Detach Signal', () {
       expect(Wire.detach(testWire), isTrue);
       expect(Wire.send(testWire.signal), isTrue);
+    });
+
+    test('1.4 Counter Signal', () {
+      Wire.add(SCOPE, SIGNAL_COUNTER, (wire, data) => {
+        print('1.4 Response on ${wire.signal} replies left: ${wire.replies}')
+      }, replies: CALLS_COUNTER);
+      expect(Wire.send(SIGNAL_COUNTER), isFalse);
+      expect(Wire.send(SIGNAL_COUNTER), isTrue);
     });
   });
 
@@ -72,7 +86,7 @@ void main() {
 
     var testWire = Wire(SCOPE, 'wire_signal_2', listener);
 
-    var testMiddleware = TestMiddleware();
+    var testMiddleware = TestWireMiddleware();
 
     setUp(() {
       Wire.purge(withMiddleware: true);

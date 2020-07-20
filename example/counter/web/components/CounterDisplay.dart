@@ -7,12 +7,12 @@ import 'base/dom_element.dart';
 
 class CounterDisplay extends DomElement {
   CounterDisplay():super(DivElement()) {
-    var wireData = Wire.data(CounterParams.COUNT);
+    var wireData = Wire.data(CounterDataKeys.COUNT);
     dom
       ..text = wireData.value.toString()
       ..className = 'spectrum-Body spectrum-Body--L';
 
-    wireData.subscribe(this, (value) => {
+    wireData.subscribe((value) => {
       dom.text = value.toString()
     });
   }

@@ -8,7 +8,7 @@ import 'base/DomElementView.dart';
 
 class TodoFilterView extends DomElement {
   TodoFilterView(UListElement dom):super(dom) {
-    Wire.data(TodoDataParams.FILTER).subscribe(this, (value) {
+    Wire.data(TodoDataParams.FILTER).subscribe((value) {
       var filter = value as TodoFilterValue;
       var selectedChildIndex;
       switch (filter) {

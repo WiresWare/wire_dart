@@ -1,5 +1,5 @@
-class CounterParams {
+class CounterDataKeys {
   static const String
-    COUNT = "PARAMS_COUNT";
+    COUNT = "DATA_KEY__COUNT";
 }
 

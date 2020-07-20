@@ -9,7 +9,7 @@ class TodoCountView extends DomElement {
   TodoCountView(SpanElement dom):super(dom) {
     var wireData = Wire.data(TodoDataParams.COUNT);
     var update = (value) => dom.firstChild.text = value.toString();
-    wireData.subscribe(this, update);
+    wireData.subscribe(update);
     update(wireData.value);
   }
 }

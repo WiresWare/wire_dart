@@ -9,20 +9,20 @@ typedef WireDataListener = void Function(dynamic value);
 
 class WireData {
   Function _onRemove;
-  final _listeners = <Object, List<WireDataListener>>{};
+  final _listeners = <WireDataListener>{};
 
   /// This property needed to distinguish between newly created and not set WireData which has value of null at the beginning
   /// And with WireData at time when it's removed, because when removing the value also set to null
   bool _isSet = false;
   bool get isSet => _isSet;
 
-  dynamic _key;
-  dynamic get key => _key;
+  String _key;
+  String get key => _key;
 
   dynamic _value; // initial value is null
   dynamic get value => _value;
-  set value(dynamic value) {
-    _value = value;
+  set value(dynamic input) {
+    _value = input;
     _isSet = true;
     refresh();
   }
@@ -30,8 +30,7 @@ class WireData {
   WireData(this._key, this._onRemove);
 
   void refresh() {
-    _listeners.forEach(
-        (scope, listeners) => listeners.forEach((func) => func(_value)));
+    _listeners.forEach((listener) => listener(_value));
   }
 
   void remove() {
@@ -42,28 +41,24 @@ class WireData {
     // null value means remove element that listening on change (unsubscribe)
     value = null;
 
-    while (_listeners.isNotEmpty) {
-      var value = _listeners.remove(_listeners.keys.last);
-      while (value.isNotEmpty) {
-        value.removeLast();
-      }
-    }
+    _listeners.clear();
   }
 
-  WireData subscribe(Object scope, WireDataListener listener) {
-    _listeners.putIfAbsent(scope, () => <WireDataListener>[]);
-    _listeners[scope].add(listener);
+  WireData subscribe(WireDataListener listener) {
+    if (!hasListener(listener)) _listeners.add(listener);
     return this;
   }
 
-  WireData unsubscribe(Object scope, [WireDataListener listener]) {
-    if (_listeners != null && _listeners.containsKey(scope)) {
-      if (listener != null) {
-        _listeners[scope].remove(listener);
-        if (_listeners[scope].isNotEmpty) return this;
-      }
-      _listeners.remove(scope);
+  WireData unsubscribe([WireDataListener listener]) {
+    if (listener != null) {
+      if (hasListener(listener)) _listeners.remove(listener);
+    } else {
+      _listeners.clear();
     }
     return this;
+  }
+
+  bool hasListener(WireDataListener listener) {
+    return _listeners.contains(listener);
   }
 }
