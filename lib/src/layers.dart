@@ -5,43 +5,43 @@ part of wire;
 /// Github: https://github.com/DQvsRA
 /// License: APACHE LICENSE, VERSION 2.0
 ///
-class WireLayer {
-  final Map<int, Wire> _wireByHash = <int, Wire>{};
-  final Map<String, List<int>> _hashesBySignal = <String, List<int>>{};
+class WireCommunicateLayer {
+  final Map<int, Wire> _wireByWID = <int, Wire>{};
+  final Map<String, List<int>> _widsBySignal = <String, List<int>>{};
 
   Wire add(Wire wire) {
-    final hash = wire.hash;
+    final wid = wire.wid;
     final signal = wire.signal;
 
-    if (_wireByHash.containsKey(hash)) {
-      throw ERROR__WIRE_ALREADY_REGISTERED + hash.toString();
+    if (_wireByWID.containsKey(wid)) {
+      throw ERROR__WIRE_ALREADY_REGISTERED + wid.toString();
     }
 
-    _wireByHash[hash] = wire;
+    _wireByWID[wid] = wire;
 
-    if (!_hashesBySignal.containsKey(signal)) {
-      _hashesBySignal[signal] = <int>[];
+    if (!_widsBySignal.containsKey(signal)) {
+      _widsBySignal[signal] = <int>[];
     }
 
-    _hashesBySignal[signal].add(hash);
+    _widsBySignal[signal].add(wid);
 
     return wire;
   }
 
   bool hasSignal(String signal) {
-    return _hashesBySignal.containsKey(signal);
+    return _widsBySignal.containsKey(signal);
   }
 
   bool hasWire(Wire wire) {
-    return _wireByHash.containsKey(wire.hash);
+    return _wireByWID.containsKey(wire.wid);
   }
 
   bool send(String signal, [data]) {
     var noMoreSubscribers = true;
     if (hasSignal(signal)) {
       var WiresToRemove = <Wire>[];
-      _hashesBySignal[signal].forEach((hash) {
-        var wire = _wireByHash[hash];
+      _widsBySignal[signal].forEach((wid) {
+        var wire = _wireByWID[wid];
         var replies = wire.replies;
         noMoreSubscribers = replies > 0 && --replies == 0;
         if (noMoreSubscribers) WiresToRemove.add(wire);
@@ -57,8 +57,8 @@ class WireLayer {
     var exists = hasSignal(signal);
     if (exists) {
       var toRemove = <Wire>[];
-      _hashesBySignal[signal].forEach((hash) {
-        var wire = _wireByHash[hash];
+      _widsBySignal[signal].forEach((wid) {
+        var wire = _wireByWID[wid];
         var isWrongScope = scope != null && scope != wire.scope;
         var isWrongListener = listener != null && listener != wire.listener;
         if (isWrongScope || isWrongListener) return;
@@ -71,54 +71,76 @@ class WireLayer {
 
   void clear() {
     var wireToRemove = <Wire>[];
-    _wireByHash.forEach((h, w) => wireToRemove.add(w));
+    _wireByWID.forEach((h, w) => wireToRemove.add(w));
     wireToRemove.forEach(_removeWire);
-    _wireByHash.clear();
-    _hashesBySignal.clear();
+    _wireByWID.clear();
+    _widsBySignal.clear();
   }
 
   List<Wire> getBySignal(String signal) {
     return hasSignal(signal)
-        ? _hashesBySignal[signal].map((hash) => _wireByHash[hash])
+        ? _widsBySignal[signal].map((wid) => _wireByWID[wid])
         : <Wire>[];
   }
 
   List<Wire> getByScope(Object scope) {
     var result = <Wire>[];
-    _wireByHash
-        .forEach((hash, wire) => {if (wire.scope == scope) result.add(wire)});
+    _wireByWID
+        .forEach((wid, wire) => {if (wire.scope == scope) result.add(wire)});
     return result;
   }
 
   List<Wire> getByListener(WireListener listener) {
     var result = <Wire>[];
-    _wireByHash.forEach(
-        (hash, wire) => {if (wire.listener == listener) result.add(wire)});
+    _wireByWID.forEach(
+        (wid, wire) => {if (wire.listener == listener) result.add(wire)});
     return result;
+  }
+
+  Wire getByWID(int wid) {
+    return _wireByWID.containsKey(wid) ? _wireByWID[wid] : null;
   }
 
   ///
   /// Exclude a Wire based on an signal.
   ///
   /// @param    The Wire to remove.
-  /// @return If there is no hashes (no Wires) for that SIGNAL stop future perform
+  /// @return If there is no ids (no Wires) for that SIGNAL stop future perform
   ///
   bool _removeWire(Wire wire) {
-    var hash = wire.hash;
+    var wid = wire.wid;
     var signal = wire.signal;
 
-    // Remove Wire by hash
-    _wireByHash.remove(hash);
+    // Remove Wire by wid
+    _wireByWID.remove(wid);
 
-    // Remove hash for Wire signal
-    var hashesForSignal = _hashesBySignal[signal];
-    hashesForSignal.remove(hash);
+    // Remove wid for Wire signal
+    var widsForSignal = _widsBySignal[signal];
+    widsForSignal.remove(wid);
 
-    var noMoreSignals = hashesForSignal.isEmpty;
-    if (noMoreSignals) _hashesBySignal.remove(signal);
+    var noMoreSignals = widsForSignal.isEmpty;
+    if (noMoreSignals) _widsBySignal.remove(signal);
 
     wire.clear();
 
     return noMoreSignals;
+  }
+}
+
+class WireDataContainerLayer {
+  final Map<String, WireData> _map = <String, WireData>{};
+  WireData get(String key) {
+    if (!_map.containsKey(key)) {
+      _map[key] = WireData(key, _map.remove);
+    }
+
+    return _map[key];
+  }
+
+  void clear() {
+    _map.forEach((key, wireData) {
+      wireData.remove();
+    });
+    _map.clear();
   }
 }

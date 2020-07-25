@@ -6,10 +6,10 @@ It is a container for communication layer or a "bus" to which you can attach an 
 
 WireData also has Flutter Widget - **WireDataBuilder**: https://pub.dev/packages/wire_flutter. And [Haxe](https://haxe.org/) version can help to compile or better say transpile code of the library (with business logic as shared part) in one of the following language: **JavaScript, Java, C#, C++, HL, Lua, PHP**: [Wire Haxe](https://github.com/wire-toolkit/wire_haxe) (work in progress).
 
-# Goal
+## Goal
 The idea of this library is to decouple business logic or any logic that makes decisions on data processing from UI - this allows to have shared code that can be reused on any platform regardless of how a UI is looked like. 
 
-# General Concepts
+## General Concepts
 A software system consists in leveraging three main concepts:
 1. Data storage and distribution.
 2. Events listening and propagation.
@@ -84,6 +84,28 @@ class TodoController {
 ```
 In controller you make a decision of how to process input data, then it delegated to a model(s), stored or sent to the server, then controller might initiate reaction - send another signal or if data in data container layer was not updated in the model then controller might update them manually (from `Wire.data(key, value)`). Application might have multiple controllers each responsible to its particular data processing. You might think of them as reducers from Redux world, but more “advanced” interacting with services and models.
 
+## Wire in Flutter / [WireDataBuilder](https://pub.dev/packages/wire_flutter)
+Having business logic separated from presentation and data being distributed from shared layer (Wire.data) it's now possible to consume the data in UI easily. This means that in Flutter we can leave visual hierarchy, UI rendering and transitions between screens/pages to the Flutter framework, and consume data in places where it's needed, and do this with special widget - `WireDataBuilder({Key key, String dataKey, Builder builder})` which subscribe with a string `dataKey` to WireData value changes and rebuild underlying widget you pass to `builder` when value updated. However if you need only data in place you still can get it directly with `Wire.data('key').value`. Here is an example from [Todo ](https://github.com/wire-toolkit/wire_flutter/tree/master/example/wire_flutter_todo) application:
+Here is Wire in Flutter
+```dart
+class StatsCounter extends StatelessWidget {
+  StatsCounter() : super(key: ArchSampleKeys.statsCounter);
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: WireDataBuilder<int>( // <----- Subscribe to update
+        dataKey: DataKeys.COUNT, // <------ Data key (string)
+        builder: (context, notCompletedCount) {
+          var allTodoCount = Wire.data(DataKeys.LIST).value.length; // <---- Access data without listening for its change
+          var numCompleted = allTodoCount - notCompletedCount;
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ...
+```
+![Wire in Flutter](https://github.com/wire-toolkit/wire_flutter/blob/master/assets/wire_flutter_example_todo.gif)
+In the example above exactly the same business logic is in use as in the web version from this repository.
+
 # API
 ### Wire (static methods):
 ```
@@ -95,15 +117,16 @@ void .attach(Wire wire)
 bool .detach(Wire wire)
 bool .purge()
 void .middleware(WireMiddleware value)
-List<Wire> .get({String signal, Object scope, Function listener})
+List<Wire> .get({String signal, Object scope, Function listener, int wid})
 
 WireData .data(String key, [dynamic value])
 ```
 
 ### WireListener:
 Definition of listener to a signal in `Wire.add(scope, signal, listener)`
+To get signal use `Wire.get(wid:wid).single`
 ```
-void Function(Wire wire, dynamic data)
+void Function(dynamic data, int wid)
 ```
 
 ### WireData:
@@ -134,7 +157,7 @@ abstract class WireMiddleware {
 
 ![UML](uml/configuration.png)
 
-Generate UML with dcdg (PlantUML): pub global run dcdg -o ./uml/configuration
+Generate UML with `dcdg` (PlantUML): `pub global run dcdg -o ./uml/configuration`
 
 ## Examples
 ### 1. Counter (web):
@@ -142,14 +165,15 @@ Generate UML with dcdg (PlantUML): pub global run dcdg -o ./uml/configuration
 - Select build target - Dart Web, point to example/counter/index.html
 - Run Debug
 
-### 2. API calls variations (console):
-- Open IDEA
-- Select build target - Dart Command Line App, point to example/api/wire_api_example.dart
-- Run Debug
-
-### 3. Todo MVC (web):
+### 2. Todo MVC (web and [Flutter](https://github.com/wire-toolkit/wire_flutter/tree/master/example/wire_flutter_todo)):
+![Todo with Wire](/assets/wire_example_todo_web.gif)
 - Open IDEA
 - Select build target - Dart Web, point to example/todo/index.html
+- Run Debug
+
+### 3. API calls variations (console):
+- Open IDEA
+- Select build target - Dart Command Line App, point to example/api/wire_api_example.dart
 - Run Debug
 
 ## Licence
@@ -169,5 +193,3 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
-
-

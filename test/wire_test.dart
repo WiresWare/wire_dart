@@ -31,8 +31,8 @@ void main() {
     const CALLS_COUNTER = 2;
     const SCOPE = Object();
 
-    WireListener listener = (wire, data) =>
-      { print('> Response on ${wire.signal} with data: ${data}') };
+    WireListener listener = (data, wid) =>
+      { print('> Response on ${Wire.get(wid:wid).single.signal} with data: ${data}') };
 
     var testWire = Wire(SCOPE, 'wire_signal_1', listener);
 
@@ -67,8 +67,9 @@ void main() {
     });
 
     test('1.4 Counter Signal', () {
-      Wire.add(SCOPE, SIGNAL_COUNTER, (wire, data) => {
-        print('1.4 Response on ${wire.signal} replies left: ${wire.replies}')
+      Wire.add(SCOPE, SIGNAL_COUNTER, (data, wid) {
+        var wire = Wire.get(wid:wid).single;
+        print('1.4 Response on ${wire.signal} replies left: ${wire.replies}');
       }, replies: CALLS_COUNTER);
       expect(Wire.send(SIGNAL_COUNTER), isFalse);
       expect(Wire.send(SIGNAL_COUNTER), isTrue);

@@ -1,3 +1,10 @@
+## 0.9.6 (pre-release)
+- Wire's property "hash" renamed to "wid" - unique integer number which is just counter of created Wires in runtime. 
+- Parameters of WireListener was changed - instance of Wire removed, first parameter now is data from `Wire.send(signal, data)`, second parameter is a "wid" using it associated Wire can be retrieved from communication layer with `Wire.get(wid:wid).single`.
+- Internal renaming to match layers concept
+- README update with Flutter widget example
+- Examples updates according changes
+
 ## 0.9.1
 - In Wire.data first parameter renamed from 'param' to 'key' and related changes applied.
 - Method subscribe for WireDataListener has only listener, and scope was removed

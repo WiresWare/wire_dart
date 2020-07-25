@@ -1,6 +1,6 @@
 name: wire
 description: Communication and data container layers library aimed to decouple UI from business logic
-version: 0.9.1
+version: 0.9.6
 homepage: https://github.com/wire-toolkit/wire_dart
 
 environment:
