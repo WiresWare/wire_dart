@@ -1,4 +1,7 @@
-## 0.9.6 (pre-release)
+## 0.9.7  (pre-release)
+- README update
+
+## 0.9.6
 - Wire's property "hash" renamed to "wid" - unique integer number which is just counter of created Wires in runtime. 
 - Parameters of WireListener was changed - instance of Wire removed, first parameter now is data from `Wire.send(signal, data)`, second parameter is a "wid" using it associated Wire can be retrieved from communication layer with `Wire.get(wid:wid).single`.
 - Internal renaming to match layers concept

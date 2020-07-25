@@ -103,8 +103,6 @@ class StatsCounter extends StatelessWidget {
             children: [
               ...
 ```
-![Wire in Flutter](https://github.com/wire-toolkit/wire_flutter/blob/master/assets/wire_flutter_example_todo.gif)
-In the example above exactly the same business logic is in use as in the web version from this repository.
 
 # API
 ### Wire (static methods):
@@ -130,12 +128,12 @@ void Function(dynamic data, int wid)
 ```
 
 ### WireData:
-It is a data container that holds dynamic value. WireData can be subscribed (and unsubscribed). It's associated with string key and retrieved from internal storage with `Wire.data(key)`. WireData can't be null and `Wire.data(key)` will always return WireData instance. Initial value can null (if first call does not have value) and special property of WireData `isSet` is false until not null value is set for the first time
+It is a data container that holds dynamic value. WireData can be subscribed (and unsubscribed). It's associated with string key and retrieved from internal storage with `Wire.data(key)`. WireData can't be null and `Wire.data(key)` will always return WireData instance. Initial value can null (if first call does not have value) and special property of WireData `isSet` is false until not null value is set for the first time. To remove value from data container use method `remove` - it emit null value before remove all subscribers, use `isSet` property to to distinguish between newly created (false) and removed.
 ```
-WireData subscribe(Object scope, WireDataListener listener)
-WireData unsubscribe(Object scope, [WireDataListener listener])
+WireData subscribe(WireDataListener listener)
+WireData unsubscribe(WireDataListener listener)
 void refresh()
-void remove() // emit null value before remove all subscribers, use isSet property to to distinguish between newly created (false) and removed (value still maybe be null thus isSet is false)
+void remove()
 ```
 
 ### WireDataListener:
