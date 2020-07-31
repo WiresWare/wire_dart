@@ -1,0 +1,12 @@
+.done {
+  text-decoration: line-through;
+}
+
+material-checkbox {
+  vertical-align: middle;
+}
+
+material-fab {
+  float: right;
+  vertical-align: middle;
+}

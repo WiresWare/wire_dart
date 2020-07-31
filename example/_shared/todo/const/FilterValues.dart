@@ -1,4 +1,4 @@
-enum TodoFilterValue {
+enum FilterValues {
   ALL,
   ACTIVE,
   COMPLETED

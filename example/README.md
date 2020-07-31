@@ -14,3 +14,8 @@
 - Open IDEA
 - Select build target - Dart Command Line App, point to example/api/wire_api_example.dart
 - Run Debug
+
+4. Todo with AngularDart web
+- Open folder from IDEA
+- Create symlink (or anchor on Windows) from "_shared" folder in "example" folder and put the link in to "todo_angular/lib/src/" folder.
+- Run DartWeb configuration with index.html

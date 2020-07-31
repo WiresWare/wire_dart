@@ -1,4 +1,7 @@
-## 0.9.7  (pre-release)
+## 0.9.8  (pre-release)
+- Todo example with AngularDart using shared code from symlink.
+
+## 0.9.7 
 - README update
 
 ## 0.9.6

@@ -1,0 +1,13 @@
+<div>
+  <material-input label="What do you need to do?"
+                  autoFocus floatingLabel style="width:80%"
+                  [(ngModel)]="text"
+                  (keyup.enter)="enter()">
+  </material-input>
+
+  <material-fab mini raised
+                (trigger)="enter()"
+                [disabled]="text.isEmpty">
+    <material-icon icon="add"></material-icon>
+  </material-fab>
+</div>

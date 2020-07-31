@@ -169,6 +169,12 @@ Generate UML with `dcdg` (PlantUML): `pub global run dcdg -o ./uml/configuration
 - Select build target - Dart Web, point to example/todo/index.html
 - Run Debug
 
+### 2.1 Todo Angular
+![Todo Example with AngularDart using shared code](/assets/wire_example_todo_angular.gif)
+- Open IDEA
+- Create symlink (or anchor on Windows) from "_shared/todo" folder in "example" folder and put the link in to "todo_angular/lib/src/_shared" folder.
+- Run DartWeb configuration with index.html
+
 ### 3. API calls variations (console):
 - Open IDEA
 - Select build target - Dart Command Line App, point to example/api/wire_api_example.dart

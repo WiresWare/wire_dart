@@ -2,23 +2,23 @@ import 'dart:html';
 
 import 'package:wire/wire.dart';
 
-import '../const/TodoDataParams.dart';
-import '../const/TodoViewSignal.dart';
+import '../../../_shared/todo/const/DataKeys.dart';
+import '../../../_shared/todo/const/ViewSignals.dart';
 import 'base/DomElementView.dart';
 
 class ClearCompletedView extends DomElement {
   ClearCompletedView(ButtonElement dom):super(dom) {
-    var listWireData = Wire.data(TodoDataParams.LIST);
-    var countWireData = Wire.data(TodoDataParams.COUNT);
+    var listWireData = Wire.data(DataKeys.LIST);
+    var countWireData = Wire.data(DataKeys.COUNT);
 
-    var updateComponentVisibility = (value) => 
+    var updateComponentVisibility = (value) =>
       setComponentVisibilityFrom(listWireData.value, countWireData.value);
 
     listWireData.subscribe(updateComponentVisibility);
     countWireData.subscribe(updateComponentVisibility);
     updateComponentVisibility(null);
 
-    dom.onClick.listen((e) => Wire.send(TodoViewSignal.CLEAR_COMPLETED));
+    dom.onClick.listen((e) => Wire.send(ViewSignals.CLEAR_COMPLETED));
   }
 
   void setComponentVisibilityFrom(List list, int count) {

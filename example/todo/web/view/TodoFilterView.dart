@@ -2,19 +2,19 @@ import 'dart:html';
 
 import 'package:wire/wire.dart';
 
-import '../const/TodoDataParams.dart';
-import '../const/TodoFilterValues.dart';
+import '../../../_shared/todo/const/DataKeys.dart';
+import '../../../_shared/todo/const/FilterValues.dart';
 import 'base/DomElementView.dart';
 
 class TodoFilterView extends DomElement {
   TodoFilterView(UListElement dom):super(dom) {
-    Wire.data(TodoDataParams.FILTER).subscribe((value) {
-      var filter = value as TodoFilterValue;
+    Wire.data(DataKeys.FILTER).subscribe((value) {
+      var filter = value as FilterValues;
       var selectedChildIndex;
       switch (filter) {
-        case TodoFilterValue.ALL: selectedChildIndex = 0; break;
-        case TodoFilterValue.ACTIVE: selectedChildIndex = 1; break;
-        case TodoFilterValue.COMPLETED: selectedChildIndex = 2; break;
+        case FilterValues.ALL: selectedChildIndex = 0; break;
+        case FilterValues.ACTIVE: selectedChildIndex = 1; break;
+        case FilterValues.COMPLETED: selectedChildIndex = 2; break;
       }
       (dom.querySelector('.selected') as AnchorElement).className = '';
       (dom.children[selectedChildIndex].children[0] as AnchorElement)

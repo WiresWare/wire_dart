@@ -1,0 +1,14 @@
+mat-list {
+  display: block;
+  list-style: none;
+  padding-left: 0;
+}
+
+mat-list-item {
+  display: block;
+  line-height: 3em;
+}
+
+mat-list-item:hover {
+  background-color: #EEEEEE;
+}

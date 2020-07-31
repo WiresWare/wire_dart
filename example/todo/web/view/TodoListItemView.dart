@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:html';
 import 'package:wire/wire.dart';
-import '../const/TodoViewSignal.dart';
-import '../data/dto/EditDTO.dart';
-import '../data/vo/TodoVO.dart';
+import '../../../_shared/todo/const/ViewSignals.dart';
+import '../../../_shared/todo/data/dto/EditDTO.dart';
+import '../../../_shared/todo/data/vo/TodoVO.dart';
 import 'base/DomElementView.dart';
 
 class TodoListItemView extends DomElement {
@@ -30,10 +30,10 @@ class TodoListItemView extends DomElement {
   TodoListItemView(String id):super(LIElement()) {
 
     listeners.addAll([
-      inpToggle.onClick.listen((e) => Wire.send(TodoViewSignal.TOGGLE, id)),
-      btnDelete.onClick.listen((e) => Wire.send(TodoViewSignal.DELETE, id)),
+      inpToggle.onClick.listen((e) => Wire.send(ViewSignals.TOGGLE, id)),
+      btnDelete.onClick.listen((e) => Wire.send(ViewSignals.DELETE, id)),
       inpEdit.onKeyDown.listen((e) {
-        if (e.keyCode == KeyCode.ENTER) { Wire.send(TodoViewSignal.EDIT, getEditData()); }
+        if (e.keyCode == KeyCode.ENTER) { Wire.send(ViewSignals.EDIT, getEditData()); }
         else if (e.keyCode == KeyCode.ESC) _OnEditCancel();
       }),
 

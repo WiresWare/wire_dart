@@ -1,0 +1,20 @@
+name: wire_example_angular_todo
+description: A web app that uses AngularDart Components
+# version: 1.0.0
+# homepage: https://www.example.com
+
+environment:
+  sdk: '>=2.8.1 <3.0.0'
+
+dependencies:
+  angular: ^5.3.1
+  angular_components: ^0.13.0+1
+  wire: ^0.9.7
+
+dev_dependencies:
+  angular_test: ^2.3.0
+  build_runner: ^1.9.0
+  build_test: ^1.0.0
+  build_web_compilers: ^2.10.0
+  pedantic: ^1.9.0
+  test: ^1.6.3

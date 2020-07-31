@@ -1,4 +1,4 @@
-import 'package:wire/src/main.dart';
+import 'package:wire/wire.dart';
 
 class TodoMiddleware extends WireMiddleware {
   @override

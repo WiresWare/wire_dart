@@ -1,0 +1,11 @@
+<!-- Components info: https://angulardart.dev/components -->
+<p *ngIf="items.isEmpty">
+  Nothing to do! Add items above.
+</p>
+<div *ngIf="items.isNotEmpty">
+  <mat-list class="todo-list">
+    <mat-list-item *ngFor="let id of items" class="">
+      <todo-item [id]="id"></todo-item>
+    </mat-list-item>
+  </mat-list>
+</div>

@@ -1,12 +1,12 @@
 import 'dart:html';
 import 'package:wire/wire.dart';
-import '../const/TodoDataParams.dart';
+import '../../../_shared/todo/const/DataKeys.dart';
 import 'base/DomElementView.dart';
 import 'TodoListItemView.dart';
 
 class TodoListView extends DomElement {
   TodoListView(UListElement dom):super(dom) {
-    var wireData = Wire.data(TodoDataParams.LIST);
+    var wireData = Wire.data(DataKeys.LIST);
     var list = (wireData.value as List);
     var append = (id) => dom.append(TodoListItemView(id).dom);
     if (list != null && list.isNotEmpty) list.forEach(append);

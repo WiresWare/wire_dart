@@ -18,4 +18,9 @@ class WebDatabaseService extends IDatabaseService {
   void save(String key, dynamic data) {
     window.localStorage[key] = jsonEncode(data);
   }
+
+  @override
+  Future init([String key]) {
+    return null;
+  }
 }

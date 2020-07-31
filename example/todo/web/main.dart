@@ -1,24 +1,24 @@
 import 'dart:html';
 import 'package:wire/wire.dart';
 
+import '../../_shared/todo/controller/TodoController.dart';
+import '../../_shared/todo/middleware/TodoMiddleware.dart';
+import '../../_shared/todo/model/TodoModel.dart';
+import '../../_shared/todo/service/WebDatabaseService.dart';
 import 'controller/RouteController.dart';
-import 'controller/TodoController.dart';
-import 'model/TodoModel.dart';
-import 'service/WebDatabaseService.dart';
 import 'view/ClearCompletedView.dart';
 import 'view/CompleteAllView.dart';
 import 'view/TodoCountView.dart';
 import 'view/TodoFilterView.dart';
 import 'view/TodoInputView.dart';
 import 'view/TodoListView.dart';
-import 'middleware/TodoMiddleware.dart';
 
 var todoModel;
 var todoView;
 var todoController;
 var routeController;
 
-main() {
+void main() {
   /// COUNTER EXAMPLE ======================================
   init();
   ready();
