@@ -1,10 +1,10 @@
 import 'dart:html';
 import 'package:wire/wire.dart';
+import 'package:wire_example_shared/todo/controller/TodoController.dart';
+import 'package:wire_example_shared/todo/middleware/TodoMiddleware.dart';
+import 'package:wire_example_shared/todo/model/TodoModel.dart';
+import 'package:wire_example_shared/todo/service/WebDatabaseService.dart';
 
-import '../../_shared/todo/controller/TodoController.dart';
-import '../../_shared/todo/middleware/TodoMiddleware.dart';
-import '../../_shared/todo/model/TodoModel.dart';
-import '../../_shared/todo/service/WebDatabaseService.dart';
 import 'controller/RouteController.dart';
 import 'view/ClearCompletedView.dart';
 import 'view/CompleteAllView.dart';

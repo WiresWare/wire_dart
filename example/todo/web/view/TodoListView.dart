@@ -1,6 +1,6 @@
 import 'dart:html';
 import 'package:wire/wire.dart';
-import '../../../_shared/todo/const/DataKeys.dart';
+import 'package:wire_example_shared/todo/const/DataKeys.dart';
 import 'base/DomElementView.dart';
 import 'TodoListItemView.dart';
 

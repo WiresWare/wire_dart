@@ -1,7 +1,7 @@
 import 'dart:html';
 import 'package:wire/wire.dart';
-import '../../../_shared/todo/const/ViewSignals.dart';
-import '../../../_shared/todo/data/dto/InputDTO.dart';
+import 'package:wire_example_shared/todo/const/ViewSignals.dart';
+import 'package:wire_example_shared/todo/data/dto/InputDTO.dart';
 import 'base/DomElementView.dart';
 
 class TodoInputView extends DomElement {

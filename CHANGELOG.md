@@ -1,4 +1,7 @@
-## 0.9.8  (pre-release)
+## 0.9.81  (pre-release)
+- Shared folder extracted as pub library and added to subrepo on separate branch with "git subrepo" extension. Changes to examples applied.
+
+## 0.9.8
 - Todo example with AngularDart using shared code from symlink.
 
 ## 0.9.7 

@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:angular/angular.dart';
 import 'package:angular_components/angular_components.dart';
 import 'package:wire/wire.dart';
-import 'package:wire_example_angular_todo/src/_shared/todo/const/ViewSignals.dart';
-import 'package:wire_example_angular_todo/src/_shared/todo/data/vo/TodoVO.dart';
+import 'package:wire_example_shared/todo/const/ViewSignals.dart';
+import 'package:wire_example_shared/todo/data/vo/TodoVO.dart';
 
 @Component(
   selector: 'todo-item',

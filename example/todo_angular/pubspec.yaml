@@ -10,6 +10,8 @@ dependencies:
   angular: ^5.3.1
   angular_components: ^0.13.0+1
   wire: ^0.9.7
+  wire_example_shared:
+    path: ../_shared
 
 dev_dependencies:
   angular_test: ^2.3.0

@@ -224,7 +224,7 @@ packages:
       name: dart_internal
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.9"
+    version: "0.1.10"
   dart_style:
     dependency: transitive
     description:
@@ -637,7 +637,14 @@ packages:
       name: wire
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.9.7"
+    version: "0.9.8"
+  wire_example_shared:
+    dependency: "direct main"
+    description:
+      path: "../_shared"
+      relative: true
+    source: path
+    version: "0.0.1"
   yaml:
     dependency: transitive
     description:
@@ -646,4 +653,4 @@ packages:
     source: hosted
     version: "2.2.1"
 sdks:
-  dart: ">=2.8.1 <2.9.0"
+  dart: ">=2.8.1 <2.10.0"
