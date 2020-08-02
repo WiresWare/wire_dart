@@ -28,17 +28,20 @@ void main() {
 
     const SIGNAL = 'SIGNAL_SUBSCRIPTION';
     const SIGNAL_COUNTER = 'SIGNAL_COUNTER';
-    const CALLS_COUNTER = 2;
     const SCOPE = Object();
 
-    WireListener listener = (data, wid) =>
-      { print('> Response on ${Wire.get(wid:wid).single.signal} with data: ${data}') };
+    WireListener<String> listener_string = (String data, wid) =>
+    { print('> Response on ${Wire.get(wid:wid).single.signal} with STRING data: ${data}') };
 
-    var testWire = Wire(SCOPE, 'wire_signal_1', listener);
+    WireListener<bool> listener_boolean = (bool data, wid) =>
+    { print('> Response on ${Wire.get(wid:wid).single.signal} with BOOLEAN data: ${data}') };
+
+    var testWire = Wire<String>(SCOPE, 'wire_signal_1', listener_string);
 
     setUp(() {
       Wire.purge(withMiddleware: true);
-      Wire.add(SCOPE, SIGNAL, listener);
+      Wire.add<String>(SCOPE, SIGNAL, listener_string);
+      Wire.add<bool>(SCOPE, SIGNAL, listener_boolean);
       Wire.attach(testWire);
     });
 
@@ -46,6 +49,8 @@ void main() {
 
     test('1.0 Registered Signal', () {
       expect(Wire.send(SIGNAL), isFalse);
+      expect(Wire.send(SIGNAL, 'STRING_DATA'), isFalse);
+      expect(Wire.send(SIGNAL, false), isFalse);
       expect(Wire.send(testWire.signal), isFalse);
     });
 
@@ -67,10 +72,10 @@ void main() {
     });
 
     test('1.4 Counter Signal', () {
-      Wire.add(SCOPE, SIGNAL_COUNTER, (data, wid) {
+      Wire.add(SCOPE, SIGNAL_COUNTER, (_, wid) {
         var wire = Wire.get(wid:wid).single;
         print('1.4 Response on ${wire.signal} replies left: ${wire.replies}');
-      }, replies: CALLS_COUNTER);
+      }, replies: 2);
       expect(Wire.send(SIGNAL_COUNTER), isFalse);
       expect(Wire.send(SIGNAL_COUNTER), isTrue);
     });
@@ -82,8 +87,10 @@ void main() {
     var SIGNAL_2 = 'SIGNAL_SUBSCRIPTION_2';
     var SCOPE = Object();
 
-    WireListener listener = (signal, data) =>
-      { print('Response on ${signal} with data: ${data}') };
+    WireListener listener = (data, wid) {
+      var wire = Wire.get(wid:wid).single;
+      print('Response on ${wire.signal} with data: ${data}');
+    };
 
     var testWire = Wire(SCOPE, 'wire_signal_2', listener);
 
@@ -118,5 +125,9 @@ void main() {
       expect(Wire.has(signal:SIGNAL), isFalse);
       expect(Wire.get(signal:SIGNAL), isEmpty);
     });
+  });
+
+  group('3. Data Layer', () {
+
   });
 }
