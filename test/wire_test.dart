@@ -36,13 +36,17 @@ void main() {
     WireListener<bool> listener_boolean = (bool data, wid) =>
     { print('> Response on ${Wire.get(wid:wid).single.signal} with BOOLEAN data: ${data}') };
 
-    var testWire = Wire<String>(SCOPE, 'wire_signal_1', listener_string);
+    WireListener listener_dynamic = (data, wid) =>
+    { print('> Response on ${Wire.get(wid:wid).single.signal} with DYNAMIC data: ${data}') };
+
+    var attachedWire = Wire<String>(SCOPE, 'wire_signal_1', listener_string);
 
     setUp(() {
       Wire.purge(withMiddleware: true);
       Wire.add<String>(SCOPE, SIGNAL, listener_string);
       Wire.add<bool>(SCOPE, SIGNAL, listener_boolean);
-      Wire.attach(testWire);
+      Wire.add(SCOPE, SIGNAL, listener_dynamic); // Dynamic listener will react on any signal regardless attached data types
+      Wire.attach(attachedWire);
     });
 
     var SIGNAL_NOT_REGISTERED = 'SIGNAL_NOT_REGISTERED';
@@ -51,14 +55,14 @@ void main() {
       expect(Wire.send(SIGNAL), isFalse);
       expect(Wire.send(SIGNAL, 'STRING_DATA'), isFalse);
       expect(Wire.send(SIGNAL, false), isFalse);
-      expect(Wire.send(testWire.signal), isFalse);
+      expect(Wire.send(attachedWire.signal), isFalse);
     });
 
     test('1.1 Has Signal', () {
       expect(Wire.has(signal:SIGNAL), isTrue);
       expect(Wire.has(signal:SIGNAL_NOT_REGISTERED), isFalse);
       expect(Wire.has(signal:'RANDOM_SIGNAL'), isFalse);
-      expect(Wire.has(wire:testWire), isTrue);
+      expect(Wire.has(wire:attachedWire), isTrue);
     });
 
     test('1.2 Unregistered Signal', () {
@@ -67,8 +71,8 @@ void main() {
     });
 
     test('1.3 Detach Signal', () {
-      expect(Wire.detach(testWire), isTrue);
-      expect(Wire.send(testWire.signal), isTrue);
+      expect(Wire.detach(attachedWire), isTrue);
+      expect(Wire.send(attachedWire.signal), isTrue);
     });
 
     test('1.4 Counter Signal', () {
