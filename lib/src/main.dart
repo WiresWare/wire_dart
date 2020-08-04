@@ -94,15 +94,15 @@ class Wire<T> {
   }
 
   /// Call associated WireListener with data.
-  void transfer(dynamic payload) {
+  void transfer(dynamic payload) async {
     // Call a listener in this Wire only in case data type match it's listener type.
     if (payload is T || payload == null) {
-      _listener!(payload, _id!);
+      await _listener!(payload, _id!);
     }
   }
 
   /// Nullify all relations
-  void clear() {
+  void clear() async {
     _scope = null;
     _signal = null;
     _listener = null;
@@ -146,7 +146,7 @@ class Wire<T> {
   /// If use scope then only wire with this scope value will receive the payload
   /// All middleware will be informed from [WireMiddleware.onSend] before signal sent on wires
   /// Returns true when no wire for the signal has found
-  static bool send<T>(String signal, {T? payload, Object? scope}) {
+  static Future<bool> send<T>(String signal, {T? payload, Object? scope}) async {
     _MIDDLEWARE_LIST.forEach((m) => m.onSend(signal, payload));
     return _COMMUNICATION_LAYER.send(signal, payload, scope);
   }

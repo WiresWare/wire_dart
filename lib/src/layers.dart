@@ -36,18 +36,18 @@ class WireCommunicateLayer {
     return _wireById.containsKey(wire.id);
   }
 
-  bool send(String signal, [payload, scope]) {
+  Future<bool> send(String signal, [payload, scope]) async {
     var noMoreSubscribers = true;
     if (hasSignal(signal)) {
       var wiresToRemove = <Wire?>[];
-      _wireIdsBySignal[signal]!.forEach((wireId) {
+      _wireIdsBySignal[signal]!.forEach((wireId) async {
         final wire = _wireById[wireId];
         if (scope != null && wire!.scope != scope) return;
         noMoreSubscribers = wire!.replies > 0 && --wire.replies == 0;
         if (noMoreSubscribers) wiresToRemove.add(wire);
-        wire.transfer(payload);
+        await wire.transfer(payload);
       });
-      wiresToRemove.forEach((r) => noMoreSubscribers = _removeWire(r!));
+      await wiresToRemove.forEach((r) async => noMoreSubscribers = await _removeWire(r!));
     }
     return noMoreSubscribers;
   }
@@ -68,10 +68,10 @@ class WireCommunicateLayer {
     return exists;
   }
 
-  void clear() {
+  Future<void> clear() async {
     var wiresToRemove = <Wire>[];
-    _wireById.forEach((h, w) => wiresToRemove.add(w));
-    wiresToRemove.forEach(_removeWire);
+    _wireById.forEach((h, w) async => await wiresToRemove.add(w));
+    await wiresToRemove.forEach(_removeWire);
     _wireById.clear();
     _wireIdsBySignal.clear();
   }
@@ -106,7 +106,7 @@ class WireCommunicateLayer {
   /// @param    The Wire to remove.
   /// @return If there is no ids (no Wires) for that SIGNAL stop future perform
   ///
-  bool _removeWire(Wire wire) {
+  Future<bool> _removeWire(Wire wire) async {
     final wireId = wire.id;
     final signal = wire.signal;
 
@@ -120,7 +120,7 @@ class WireCommunicateLayer {
     var noMoreSignals = wireIdsForSignal.isEmpty;
     if (noMoreSignals) _wireIdsBySignal.remove(signal);
 
-    wire.clear();
+    await wire.clear();
 
     return noMoreSignals;
   }
@@ -135,9 +135,9 @@ class WireDataContainerLayer {
     return _map[key] = WireData(key, _map.remove);
   }
 
-  void clear() {
-    _map.forEach((key, wireData) {
-      wireData.remove();
+  void clear() async {
+    await _map.forEach((key, wireData) async {
+      await wireData.remove();
     });
     _map.clear();
   }
