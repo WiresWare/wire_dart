@@ -55,8 +55,8 @@ class WireData<T> {
 
   WireData(this._key, this._onRemove);
 
-  void refresh() {
-    _listeners.forEach((l) => l(_value));
+  Future<void> refresh() async {
+    _listeners.forEach((l) async => await l(_value));
   }
 
   void remove() {
@@ -75,12 +75,12 @@ class WireData<T> {
 
   void _guardian() { if (isLocked) throw ERROR__DATA_IS_LOCKED; }
 
-  WireData subscribe(WireDataListener<T> listener) {
+  WireData<T> subscribe(WireDataListener<T> listener) {
     if (!hasListener(listener)) _listeners.add(listener);
     return this;
   }
 
-  WireData unsubscribe([WireDataListener<T> listener]) {
+  WireData<T> unsubscribe([WireDataListener<T> listener]) {
     if (listener != null) {
       if (hasListener(listener)) _listeners.remove(listener);
     } else {
