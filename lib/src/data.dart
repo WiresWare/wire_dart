@@ -5,11 +5,11 @@ part of wire;
 /// Github: https://github.com/DQvsRA
 /// License: APACHE LICENSE, VERSION 2.0
 ///
-typedef WireDataListener = void Function(dynamic value);
+typedef WireDataListener<T> = void Function(T value);
 
-class WireData {
+class WireData<T> {
   Function _onRemove;
-  final _listeners = <WireDataListener>{};
+  final _listeners = <WireDataListener<T>>{};
 
   /// This property needed to distinguish between newly created and not set WireData which has value of null at the beginning
   /// And with WireData at time when it's removed, because when removing the value also set to null
@@ -19,8 +19,8 @@ class WireData {
   String _key;
   String get key => _key;
 
-  dynamic _value; // initial value is null
-  dynamic get value => _value;
+  T _value; // initial value is null
+  T get value => _value;
   set value(dynamic input) {
     _value = input;
     _isSet = true;
@@ -44,12 +44,12 @@ class WireData {
     _listeners.clear();
   }
 
-  WireData subscribe(WireDataListener listener) {
+  WireData<T> subscribe(WireDataListener<T> listener) {
     if (!hasListener(listener)) _listeners.add(listener);
     return this;
   }
 
-  WireData unsubscribe([WireDataListener listener]) {
+  WireData<T> unsubscribe([WireDataListener<T> listener]) {
     if (listener != null) {
       if (hasListener(listener)) _listeners.remove(listener);
     } else {
@@ -58,7 +58,7 @@ class WireData {
     return this;
   }
 
-  bool hasListener(WireDataListener listener) {
+  bool hasListener(WireDataListener<T> listener) {
     return _listeners.contains(listener);
   }
 }

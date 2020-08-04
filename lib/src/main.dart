@@ -14,7 +14,7 @@ part 'data.dart';
 /// License: APACHE LICENSE, VERSION 2.0
 ///
 
-typedef WireListener = void Function(dynamic data, int wid);
+typedef WireListener<T> = void Function(T data, int wid);
 
 abstract class WireMiddleware {
   void onAdd(Wire wire);
@@ -23,7 +23,7 @@ abstract class WireMiddleware {
   void onData(String key, dynamic prevValue, dynamic nextValue);
 }
 
-class Wire {
+class Wire<T> {
   ///
   /// [read-only] [static]
   /// Used to generate Wire wid
@@ -51,8 +51,8 @@ class Wire {
   /// The closure method that this item was associated.
   ///
   /// @private
-  WireListener _listener;
-  WireListener get listener => _listener;
+  WireListener<T> _listener;
+  WireListener<T> get listener => _listener;
 
   ///
   /// [read-only] [internal use]
@@ -82,7 +82,7 @@ class Wire {
   /// But it wont react on signal until it is attached to the communication layer with [attach]
   /// However you still can send data through it by calling [transfer]
   ///
-  Wire(Object scope, String signal, WireListener listener, [int replies = 0])
+  Wire(Object scope, String signal, WireListener<T> listener, [int replies = 0])
       : assert(scope != null),
         assert(signal != null),
         assert(listener != null) {
@@ -95,8 +95,8 @@ class Wire {
 
   /// Call associated WireListener with data.
   void transfer(data) {
-    // Call a listener in this Wire.
-    _listener(data, _wid);
+    // Call a listener in this Wire only in case data type match it's listener type.
+    if (data is T) _listener(data, _wid);
   }
 
   /// Nullify all relations
@@ -124,9 +124,9 @@ class Wire {
 
   /// Create wire object from params and [attach] it to the communication layer
   /// All middleware will be informed from [WireMiddleware.onAdd] before wire is attached to the layer
-  static Wire add(Object scope, String signal, WireListener listener,
+  static Wire add<T>(Object scope, String signal, WireListener<T> listener,
       {int replies = 0}) {
-    final wire = Wire(scope, signal, listener, replies);
+    final wire = Wire<T>(scope, signal, listener, replies);
     _MIDDLEWARE_LIST.forEach((m) => m.onAdd(wire));
     attach(wire);
     return wire;
@@ -143,7 +143,7 @@ class Wire {
   /// Data is optional, default is null, passed to WireListener from [transfer]
   /// All middleware will be informed from [WireMiddleware.onSend] before signal sent on wires
   /// Returns true when no wire for the signal has found
-  static bool send(String signal, [data]) {
+  static bool send<T>(String signal, [T data]) {
     _MIDDLEWARE_LIST.forEach((m) => m.onSend(signal, data));
     return _COMMUNICATION_LAYER.send(signal, data);
   }
@@ -208,7 +208,7 @@ class Wire {
   /// void remove()
   /// ```
   /// Returns [WireData]
-  static WireData data(String key, [dynamic value]) {
+  static WireData data<T>(String key, [T value]) {
     var wireData = _DATA_CONTAINER_LAYER.get(key);
     if (value != null) {
       var prevValue = wireData.value;

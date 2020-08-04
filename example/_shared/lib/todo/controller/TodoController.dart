@@ -2,6 +2,7 @@ import 'package:wire/wire.dart';
 
 import '../const/FilterValues.dart';
 import '../const/ViewSignals.dart';
+import '../data/base/DTO.dart';
 import '../data/dto/InputDTO.dart';
 import '../model/TodoModel.dart';
 import '../data/dto/EditDTO.dart';
@@ -38,7 +39,7 @@ class TodoController {
     print('Processor Ready');
   }
 
-  void _signalProcessor(dynamic data, int wid) {
+  void _signalProcessor(DTO data, int wid) {
     var wire = Wire.get(wid: wid).single;
     print('> TodoProcessor -> ${wire.signal}: data = ' + data.toString());
     switch (wire.signal) {
