@@ -5,3 +5,4 @@
 *.lock
 *node_modules/*
 /example/counter/assets/styles/@spectrum-css/
+pubspec.lock

@@ -12,5 +12,3 @@ dev_dependencies:
   test: ^1.6.0
   build_web_compilers:
   build_runner:
-  wire_example_shared:
-    path: example/_shared
