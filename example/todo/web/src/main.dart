@@ -27,7 +27,7 @@ void main() {
 void init() {
   Wire.middleware(TodoMiddleware());
   var databaseService = WebDatabaseService();
-  todoModel = TodoModel(databaseService);
+  todoModel = TodoModel(databaseService, isFlutter: false);
   todoView = TodoView();
   todoController = TodoController(todoModel);
   routeController = RouteController();
