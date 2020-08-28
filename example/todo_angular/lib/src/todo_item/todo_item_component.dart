@@ -32,5 +32,5 @@ class TodoItemComponent implements OnInit {
   Future<Null> ngOnInit() async { }
 
   TodoVO get todo => Wire.data(id).value;
-  void delete() { Wire.send(ViewSignals.DELETE, id); }
+  void delete() { Wire.send(ViewSignals.DELETE, payload: id); }
 }

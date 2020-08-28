@@ -27,5 +27,5 @@ class TodoInputComponent implements OnInit {
     });
   }
 
-  void enter() { Wire.send(ViewSignals.INPUT, InputDTO(text, '')); }
+  void enter() { Wire.send(ViewSignals.INPUT, payload: InputDTO(text, '')); }
 }
