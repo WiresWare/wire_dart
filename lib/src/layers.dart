@@ -47,7 +47,6 @@ class WireCommunicateLayer {
         noMoreSubscribers = wire.replies > 0 && --wire.replies == 0;
         if (noMoreSubscribers) WiresToRemove.add(wire);
         wire.transfer(payload);
-
       });
       WiresToRemove.forEach((r) => noMoreSubscribers = _removeWire(r));
     }

@@ -30,8 +30,10 @@ class Wire<T> {
   ///
   /// @private
   static int _INDEX = 0;
-  static final WireCommunicateLayer _COMMUNICATION_LAYER = WireCommunicateLayer();
-  static final WireDataContainerLayer _DATA_CONTAINER_LAYER = WireDataContainerLayer();
+  static final WireCommunicateLayer _COMMUNICATION_LAYER =
+      WireCommunicateLayer();
+  static final WireDataContainerLayer _DATA_CONTAINER_LAYER =
+      WireDataContainerLayer();
   static final _MIDDLEWARE_LIST = <WireMiddleware>[];
 
   ///**************************************************
@@ -179,7 +181,8 @@ class Wire<T> {
 
   /// When you need Wires associated with signal or scope or listener
   /// Returns [List<Wire>]
-  static List<Wire> get({String signal, Object scope, WireListener listener, int wid}) {
+  static List<Wire> get(
+      {String signal, Object scope, WireListener listener, int wid}) {
     var result = <Wire>[];
     if (signal != null) {
       result.addAll(_COMMUNICATION_LAYER.getBySignal(signal));
