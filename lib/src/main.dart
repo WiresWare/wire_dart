@@ -14,11 +14,11 @@ part 'data.dart';
 /// License: APACHE LICENSE, VERSION 2.0
 ///
 
-typedef WireListener<T> = void Function(T data, int wid);
+typedef WireListener<T> = void Function(T payload, int wid);
 
 abstract class WireMiddleware {
   void onAdd(Wire wire);
-  void onSend(String signal, [data]);
+  void onSend(String signal, [payload, scope]);
   void onRemove(String signal, [Object scope, WireListener listener]);
   void onData(String key, dynamic prevValue, dynamic nextValue);
 }
@@ -94,9 +94,9 @@ class Wire<T> {
   }
 
   /// Call associated WireListener with data.
-  void transfer(data) {
+  void transfer(payload) {
     // Call a listener in this Wire only in case data type match it's listener type.
-    if (data is T) _listener(data, _wid);
+    if (payload is T) _listener(payload, _wid);
   }
 
   /// Nullify all relations
@@ -140,12 +140,13 @@ class Wire<T> {
   }
 
   /// Send signal through all wires has the signal string value
-  /// Data is optional, default is null, passed to WireListener from [transfer]
+  /// Payload is optional, default is null, passed to WireListener from [transfer]
+  /// If use scope then only wire with this scope value will receive the payload
   /// All middleware will be informed from [WireMiddleware.onSend] before signal sent on wires
   /// Returns true when no wire for the signal has found
-  static bool send<T>(String signal, [T data]) {
-    _MIDDLEWARE_LIST.forEach((m) => m.onSend(signal, data));
-    return _COMMUNICATION_LAYER.send(signal, data);
+  static bool send<T>(String signal, {T payload, Object scope}) {
+    _MIDDLEWARE_LIST.forEach((m) => m.onSend(signal, payload));
+    return _COMMUNICATION_LAYER.send(signal, payload, scope);
   }
 
   /// Remove all entities from Communication Layer and Data Container Layer

@@ -36,17 +36,18 @@ class WireCommunicateLayer {
     return _wireByWID.containsKey(wire.wid);
   }
 
-  bool send(String signal, [data]) {
+  bool send(String signal, [payload, scope]) {
     var noMoreSubscribers = true;
     if (hasSignal(signal)) {
       var WiresToRemove = <Wire>[];
       _widsBySignal[signal].forEach((wid) {
         var wire = _wireByWID[wid];
-        var replies = wire.replies;
-        noMoreSubscribers = replies > 0 && --replies == 0;
+        if (scope != null && wire.scope != scope) return;
+
+        noMoreSubscribers = wire.replies > 0 && --wire.replies == 0;
         if (noMoreSubscribers) WiresToRemove.add(wire);
-        wire.replies = replies;
-        wire.transfer(data);
+        wire.transfer(payload);
+
       });
       WiresToRemove.forEach((r) => noMoreSubscribers = _removeWire(r));
     }

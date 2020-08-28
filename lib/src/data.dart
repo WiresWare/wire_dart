@@ -44,12 +44,12 @@ class WireData<T> {
     _listeners.clear();
   }
 
-  WireData<T> subscribe(WireDataListener<T> listener) {
+  WireData subscribe(WireDataListener<T> listener) {
     if (!hasListener(listener)) _listeners.add(listener);
     return this;
   }
 
-  WireData<T> unsubscribe([WireDataListener<T> listener]) {
+  WireData unsubscribe([WireDataListener<T> listener]) {
     if (listener != null) {
       if (hasListener(listener)) _listeners.remove(listener);
     } else {

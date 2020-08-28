@@ -8,21 +8,22 @@ abstract class "wire::src::main.dart::WireMiddleware" {
   +void onData()
 }
 
-class "wire::src::main.dart::Wire" {
+class "wire::src::main.dart::Wire<T>" {
   {static} -int _INDEX
-  {static} -WireLayer _LAYER
-  {static} -WireStore _STORE
+  {static} -WireCommunicateLayer _COMMUNICATION_LAYER
+  {static} -WireDataContainerLayer _DATA_CONTAINER_LAYER
   {static} -List<WireMiddleware> _MIDDLEWARE_LIST
   -String _signal
-  -void Function(Wire, dynamic) _listener
-  -int _hash
+  -void Function(T, int) _listener
+  -int _wid
   -Object _scope
   +int replies
   +String signal
-  +void Function(Wire, dynamic) listener
-  +int hash
+  +void Function(T, int) listener
+  +int wid
   +Object scope
   +void transfer()
+  +void clear()
   {static} +void attach()
   {static} +bool detach()
   {static} +Wire add()
@@ -35,19 +36,13 @@ class "wire::src::main.dart::Wire" {
   {static} +WireData data()
 }
 
-"wire::src::main.dart::Wire" o-- "wire::src::main.dart::WireLayer"
-"wire::src::main.dart::Wire" o-- "wire::src::main.dart::WireStore"
-"wire::src::main.dart::Wire" o-- "wire::src::main.dart::void Function(Wire, dynamic)"
+"wire::src::main.dart::Wire<T>" o-- "wire::src::main.dart::WireCommunicateLayer"
+"wire::src::main.dart::Wire<T>" o-- "wire::src::main.dart::WireDataContainerLayer"
+"wire::src::main.dart::Wire<T>" o-- "wire::src::main.dart::void Function(T, int)"
 
-class "wire::src::main.dart::WireStore" {
-  -Map<String, WireData> _map
-  +dynamic get()
-  +void clear()
-}
-
-class "wire::src::main.dart::WireLayer" {
-  -Map<int, Wire> _wireByHash
-  -Map<String, List<int>> _hashesBySignal
+class "wire::src::main.dart::WireCommunicateLayer" {
+  -Map<int, Wire> _wireByWID
+  -Map<String, List<int>> _widsBySignal
   +Wire add()
   +bool hasSignal()
   +bool hasWire()
@@ -57,22 +52,30 @@ class "wire::src::main.dart::WireLayer" {
   +List getBySignal()
   +List getByScope()
   +List getByListener()
-  -bool _removeSignal()
+  +Wire getByWID()
+  -bool _removeWire()
 }
 
-class "wire::src::main.dart::WireData" {
+class "wire::src::main.dart::WireDataContainerLayer" {
+  -Map<String, WireData> _map
+  +WireData get()
+  +void clear()
+}
+
+class "wire::src::main.dart::WireData<T>" {
   -Function _onRemove
-  -Map<Object, List<void Function(dynamic)>> _listeners
+  -Set<void Function(T)> _listeners
   -bool _isSet
-  -dynamic _key
-  -dynamic _value
+  -String _key
+  -T _value
   +bool isSet
-  +dynamic key
-  +dynamic value
+  +String key
+  +T value
   +void refresh()
   +void remove()
   +WireData subscribe()
   +WireData unsubscribe()
+  +bool hasListener()
 }
 
 

@@ -18,8 +18,8 @@ class TestWireMiddleware extends WireMiddleware {
   }
 
   @override
-  void onSend(String signal, [data]) {
-    print('> TestWireMiddleware -> onRemove: signal = ${signal} | $data');
+  void onSend(String signal, [data, scope]) {
+    print('> TestWireMiddleware -> onRemove: signal = ${signal} | $data | $scope');
   }
 }
 
@@ -53,8 +53,8 @@ void main() {
 
     test('1.0 Registered Signal', () {
       expect(Wire.send(SIGNAL), isFalse);
-      expect(Wire.send(SIGNAL, 'STRING_DATA'), isFalse);
-      expect(Wire.send(SIGNAL, false), isFalse);
+      expect(Wire.send(SIGNAL, payload: 'STRING_DATA'), isFalse);
+      expect(Wire.send(SIGNAL, payload: false), isFalse);
       expect(Wire.send(attachedWire.signal), isFalse);
     });
 

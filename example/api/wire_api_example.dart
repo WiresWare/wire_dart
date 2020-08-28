@@ -20,9 +20,9 @@ main() {
   Wire.add(SCOPE, SIGNAL_1, listener1);
   Wire.middleware(TestWireMiddleware());
 
-  Wire.send(SIGNAL_1, 'World');
-  Wire.send(SIGNAL_1, 'Dart');
-  Wire.send(SIGNAL_1, 'Vladimir');
+  Wire.send(SIGNAL_1, payload: 'World');
+  Wire.send(SIGNAL_1, payload: 'Dart');
+  Wire.send(SIGNAL_1, payload: 'Vladimir');
   Wire.remove(SIGNAL_1);
   /// SUBSCRIBER END =========================================
   ///
@@ -34,16 +34,20 @@ main() {
   var SIGNAL_3 = 'SIGNAL_3';
   var SIGNAL_4 = 'SIGNAL_4';
 
-  /* 1 */ Wire.add(SCOPE, SIGNAL_3, listener2); // Will be removed
+  /* 1 */ Wire.add(SCOPE, SIGNAL_3, listener2); // Will be removed in ***
   /* 2 */ Wire.add(SCOPE, SIGNAL_4, listener2);
-  /* 3 */ Wire.add(SCOPE_2, SIGNAL_3, listener2); // Will be removed
-  /* 4 */ Wire.add(SCOPE_2, SIGNAL_4, (dynamic data, int wid) => print('> Remove: SIGNAL 2 -> data: ' + data));
+  /* 3 */ Wire.add(SCOPE_2, SIGNAL_3, listener2); // Will be removed in ***
+  /* 4 */ Wire.add(SCOPE_2, SIGNAL_4, (dynamic data, int wid) => print('> Remove: SIGNAL 2 -> dynamic data: ' + data));
+  /* 4 */ Wire.add<String>(SCOPE_2, SIGNAL_4, (String data, int wid) => print('> Remove: SIGNAL 2 -> String data: ' + data));
+  /* 5 */ Wire.add<bool>(SCOPE_2, SIGNAL_4, (bool data, int wid) => print('> Remove: SIGNAL 2 -> Boolean data: ' + data.toString()));
 
+  // *** (remove)
   /* 1 */ Wire.remove(SIGNAL_3, listener: listener2);
   /* 3 */ Wire.remove(SIGNAL_3, scope: SCOPE_2);
 
-  Wire.send(SIGNAL_3, 'SIGNAL_3');
-  Wire.send(SIGNAL_4, 'SIGNAL_4');
+  /* 1, 3 */ Wire.send(SIGNAL_3, payload: 'SIGNAL_3');
+  /* 4 */ Wire.send(SIGNAL_4, payload: 'SIGNAL_4');
+  /* 5 */ Wire.send(SIGNAL_4, payload: false);
 
   /* 2 */ Wire.remove(SIGNAL_1, scope: SCOPE);
   /* 4 */ Wire.remove(SIGNAL_2, scope: SCOPE_2);
@@ -53,9 +57,9 @@ main() {
     print('> SIGNAL 1 (limit 1) -> Goodbye: ' + data);
   }, replies: 1);
 
-  print('\tNo ends: ' + Wire.send(SIGNAL_ONCE, 'World').toString());
-  print('\tNo ends: ' + Wire.send(SIGNAL_ONCE, 'Dart').toString());
-  print('\tNo ends: ' + Wire.send(SIGNAL_ONCE, 'Vladimir').toString());
+  print('\tNo ends: ' + Wire.send(SIGNAL_ONCE, payload: 'World').toString());
+  print('\tNo ends: ' + Wire.send(SIGNAL_ONCE, payload: 'Dart').toString());
+  print('\tNo ends: ' + Wire.send(SIGNAL_ONCE, payload: 'Peace').toString());
   /// ONCE END ===============================================
 
   Wire.add(SCOPE, SIGNAL_2, (dynamic data, int wid) {
@@ -66,11 +70,11 @@ main() {
     print('> SIGNAL 2 (limit 2) -> I do: ' + data);
   }, replies: 2);
 
-  print('\tSend ends: ' + Wire.send(SIGNAL_2, 'Code').toString());
-  print('\tSend ends: ' + Wire.send(SIGNAL_2, 'Gym').toString());
-  print('\tSend ends: ' + Wire.send(SIGNAL_2, 'Eat (sometimes)').toString());
-  print('\tSend ends: ' + Wire.send(SIGNAL_2, 'Sleep').toString());
-  print('\tSend ends: ' + Wire.send(SIGNAL_2, 'Repeat').toString());
+  print('\tSend ends: ' + Wire.send(SIGNAL_2, payload: 'Code').toString());
+  print('\tSend ends: ' + Wire.send(SIGNAL_2, payload: 'Gym').toString());
+  print('\tSend ends: ' + Wire.send(SIGNAL_2, payload: 'Eat (sometimes)').toString());
+  print('\tSend ends: ' + Wire.send(SIGNAL_2, payload: 'Sleep').toString());
+  print('\tSend ends: ' + Wire.send(SIGNAL_2, payload: 'Repeat').toString());
 
   /// DATA TESTS ===============================================
   var key1 = 'SUPER_PARAM';
@@ -104,7 +108,7 @@ class TestWireMiddleware extends WireMiddleware {
   }
 
   @override
-  void onSend(String signal, [data]) {
-    print('> TestWireMiddleware -> onRemove: signal = ${signal} | $data');
+  void onSend(String signal, [payload, scope]) {
+    print('> TestWireMiddleware -> onRemove: signal = ${signal} | $payload');
   }
 }

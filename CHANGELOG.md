@@ -1,3 +1,9 @@
+## 1.0.0
+- Typed Wire<T> and WireListener<T>, WireData<T> and WireDataListener<T>.
+- WireListener optional property was renamed - data -> payload.
+- Method Wire.send has new optional parameter - Object scope, if it's not null then only Wire instances with this scope value will receive the payload.
+- README updated
+
 ## 0.9.81  (pre-release)
 - Shared folder extracted as pub library and added to subrepo on separate branch with "git subrepo" extension. Changes to examples applied.
 

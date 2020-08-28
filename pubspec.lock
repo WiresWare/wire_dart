@@ -520,7 +520,7 @@ packages:
     source: hosted
     version: "0.7.3"
   wire_example_shared:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       path: "example/_shared"
       relative: true

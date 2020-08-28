@@ -32,8 +32,8 @@ class CounterStorageMiddleware extends WireMiddleware {
   }
 
   @override
-  void onSend(String signal, [data]) {
-    print('> CounterMiddleware -> onSend: signal = ${signal} | data = ${data}');
+  void onSend(String signal, [data, scope]) {
+    print('> CounterMiddleware -> onSend: signal = ${signal} | data = ${data} | scope = ${scope}');
   }
 
   int getInitialValue() {
