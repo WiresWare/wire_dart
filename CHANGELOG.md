@@ -1,3 +1,9 @@
+## 1.0.1
+- Commented out overrides for wire in example/_shared
+- Removed wire_example_shared from dependencies in pubspec, pubspec.lock added to gitignore
+- Shared examples - TodoController updated. Todo example Model initialization with isFlutter false for proper components update on web.
+- README updated with "Few words about FLUX" section. Also README in example folder updated with how to setup IDEA
+
 ## 1.0.0
 - Typed Wire<T> and WireListener<T>, WireData<T> and WireDataListener<T>.
 - WireListener optional property was renamed - data -> payload.

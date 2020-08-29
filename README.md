@@ -47,7 +47,7 @@ A software system consists in leveraging three main concepts:
 2. Events listening and propagation.
 3. Decision making based on that data (or FSM).
 
-You find these concepts in every program. Basically it's called - Model-View-Controller - meta-pattern or idea of separating program on functional pieces. Understanding MVC is about understanding how programs should work.
+You find these concepts in every program. Basically it's called - Model-View-Controller - meta-pattern or idea of separating program on functional pieces. Understanding MVC is about understanding how programs should work. 
  
 ### Model
 Data structure and the ways how to access data define how an application works and how to apply changes. Therefore data definition is the first step in software development. All starts with data. In MVC, the fact that Model is in the first position emphasize it as well. Models in application play a wider role than just value objects definition, it's also a way of how these objects are stored and retrieved, you can think of it as a data API - create, update, delete and etc. Does it make any decisions on how to modify the data? Probably not, maybe only update related data (e.g. in-memory counter of completed todos). And don't forget that there are two types of models - active and passive, one can notify when changes have occurred (active) and another is a plain storage, file or database (passive) - it has to be monitored by a controller or another agent. 
@@ -129,6 +129,17 @@ class TodoController {
 }
 ```
 In controller you make a decision of how to process input data, do calculation, then data delegated to a model(s), stored or sent to the server, then controller might initiate reaction - send another signal or if data was not updated from model (in Data Container Layer) then controller might update it manually (with `Wire.data(key, value)`). Application can have multiple controllers each responsible to its particular data processing. You might think of them as reducers from Redux world or commands from PureMVC.
+
+## Few words about FLUX
+[FLUX pattern](https://facebook.github.io/flux/docs/in-depth-overview) is a modification of MVC idea, where **data flow unidirectional** and controllers replaced with so-called "controller-views": 
+> "Views often found at the top of the hierarchy that retrieve data from the stores and pass this data down to their children."
+
+![FLUX Diagram](./assets/wire-flux-concept.svg)
+
+But in general it's all MVC, **Wire** incorporate these ideas of Flux, but also allows consumers of data additionally react on signals from other parts of the system, basically from anywhere, beside provides a way to manually subscribe to data changes. The basic flow is next:
+1. Consumers request the data and subscribe for its updates - register reactions.
+2. Signals produced somewhere in the system (maybe by the same data consumers) or come from outside (e.g. network requests).
+3. Listeners react to signals and process data coming with them, these listeners are controllers and update data in stores, which then will trigger reactions (also they can send new signals, but its just an options).
 
 ## Wire in Flutter / [WireDataBuilder<T>](https://pub.dev/packages/wire_flutter)
 Having business logic separated from presentation, events distributed in Communication Layer and data accessible from shared layer (Wire.data) it's now possible to consume the data and send signal from UI easily. In Flutter this means that we can leave visual hierarchy, UI rendering and transitions between screens/pages to the Flutter framework, and consume data in places where it's needed, we can do this with special widget - `WireDataBuilder<T>({Key key, String dataKey, Builder builder})` which subscribe with a string `dataKey` to WireData value and its changes, it rebuilds underlying widget you return from `builder` function when WireData value updated. However if you need only data in place you still can get it directly with `Wire.data('key').value`. Here is an example from [Todo](https://github.com/wire-toolkit/wire_flutter/tree/master/example/wire_flutter_todo) application:
