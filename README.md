@@ -13,11 +13,11 @@ It has two layers:
 Also ported to (Work In Progress):
 - [Wire Haxe](https://github.com/wire-toolkit/wire_haxe) that can help to compile or better say transpile reusable code in one of the following language: __JavaScript, Java, C#, C++, HL, Lua, PHP__.
 
-## How it looks like in the code
+## Usage:
 
-This is the code showing steps from diagram's description above, it is basic example of counter application (see folder `./example/counter`).
+Steps from diagram's description above. It's example of counter application (see folder `./example/counter`).
 
-#### 1,4,6. A box that process signals (does not care from where they are come from):
+#### Steps: 1, 4, 6 - "box" that processes signals:
 
 ```dart
 class CounterProcessor {
@@ -34,7 +34,7 @@ class CounterProcessor {
 
 Since there is no Model box in this example, the processor (or controller) updates data by itself the steps 4 and 6 are the part of it.
 
-#### 2,7. View subscribe to data changes and know how to update itself:
+#### Steps: 2, 7 - View subscribe to data changes and know how to update itself:
 
 ```dart
 class CounterDisplay extends DomElement {
@@ -49,7 +49,7 @@ class CounterDisplay extends DomElement {
 }
 ```
 
-#### 3. Another View translate UI event to the system signal (does not care where and whom it will be process):
+#### Step: 3 - another View translate UI event to the system signal:
 
 ```dart
 class CounterButton extends DomElement {
@@ -62,7 +62,7 @@ class CounterButton extends DomElement {
 
 Adding wires and `WireListener`s to the system. In reaction its immediately set new value to data-container layer from function that do decision making `Wire.data(CounterDataKeys.COUNT, (oldValue) => newValue)`.
 
-#### 4,5. Middleman who catch all whats happening in the system (in this example it stores counter value to database):
+#### Steps: 4, 5 - "middleman" who catch all whats happening in the system (in this example it stores counter value to localStorage):
 
 ```dart
 class CounterStorageMiddleware extends WireMiddleware {
@@ -82,16 +82,13 @@ class CounterStorageMiddleware extends WireMiddleware {
     }
   }
 
-  @override
-  void onAdd(Wire wire) { }
-  @override
-  void onRemove(String signal, [Object scope, listener]) { }
-  @override
-  void onSend(String signal, [data, scope]) { }
+  @override void onAdd(Wire wire) { }
+  @override void onRemove(String signal, [Object scope, listener]) { }
+  @override void onSend(String signal, [data, scope]) { }
 }
 ```
 
-This middleman can be considered as a Model part.
+This "middleman" can be considered as a part of a Model.
 
 #### Initialization:
 
@@ -110,7 +107,7 @@ void init() {
 }
 ```
 
-### That simple! Right? Want to know more - read next.
+### That simple!
 
 ## Preface
 
