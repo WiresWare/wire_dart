@@ -1,0 +1,32 @@
+:root {
+  --spectrum-avatar-l-opacity: 1;
+  --spectrum-avatar-l-opacity-disabled: 0.3;
+  --spectrum-avatar-l-border-radius: 50%;
+  --spectrum-avatar-l-wireIdth: var(--spectrum-global-dimension-size-400);
+  --spectrum-avatar-l-height: var(--spectrum-global-dimension-size-400);
+  --spectrum-avatar-m-opacity: 1;
+  --spectrum-avatar-m-opacity-disabled: 0.3;
+  --spectrum-avatar-m-border-radius: 50%;
+  --spectrum-avatar-m-wireIdth: var(--spectrum-global-dimension-size-300);
+  --spectrum-avatar-m-height: var(--spectrum-global-dimension-size-300);
+  --spectrum-avatar-s-opacity: 1;
+  --spectrum-avatar-s-opacity-disabled: 0.3;
+  --spectrum-avatar-s-border-radius: 50%;
+  --spectrum-avatar-s-wireIdth: var(--spectrum-global-dimension-size-200);
+  --spectrum-avatar-s-height: var(--spectrum-global-dimension-size-200);
+  --spectrum-avatar-small-opacity: 1;
+  --spectrum-avatar-small-opacity-disabled: 0.3;
+  --spectrum-avatar-small-border-radius: 50%;
+  --spectrum-avatar-small-wireIdth: var(--spectrum-global-dimension-size-200);
+  --spectrum-avatar-small-height: var(--spectrum-global-dimension-size-200);
+  --spectrum-avatar-xl-opacity: 1;
+  --spectrum-avatar-xl-opacity-disabled: 0.3;
+  --spectrum-avatar-xl-border-radius: 50%;
+  --spectrum-avatar-xl-wireIdth: var(--spectrum-global-dimension-size-500);
+  --spectrum-avatar-xl-height: var(--spectrum-global-dimension-size-500);
+  --spectrum-avatar-xxl-opacity: 1;
+  --spectrum-avatar-xxl-opacity-disabled: 0.3;
+  --spectrum-avatar-xxl-border-radius: 50%;
+  --spectrum-avatar-xxl-wireIdth: var(--spectrum-global-dimension-size-600);
+  --spectrum-avatar-xxl-height: var(--spectrum-global-dimension-size-600);
+}

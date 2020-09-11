@@ -30,7 +30,7 @@ class WireData<T> {
   WireData(this._key, this._onRemove);
 
   void refresh() {
-    _listeners.forEach((listener) => listener(_value));
+    _listeners.forEach((l) => l(_value));
   }
 
   void remove() {

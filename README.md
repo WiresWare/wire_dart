@@ -13,6 +13,105 @@ It has two layers:
 Also ported to (Work In Progress):
 - [Wire Haxe](https://github.com/wire-toolkit/wire_haxe) that can help to compile or better say transpile reusable code in one of the following language: __JavaScript, Java, C#, C++, HL, Lua, PHP__.
 
+## How it looks like in the code
+
+This is the code showing steps from diagram's description above, it is basic example of counter application (see folder `./example/counter`).
+
+#### 1,4,6. A box that process signals (does not care from where they are come from):
+
+```dart
+class CounterProcessor {
+  CounterProcessor() {
+    Wire.add(this, CounterSignal.INCREASE, (payload, wireId) {
+      Wire.data(CounterDataKeys.COUNT, (value) => (value ?? 0) + 1);
+    });
+    Wire.add(this, CounterSignal.DECREASE, (payload, wireId) {
+      Wire.data(CounterDataKeys.COUNT, (int value) => (value ?? 0) > 0 ? value - 1 : 0);
+    });
+  }
+}
+```
+
+Since there is no Model box in this example, the processor (or controller) updates data by itself the steps 4 and 6 are the part of it.
+
+#### 2,7. View subscribe to data changes and know how to update itself:
+
+```dart
+class CounterDisplay extends DomElement {
+  CounterDisplay():super(DivElement()) {
+    // ... DOM initialization and styling
+    final wireData = Wire.data(CounterDataKeys.COUNT);
+    wireData.subscribe(update);
+    update(wireData.value ?? 0);
+  }
+  // update or render
+  void update(value) { dom.text = value.toString(); }
+}
+```
+
+#### 3. Another View translate UI event to the system signal (does not care where and whom it will be process):
+
+```dart
+class CounterButton extends DomElement {
+  CounterButton(String title, String signal):super(ButtonElement()) {
+    // ... DOM initialization and styling
+    dom.onClick.listen((_) => Wire.send(signal));
+  }
+}
+```
+
+Adding wires and `WireListener`s to the system. In reaction its immediately set new value to data-container layer from function that do decision making `Wire.data(CounterDataKeys.COUNT, (oldValue) => newValue)`.
+
+#### 4,5. Middleman who catch all whats happening in the system (in this example it stores counter value to database):
+
+```dart
+class CounterStorageMiddleware extends WireMiddleware {
+  final ls = window.localStorage;
+
+  int getInitialValue() {
+    return ls.containsKey(CounterDataKeys.COUNT) ?
+      int.parse(ls[CounterDataKeys.COUNT]) : 0;
+  }
+
+  @override
+  void onData(String key, prevValue, nextValue) {
+    print('> CounterMiddleware -> onData: key = ${key} | ${prevValue}-${nextValue}');
+    if (key == CounterDataKeys.COUNT) {
+      if (nextValue != null) ls[key] = nextValue.toString();
+      else { if (ls.containsValue(key)) ls.remove(key); }
+    }
+  }
+
+  @override
+  void onAdd(Wire wire) { }
+  @override
+  void onRemove(String signal, [Object scope, listener]) { }
+  @override
+  void onSend(String signal, [data, scope]) { }
+}
+```
+
+This middleman can be considered as a Model part.
+
+#### Initialization:
+
+```dart
+void init() {
+  final counterStorageMiddleware = CounterStorageMiddleware();
+  // Set initial value from local storage
+  Wire.data(CounterDataKeys.COUNT, counterStorageMiddleware.getInitialValue());
+  // Register middleware after setting initial value to prevent saving initial value
+  Wire.middleware(counterStorageMiddleware);
+  // Register processor(s) in the system by just creating and instance of it
+  processor = CounterProcessor();
+  // Create and initialize view parts of the application
+  final root = document.querySelector('#root');
+  application = ApplicationView(root);
+}
+```
+
+### That simple! Right? Want to know more - read next.
+
 ## Preface
 
 Key to a good software product is understanding of how things work together, what do what, software design, separation of concerns and responsibilities, SOLID principles. Here is a good saying from Robert C. Martin:

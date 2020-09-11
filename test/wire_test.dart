@@ -31,13 +31,13 @@ void main() {
     const SCOPE = Object();
 
     WireListener<String> listener_string = (String data, wid) =>
-    { print('> Response on ${Wire.get(wid:wid).single.signal} with STRING data: ${data}') };
+    { print('> Response on ${Wire.get(wireId:wid).single.signal} with STRING data: ${data}') };
 
     WireListener<bool> listener_boolean = (bool data, wid) =>
-    { print('> Response on ${Wire.get(wid:wid).single.signal} with BOOLEAN data: ${data}') };
+    { print('> Response on ${Wire.get(wireId:wid).single.signal} with BOOLEAN data: ${data}') };
 
     WireListener listener_dynamic = (data, wid) =>
-    { print('> Response on ${Wire.get(wid:wid).single.signal} with DYNAMIC data: ${data}') };
+    { print('> Response on ${Wire.get(wireId:wid).single.signal} with DYNAMIC data: ${data}') };
 
     var attachedWire = Wire<String>(SCOPE, 'wire_signal_1', listener_string);
 
@@ -77,7 +77,7 @@ void main() {
 
     test('1.4 Counter Signal', () {
       Wire.add(SCOPE, SIGNAL_COUNTER, (_, wid) {
-        var wire = Wire.get(wid:wid).single;
+        var wire = Wire.get(wireId:wid).single;
         print('1.4 Response on ${wire.signal} replies left: ${wire.replies}');
       }, replies: 2);
       expect(Wire.send(SIGNAL_COUNTER), isFalse);
@@ -92,7 +92,7 @@ void main() {
     var SCOPE = Object();
 
     WireListener listener = (data, wid) {
-      var wire = Wire.get(wid:wid).single;
+      var wire = Wire.get(wireId:wid).single;
       print('Response on ${wire.signal} with data: ${data}');
     };
 

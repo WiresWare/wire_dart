@@ -6,44 +6,43 @@ part of wire;
 /// License: APACHE LICENSE, VERSION 2.0
 ///
 class WireCommunicateLayer {
-  final Map<int, Wire> _wireByWID = <int, Wire>{};
-  final Map<String, List<int>> _widsBySignal = <String, List<int>>{};
+  final Map<int, Wire> _wireById = <int, Wire>{};
+  final Map<String, List<int>> _wireIdsBySignal = <String, List<int>>{};
 
   Wire add(Wire wire) {
-    final wid = wire.wid;
+    final wireId = wire.id;
     final signal = wire.signal;
 
-    if (_wireByWID.containsKey(wid)) {
-      throw ERROR__WIRE_ALREADY_REGISTERED + wid.toString();
+    if (_wireById.containsKey(wireId)) {
+      throw ERROR__WIRE_ALREADY_REGISTERED + wireId.toString();
     }
 
-    _wireByWID[wid] = wire;
+    _wireById[wireId] = wire;
 
-    if (!_widsBySignal.containsKey(signal)) {
-      _widsBySignal[signal] = <int>[];
+    if (!_wireIdsBySignal.containsKey(signal)) {
+      _wireIdsBySignal[signal] = <int>[];
     }
 
-    _widsBySignal[signal].add(wid);
+    _wireIdsBySignal[signal].add(wireId);
 
     return wire;
   }
 
   bool hasSignal(String signal) {
-    return _widsBySignal.containsKey(signal);
+    return _wireIdsBySignal.containsKey(signal);
   }
 
   bool hasWire(Wire wire) {
-    return _wireByWID.containsKey(wire.wid);
+    return _wireById.containsKey(wire.id);
   }
 
   bool send(String signal, [payload, scope]) {
     var noMoreSubscribers = true;
     if (hasSignal(signal)) {
       var WiresToRemove = <Wire>[];
-      _widsBySignal[signal].forEach((wid) {
-        var wire = _wireByWID[wid];
+      _wireIdsBySignal[signal].forEach((wid) {
+        final wire = _wireById[wid];
         if (scope != null && wire.scope != scope) return;
-
         noMoreSubscribers = wire.replies > 0 && --wire.replies == 0;
         if (noMoreSubscribers) WiresToRemove.add(wire);
         wire.transfer(payload);
@@ -57,8 +56,8 @@ class WireCommunicateLayer {
     var exists = hasSignal(signal);
     if (exists) {
       var toRemove = <Wire>[];
-      _widsBySignal[signal].forEach((wid) {
-        var wire = _wireByWID[wid];
+      _wireIdsBySignal[signal].forEach((wid) {
+        var wire = _wireById[wid];
         var isWrongScope = scope != null && scope != wire.scope;
         var isWrongListener = listener != null && listener != wire.listener;
         if (isWrongScope || isWrongListener) return;
@@ -71,34 +70,34 @@ class WireCommunicateLayer {
 
   void clear() {
     var wireToRemove = <Wire>[];
-    _wireByWID.forEach((h, w) => wireToRemove.add(w));
+    _wireById.forEach((h, w) => wireToRemove.add(w));
     wireToRemove.forEach(_removeWire);
-    _wireByWID.clear();
-    _widsBySignal.clear();
+    _wireById.clear();
+    _wireIdsBySignal.clear();
   }
 
   List<Wire> getBySignal(String signal) {
     return hasSignal(signal)
-        ? _widsBySignal[signal].map((wid) => _wireByWID[wid])
+        ? _wireIdsBySignal[signal].map((wid) => _wireById[wid])
         : <Wire>[];
   }
 
   List<Wire> getByScope(Object scope) {
     var result = <Wire>[];
-    _wireByWID
+    _wireById
         .forEach((wid, wire) => {if (wire.scope == scope) result.add(wire)});
     return result;
   }
 
   List<Wire> getByListener(WireListener listener) {
     var result = <Wire>[];
-    _wireByWID.forEach(
+    _wireById.forEach(
         (wid, wire) => {if (wire.listener == listener) result.add(wire)});
     return result;
   }
 
   Wire getByWID(int wid) {
-    return _wireByWID.containsKey(wid) ? _wireByWID[wid] : null;
+    return _wireById.containsKey(wid) ? _wireById[wid] : null;
   }
 
   ///
@@ -108,18 +107,18 @@ class WireCommunicateLayer {
   /// @return If there is no ids (no Wires) for that SIGNAL stop future perform
   ///
   bool _removeWire(Wire wire) {
-    var wid = wire.wid;
+    var wid = wire.id;
     var signal = wire.signal;
 
     // Remove Wire by wid
-    _wireByWID.remove(wid);
+    _wireById.remove(wid);
 
     // Remove wid for Wire signal
-    var widsForSignal = _widsBySignal[signal];
+    var widsForSignal = _wireIdsBySignal[signal];
     widsForSignal.remove(wid);
 
     var noMoreSignals = widsForSignal.isEmpty;
-    if (noMoreSignals) _widsBySignal.remove(signal);
+    if (noMoreSignals) _wireIdsBySignal.remove(signal);
 
     wire.clear();
 

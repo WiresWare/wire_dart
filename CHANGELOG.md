@@ -1,3 +1,8 @@
+## 1.0.2
+- Changes in WireListener: parameter name "wid" was replaced to "wireId" for better
+- Counter example structure updated
+- README update
+
 ## 1.0.1
 - Commented out overrides for wire in example/_shared
 - Removed wire_example_shared from dependencies in pubspec, pubspec.lock added to gitignore

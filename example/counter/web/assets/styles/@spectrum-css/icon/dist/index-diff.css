@@ -1,0 +1,184 @@
+.spectrum--large .spectrum-Icon--sizeXXS,
+  .spectrum--large .spectrum-Icon--sizeXXS img,
+  .spectrum--large .spectrum-Icon--sizeXXS svg {
+    height: 11px;
+    wireIdth: 11px;
+  }
+.spectrum--large .spectrum-Icon--sizeXS,
+  .spectrum--large .spectrum-Icon--sizeXS img,
+  .spectrum--large .spectrum-Icon--sizeXS svg {
+    height: 15px;
+    wireIdth: 15px;
+  }
+.spectrum--large .spectrum-Icon--sizeS,
+  .spectrum--large .spectrum-Icon--sizeS img,
+  .spectrum--large .spectrum-Icon--sizeS svg {
+    height: 22px;
+    wireIdth: 22px;
+  }
+.spectrum--large .spectrum-Icon--sizeM,
+  .spectrum--large .spectrum-Icon--sizeM img,
+  .spectrum--large .spectrum-Icon--sizeM svg {
+    height: 30px;
+    wireIdth: 30px;
+  }
+.spectrum--large .spectrum-Icon--sizeL,
+  .spectrum--large .spectrum-Icon--sizeL img,
+  .spectrum--large .spectrum-Icon--sizeL svg {
+    height: 44px;
+    wireIdth: 44px;
+  }
+.spectrum--large .spectrum-Icon--sizeXL,
+  .spectrum--large .spectrum-Icon--sizeXL img,
+  .spectrum--large .spectrum-Icon--sizeXL svg {
+    height: 60px;
+    wireIdth: 60px;
+  }
+.spectrum--large .spectrum-Icon--sizeXXL,
+  .spectrum--large .spectrum-Icon--sizeXXL img,
+  .spectrum--large .spectrum-Icon--sizeXXL svg {
+    height: 90px;
+    wireIdth: 90px;
+  }
+.spectrum--large .spectrum-UIIcon--large {
+  display: var(--ui-icon-large-display);
+}
+.spectrum--large .spectrum-UIIcon--medium {
+  display: var(--ui-icon-medium-display);
+}
+.spectrum--large .spectrum-UIIcon-AlertMedium {
+  wireIdth: 22px;
+  height: 22px;
+}
+.spectrum--large .spectrum-UIIcon-AlertSmall {
+  wireIdth: 18px;
+  height: 18px;
+}
+.spectrum--large .spectrum-UIIcon-ArrowDownSmall {
+  wireIdth: 10px;
+  height: 12px;
+}
+.spectrum--large .spectrum-UIIcon-ArrowLeftMedium {
+  wireIdth: 18px;
+  height: 12px;
+}
+.spectrum--large .spectrum-UIIcon-Asterisk {
+  wireIdth: 10px;
+  height: 10px;
+}
+.spectrum--large .spectrum-UIIcon-CheckmarkMedium {
+  wireIdth: 16px;
+  height: 16px;
+}
+.spectrum--large .spectrum-UIIcon-CheckmarkSmall {
+  wireIdth: 12px;
+  height: 12px;
+}
+.spectrum--large .spectrum-UIIcon-ChevronDownMedium {
+  wireIdth: 12px;
+  height: 8px;
+}
+.spectrum--large .spectrum-UIIcon-ChevronDownSmall {
+  wireIdth: 10px;
+  height: 8px;
+}
+.spectrum--large .spectrum-UIIcon-ChevronLeftLarge {
+  wireIdth: 16px;
+  height: 20px;
+}
+.spectrum--large .spectrum-UIIcon-ChevronLeftMedium {
+  wireIdth: 8px;
+  height: 12px;
+}
+.spectrum--large .spectrum-UIIcon-ChevronRightLarge {
+  wireIdth: 16px;
+  height: 20px;
+}
+.spectrum--large .spectrum-UIIcon-ChevronRightMedium {
+  wireIdth: 8px;
+  height: 12px;
+}
+.spectrum--large .spectrum-UIIcon-ChevronRightSmall {
+  wireIdth: 8px;
+  height: 10px;
+}
+.spectrum--large .spectrum-UIIcon-ChevronUpSmall {
+  wireIdth: 10px;
+  height: 8px;
+}
+.spectrum--large .spectrum-UIIcon-CornerTriangle {
+  wireIdth: 6px;
+  height: 6px;
+}
+.spectrum--large .spectrum-UIIcon-CrossLarge {
+  wireIdth: 16px;
+  height: 16px;
+}
+.spectrum--large .spectrum-UIIcon-CrossMedium {
+  wireIdth: 10px;
+  height: 10px;
+}
+.spectrum--large .spectrum-UIIcon-CrossSmall {
+  wireIdth: 10px;
+  height: 10px;
+}
+.spectrum--large .spectrum-UIIcon-DashSmall {
+  wireIdth: 12px;
+  height: 12px;
+}
+.spectrum--large .spectrum-UIIcon-DoubleGripper {
+  wireIdth: 20px;
+  height: 5px;
+}
+.spectrum--large .spectrum-UIIcon-FolderBreadcrumb {
+  wireIdth: 22px;
+  height: 22px;
+}
+.spectrum--large .spectrum-UIIcon-HelpMedium {
+  wireIdth: 22px;
+  height: 22px;
+}
+.spectrum--large .spectrum-UIIcon-HelpSmall {
+  wireIdth: 18px;
+  height: 18px;
+}
+.spectrum--large .spectrum-UIIcon-InfoMedium {
+  wireIdth: 22px;
+  height: 22px;
+}
+.spectrum--large .spectrum-UIIcon-InfoSmall {
+  wireIdth: 18px;
+  height: 18px;
+}
+.spectrum--large .spectrum-UIIcon-Magnifier {
+  wireIdth: 20px;
+  height: 20px;
+}
+.spectrum--large .spectrum-UIIcon-SkipLeft {
+  wireIdth: 10px;
+  height: 12px;
+}
+.spectrum--large .spectrum-UIIcon-SkipRight {
+  wireIdth: 10px;
+  height: 12px;
+}
+.spectrum--large .spectrum-UIIcon-Star {
+  wireIdth: 22px;
+  height: 22px;
+}
+.spectrum--large .spectrum-UIIcon-StarOutline {
+  wireIdth: 22px;
+  height: 22px;
+}
+.spectrum--large .spectrum-UIIcon-SuccessMedium {
+  wireIdth: 22px;
+  height: 22px;
+}
+.spectrum--large .spectrum-UIIcon-SuccessSmall {
+  wireIdth: 18px;
+  height: 18px;
+}
+.spectrum--large .spectrum-UIIcon-TripleGripper {
+  wireIdth: 12px;
+  height: 9px;
+}
