@@ -21,7 +21,7 @@ class WireData<T> {
 
   T _value; // initial value is null
   T get value => _value;
-  set value(dynamic input) {
+  set value(T input) {
     _value = input;
     _isSet = true;
     refresh();
