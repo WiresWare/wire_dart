@@ -165,7 +165,7 @@ class Wire<T> {
   /// All middleware will be informed from [WireMiddleware.onRemove] after signal removed, only if existed
   /// Returns [bool] telling signal existed in communication layer
   static bool remove(String signal, {Object scope, WireListener listener}) {
-    var existed = _COMMUNICATION_LAYER.remove(signal, scope, listener);
+    final existed = _COMMUNICATION_LAYER.remove(signal, scope, listener);
     if (existed) {
       _MIDDLEWARE_LIST.forEach((m) => m.onRemove(signal, scope, listener));
     }
@@ -215,10 +215,10 @@ class Wire<T> {
   /// ```
   /// Returns [WireData]
   static WireData data<T>(String key, [T value]) {
-    var wireData = _DATA_CONTAINER_LAYER.get(key);
+    final wireData = _DATA_CONTAINER_LAYER.get(key);
     if (value != null) {
-      var prevValue = wireData.value;
-      var nextValue = value is Function ? value(prevValue) : value;
+      final prevValue = wireData.value;
+      final nextValue = value is Function ? value(prevValue) : value;
       _MIDDLEWARE_LIST.forEach((m) => m.onData(key, prevValue, nextValue));
       wireData.value = nextValue;
     }
