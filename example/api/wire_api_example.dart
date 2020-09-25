@@ -1,6 +1,6 @@
 import 'package:wire/wire.dart';
 
-main() {
+void main() {
   /// SUBSCRIBER and API EXAMPLE ======================================
   const String
     SIGNAL_1 = 'SIGNAL_1',
@@ -87,8 +87,8 @@ main() {
   });
 
   print('> Wire.data Listeners: where initial data = ' + Wire.data(key1).value.toString());
-  Wire.data(key1, 'Set VALUE to key1: ' + key1);
-  Wire.data(key1, (value) => value + ' | APPENDED from function call');
+  Wire.data(key1, value: 'Set VALUE to key1: ' + key1);
+  Wire.data(key1, value: (value) => value + ' | APPENDED from function call');
 }
 
 class TestWireMiddleware extends WireMiddleware {

@@ -16,7 +16,7 @@ main() {
   final counterStorageMiddleware = CounterStorageMiddleware();
 
   // Set initial value from local storage
-  Wire.data(CounterDataKeys.COUNT, counterStorageMiddleware.getInitialValue());
+  Wire.data(CounterDataKeys.COUNT, value: counterStorageMiddleware.getInitialValue());
   // Register middleware after setting initial value to prevent saving initial value
   Wire.middleware(counterStorageMiddleware);
 

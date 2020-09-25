@@ -214,7 +214,7 @@ class Wire<T> {
   /// void remove()
   /// ```
   /// Returns [WireData]
-  static WireData data<T>(String key, [T value]) {
+  static WireData data<T>(String key, { T value, DataModificationToken token }) {
     final wireData = _DATA_CONTAINER_LAYER.get(key);
     if (value != null) {
       final prevValue = wireData.value;

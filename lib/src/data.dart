@@ -7,6 +7,8 @@ part of wire;
 ///
 typedef WireDataListener<T> = void Function(T value);
 
+class DataModificationToken { }
+
 class WireData<T> {
   Function _onRemove;
   final _listeners = <WireDataListener<T>>{};
@@ -19,15 +21,31 @@ class WireData<T> {
   String _key;
   String get key => _key;
 
+  DataModificationToken _token;
+
+  bool _changeAllowedByToken(DataModificationToken token) =>
+    _token != null && token == _token;
+
   T _value; // initial value is null
   T get value => _value;
+  @deprecated
   set value(T input) {
     _value = input;
     _isSet = true;
     refresh();
   }
 
-  WireData(this._key, this._onRemove);
+  void setValue(T input, { DataModificationToken token }) {
+    if (_changeAllowedByToken(token)) {
+      _value = input;
+      _isSet = true;
+      refresh();
+    } else {
+      throw ERROR__DATA_MODIFICATION_TOKEN_DOES_NOT_MATCH;
+    }
+  }
+
+  WireData(this._key, this._onRemove, this._token);
 
   void refresh() {
     _listeners.forEach((l) => l(_value));
@@ -39,7 +57,8 @@ class WireData<T> {
 
     _key = null;
     // null value means remove element that listening on change (unsubscribe)
-    value = null;
+    setValue(null, token: _token);
+    _token = null;
 
     _listeners.clear();
   }
