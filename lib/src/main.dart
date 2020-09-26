@@ -204,23 +204,30 @@ class Wire<T> {
   /// Access to the data container, retrieve WireData object when value is null and set when is not
   /// [WireData] is a data container to changes of which anyone can subscribe/unsubscribe.
   /// It's associated with string key.
-  /// WireData can't be null and Wire.data(key) will always return WireData instance.
-  /// Initial value will be null and special property of WireData isSet is false until not null value is set for the first time
+  /// [WireData] can't be null and Wire.data(key) will always return WireData instance.
+  /// Initial value will be null and special property of [WireData] isSet equal to false until any value is set
+  /// If value is null then delete method of [WireData] will be called, object will be removed from system
+  /// To protect [WireData] from being set from unappropriated places the [DataModificationToken] token introduced.
+  /// When only specific object want have rights to write/change value of [WireData] it can create [DataModificationToken] object
+  /// and pass it to [Wire.data] method as option parameter `token` to validate the assign action.
   /// [WireData] API:
   /// ```
   /// WireData subscribe(WireDataListener listener)
   /// WireData unsubscribe([WireDataListener listener])
+  /// void setValue(T input, { DataModificationToken token })
   /// void refresh()
   /// void remove()
   /// ```
   /// Returns [WireData]
   static WireData data<T>(String key, { T value, DataModificationToken token }) {
-    final wireData = _DATA_CONTAINER_LAYER.get(key);
-    if (value != null) {
+    final wireData = _DATA_CONTAINER_LAYER.has(key)
+        ? _DATA_CONTAINER_LAYER.get(key)
+        : _DATA_CONTAINER_LAYER.create(key, token);
+    if (value != null && wireData.modificationAllowed(token)) {
       final prevValue = wireData.value;
       final nextValue = value is Function ? value(prevValue) : value;
       _MIDDLEWARE_LIST.forEach((m) => m.onData(key, prevValue, nextValue));
-      wireData.value = nextValue;
+      wireData.setValue(nextValue);
     }
     return wireData;
   }

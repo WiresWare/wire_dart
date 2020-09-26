@@ -128,14 +128,11 @@ class WireCommunicateLayer {
 
 class WireDataContainerLayer {
   final Map<String, WireData> _map = <String, WireData>{};
-  WireData get(String key, { DataModificationToken token }) {
-    if (!has(key)) create(key, token);
-    return _map[key];
-  }
 
+  WireData get(String key) => _map[key];
   bool has(String key) => _map.containsKey(key);
-  void create(String key, DataModificationToken token) {
-    _map[key] = WireData(key, _map.remove, token);
+  WireData create(String key, DataModificationToken token) {
+    return _map[key] = WireData(key, _map.remove, token);
   }
 
   void clear() {

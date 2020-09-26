@@ -134,4 +134,24 @@ void main() {
   group('3. Data Layer', () {
 
   });
+
+  group('4. Data Modification Token', () {
+
+    final DATA_NO_TOKEN = 'DATA_NO_TOKEN';
+    final DATA_WITH_TOKEN = 'DATA_NO_TOKEN';
+    final modificationToken = DataModificationToken();
+
+    setUp(() {
+      Wire.purge(withMiddleware: true);
+
+      Wire.data(DATA_NO_TOKEN).subscribe((value) {
+        print('> $DATA_NO_TOKEN -> updated: $value');
+      });
+
+      Wire.data(DATA_WITH_TOKEN, token: modificationToken).subscribe((value) {
+        print('> $DATA_WITH_TOKEN -> updated: $value');
+      });
+      Wire.data(DATA_NO_TOKEN, value: 'Value 0');
+    });
+  });
 }

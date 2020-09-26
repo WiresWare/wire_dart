@@ -7,7 +7,9 @@ part of wire;
 ///
 typedef WireDataListener<T> = void Function(T value);
 
-class DataModificationToken { }
+class DataModificationToken {
+  bool equal(DataModificationToken token) => this == token;
+}
 
 class WireData<T> {
   Function _onRemove;
@@ -22,21 +24,17 @@ class WireData<T> {
   String get key => _key;
 
   DataModificationToken _token;
+  bool get protected => _token != null;
 
-  bool _changeAllowedByToken(DataModificationToken token) =>
-    _token != null && token == _token;
+  bool modificationAllowed(DataModificationToken token) =>
+    !protected || _token.equal(token);
 
   T _value; // initial value is null
   T get value => _value;
-  @deprecated
-  set value(T input) {
-    _value = input;
-    _isSet = true;
-    refresh();
-  }
 
   void setValue(T input, { DataModificationToken token }) {
-    if (_changeAllowedByToken(token)) {
+    if (input == null && _key != null) return remove();
+    if (modificationAllowed(token)) {
       _value = input;
       _isSet = true;
       refresh();
