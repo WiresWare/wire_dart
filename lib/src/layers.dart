@@ -131,8 +131,8 @@ class WireDataContainerLayer {
 
   WireData get(String key) => _map[key];
   bool has(String key) => _map.containsKey(key);
-  WireData create(String key, DataModificationToken token) {
-    return _map[key] = WireData(key, _map.remove, token);
+  WireData create(String key) {
+    return _map[key] = WireData(key, _map.remove);
   }
 
   void clear() {

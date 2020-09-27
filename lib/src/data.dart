@@ -7,8 +7,8 @@ part of wire;
 ///
 typedef WireDataListener<T> = void Function(T value);
 
-class DataModificationToken {
-  bool equal(DataModificationToken token) => this == token;
+class DataToken {
+  bool equal(DataToken token) => this == token;
 }
 
 class WireData<T> {
@@ -23,43 +23,51 @@ class WireData<T> {
   String _key;
   String get key => _key;
 
-  DataModificationToken _token;
+  DataToken _token;
   bool get protected => _token != null;
 
-  bool modificationAllowed(DataModificationToken token) =>
-    !protected || _token.equal(token);
+  bool lock(DataToken token) {
+    var closed = !protected || _token.equal(token);
+    if (closed) _token = token;
+    return closed; // throw ERROR__DATA_ALREADY_CLOSED
+  }
+      
+  bool unlock(DataToken token) {
+    var opened = (protected && _token.equal(token)) || !protected;
+    if (opened) _token = null;
+    return opened; // throw ERROR__DATA_CANNOT_OPEN
+  }
 
   T _value; // initial value is null
   T get value => _value;
-
-  void setValue(T input, { DataModificationToken token }) {
-    if (input == null && _key != null) return remove();
-    if (modificationAllowed(token)) {
-      _value = input;
-      _isSet = true;
-      refresh();
-    } else {
-      throw ERROR__DATA_MODIFICATION_TOKEN_DOES_NOT_MATCH;
-    }
+  set value(T input) {
+    _guardian();
+    _value = input;
+    _isSet = true;
+    refresh();
   }
 
-  WireData(this._key, this._onRemove, this._token);
+  WireData(this._key, this._onRemove);
 
   void refresh() {
     _listeners.forEach((l) => l(_value));
   }
 
   void remove() {
+    _guardian();
+
     _onRemove(_key);
     _onRemove = null;
 
     _key = null;
     // null value means remove element that listening on change (unsubscribe)
-    setValue(null, token: _token);
+    value = null;
     _token = null;
 
     _listeners.clear();
   }
+
+  void _guardian() { if (protected) throw ERROR__DATA_PROTECTED; }
 
   WireData subscribe(WireDataListener<T> listener) {
     if (!hasListener(listener)) _listeners.add(listener);

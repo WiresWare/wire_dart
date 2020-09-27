@@ -137,21 +137,25 @@ void main() {
 
   group('4. Data Modification Token', () {
 
-    final DATA_NO_TOKEN = 'DATA_NO_TOKEN';
-    final DATA_WITH_TOKEN = 'DATA_NO_TOKEN';
-    final modificationToken = DataModificationToken();
+    final DATA_KEY = 'DATA_KEY';
+    final token_one = DataToken();
+    final token_two = DataToken();
 
     setUp(() {
       Wire.purge(withMiddleware: true);
 
-      Wire.data(DATA_NO_TOKEN).subscribe((value) {
-        print('> $DATA_NO_TOKEN -> updated: $value');
+      Wire.data(DATA_KEY).subscribe((value) {
+        print('> $DATA_KEY -> updated: $value');
       });
 
-      Wire.data(DATA_WITH_TOKEN, token: modificationToken).subscribe((value) {
-        print('> $DATA_WITH_TOKEN -> updated: $value');
-      });
-      Wire.data(DATA_NO_TOKEN, value: 'Value 0');
+      Wire.data(DATA_KEY, value: 'Value 0');
+    });
+
+    test('4.1 Close data with token', () {
+      expect(Wire.data(DATA_KEY).unlock(token_one), isTrue);
+      expect(Wire.data(DATA_KEY).lock(token_one), isTrue);
+      expect(Wire.data(DATA_KEY).lock(token_one), isTrue);
+      expect(Wire.data(DATA_KEY).lock(token_two), isFalse);
     });
   });
 }
