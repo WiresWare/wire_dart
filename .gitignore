@@ -5,3 +5,4 @@
 *.lock
 *node_modules/*
 pubspec.lock
+/example/todo/build/
