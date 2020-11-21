@@ -2,7 +2,7 @@ import 'package:wire/wire.dart';
 
 void main() {
   /// SUBSCRIBER and API EXAMPLE ======================================
-  const String
+  const
     SIGNAL_1 = 'SIGNAL_1',
     SIGNAL_ONCE = 'SIGNAL_1_ONCE',
     SIGNAL_2 = 'SIGNAL_2';

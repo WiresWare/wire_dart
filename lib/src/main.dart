@@ -207,8 +207,8 @@ class Wire<T> {
   /// [WireData] can't be null and Wire.data(key) will always return WireData instance.
   /// Initial value will be null and special property of [WireData] isSet equal to false until any value is set
   /// If value is null then delete method of [WireData] will be called, object will be removed from system
-  /// To protect [WireData] from being set from unappropriated places the [DataToken] token introduced.
-  /// When only specific object want have rights to write/change value of [WireData] it can create [DataToken] object
+  /// To protect [WireData] from being set from unappropriated places the [DataLock] token introduced.
+  /// When only specific object want have rights to write/change value of [WireData] it can create [DataLock] object
   /// and pass it to [Wire.data] method as option parameter `token` to validate the assign action.
   /// [WireData] API:
   /// ```
@@ -223,7 +223,7 @@ class Wire<T> {
     final wireData = _DATA_CONTAINER_LAYER.has(key)
         ? _DATA_CONTAINER_LAYER.get(key)
         : _DATA_CONTAINER_LAYER.create(key);
-    if (value != null && !wireData.protected) {
+    if (value != null && !wireData.isLocked) {
       final prevValue = wireData.value;
       final nextValue = value is Function ? value(prevValue) : value;
       _MIDDLEWARE_LIST.forEach((m) => m.onData(key, prevValue, nextValue));

@@ -11,7 +11,7 @@ import 'const/CounterSignals.dart';
 var processor;
 var application;
 
-main() {
+void main() {
   /// COUNTER EXAMPLE ======================================
   final counterStorageMiddleware = CounterStorageMiddleware();
 

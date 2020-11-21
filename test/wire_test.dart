@@ -138,8 +138,9 @@ void main() {
   group('4. Data Modification Token', () {
 
     final DATA_KEY = 'DATA_KEY';
-    final token_one = DataToken();
-    final token_two = DataToken();
+
+    final data_token_one = DataLock();
+    final data_token_two = DataLock();
 
     setUp(() {
       Wire.purge(withMiddleware: true);
@@ -148,14 +149,23 @@ void main() {
         print('> $DATA_KEY -> updated: $value');
       });
 
-      Wire.data(DATA_KEY, value: 'Value 0');
+      Wire.data(DATA_KEY, value: 'initial value');
+      Wire.data(DATA_KEY).lock(data_token_one);
     });
 
-    test('4.1 Close data with token', () {
-      expect(Wire.data(DATA_KEY).unlock(token_one), isTrue);
-      expect(Wire.data(DATA_KEY).lock(token_one), isTrue);
-      expect(Wire.data(DATA_KEY).lock(token_one), isTrue);
-      expect(Wire.data(DATA_KEY).lock(token_two), isFalse);
+    test('4.1 Lock data with token', () {
+      expect(Wire.data(DATA_KEY).isLocked, isTrue);
+      expect(Wire.data(DATA_KEY).unlock(data_token_one), isTrue);
+      expect(Wire.data(DATA_KEY).isLocked, isFalse);
+
+      expect(Wire.data(DATA_KEY, value: 'can be changed')
+        ..lock(data_token_one), isTrue);
+
+      expect(Wire.data(DATA_KEY).lock(data_token_one), isTrue);
+
+      expect(Wire.data(DATA_KEY).lock(data_token_one), isTrue);
+
+      expect(Wire.data(DATA_KEY).lock(data_token_two), isFalse);
     });
   });
 }

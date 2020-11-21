@@ -7,8 +7,8 @@ part of wire;
 ///
 typedef WireDataListener<T> = void Function(T value);
 
-class DataToken {
-  bool equal(DataToken token) => this == token;
+class DataLock {
+  bool equal(DataLock lock) => this == lock;
 }
 
 class WireData<T> {
@@ -23,18 +23,18 @@ class WireData<T> {
   String _key;
   String get key => _key;
 
-  DataToken _token;
-  bool get protected => _token != null;
+  DataLock _dataLock;
+  bool get isLocked => _dataLock != null;
 
-  bool lock(DataToken token) {
-    var closed = !protected || _token.equal(token);
-    if (closed) _token = token;
-    return closed; // throw ERROR__DATA_ALREADY_CLOSED
+  bool lock(DataLock lock) {
+    var locked = !isLocked || _dataLock.equal(lock);
+    if (locked) _dataLock = lock;
+    return locked; // throw ERROR__DATA_ALREADY_CLOSED
   }
-      
-  bool unlock(DataToken token) {
-    var opened = (protected && _token.equal(token)) || !protected;
-    if (opened) _token = null;
+
+  bool unlock(DataLock lock) {
+    var opened = (isLocked && _dataLock.equal(lock)) || !isLocked;
+    if (opened) _dataLock = null;
     return opened; // throw ERROR__DATA_CANNOT_OPEN
   }
 
@@ -62,12 +62,12 @@ class WireData<T> {
     _key = null;
     // null value means remove element that listening on change (unsubscribe)
     value = null;
-    _token = null;
+    _dataLock = null;
 
     _listeners.clear();
   }
 
-  void _guardian() { if (protected) throw ERROR__DATA_PROTECTED; }
+  void _guardian() { if (isLocked) throw ERROR__DATA_IS_LOCKED; }
 
   WireData subscribe(WireDataListener<T> listener) {
     if (!hasListener(listener)) _listeners.add(listener);

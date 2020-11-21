@@ -1,5 +1,5 @@
 class CounterDataKeys {
   static const String
-    COUNT = "DATA_KEY__COUNT";
+    COUNT = 'DATA_KEY__COUNT';
 }
 

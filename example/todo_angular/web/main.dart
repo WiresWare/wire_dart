@@ -7,7 +7,7 @@ void main() {
   _app = runApp(ng.AppComponentNgFactory);
 }
 
-Object hot$onDestroy() {
+void hot$onDestroy() {
   _app.destroy();
   main();
 }
