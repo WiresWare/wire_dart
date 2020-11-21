@@ -1,5 +1,7 @@
 ## Examples
 
+For every project in example folder you have to run `pub get` from terminal or from IDE opened `pubspec.yaml`
+
 ### 1. Counter (web): Simple "Increase/Decrease/Output" example of Wire use 
 - Open IDEA
 - Select build target - Dart Web, point to example/counter/index.html
