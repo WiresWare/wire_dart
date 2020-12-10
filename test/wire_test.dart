@@ -135,12 +135,12 @@ void main() {
 
   });
 
-  group('4. Data Modification Token', () {
+  group('4. Data Modification - Lock/Unlock', () {
 
     final DATA_KEY = 'DATA_KEY';
 
-    final data_token_one = DataLock();
-    final data_token_two = DataLock();
+    final data_lockToken_one = WireDataLockToken();
+    final data_lockToken_two = WireDataLockToken();
 
     setUp(() {
       Wire.purge(withMiddleware: true);
@@ -150,22 +150,21 @@ void main() {
       });
 
       Wire.data(DATA_KEY, value: 'initial value');
-      Wire.data(DATA_KEY).lock(data_token_one);
+      Wire.data(DATA_KEY).lock(data_lockToken_one);
     });
 
     test('4.1 Lock data with token', () {
       expect(Wire.data(DATA_KEY).isLocked, isTrue);
-      expect(Wire.data(DATA_KEY).unlock(data_token_one), isTrue);
+      expect(Wire.data(DATA_KEY).unlock(data_lockToken_one), isTrue);
       expect(Wire.data(DATA_KEY).isLocked, isFalse);
 
-      expect(Wire.data(DATA_KEY, value: 'can be changed')
-        ..lock(data_token_one), isTrue);
+      Wire.data(DATA_KEY, value: 'can be changed');
+      expect(Wire.data(DATA_KEY).lock(data_lockToken_one), isTrue);
+      expect(Wire.data(DATA_KEY, value: 'cant be changed').isLocked, isTrue);
 
-      expect(Wire.data(DATA_KEY).lock(data_token_one), isTrue);
-
-      expect(Wire.data(DATA_KEY).lock(data_token_one), isTrue);
-
-      expect(Wire.data(DATA_KEY).lock(data_token_two), isFalse);
+      expect(Wire.data(DATA_KEY).lock(data_lockToken_one), isTrue);
+      expect(Wire.data(DATA_KEY).lock(data_lockToken_one), isTrue);
+      expect(Wire.data(DATA_KEY).lock(data_lockToken_two), isFalse);
     });
   });
 }

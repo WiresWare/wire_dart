@@ -2,13 +2,13 @@ part of wire;
 
 ///
 /// Created by Vladimir Cores (Minkin) on 12/06/20.
-/// Github: https://github.com/DQvsRA
+/// Github: https://github.com/vladimircores
 /// License: APACHE LICENSE, VERSION 2.0
 ///
 typedef WireDataListener<T> = void Function(T value);
 
-class DataLock {
-  bool equal(DataLock lock) => this == lock;
+class WireDataLockToken {
+  bool equal(WireDataLockToken token) => this == token;
 }
 
 class WireData<T> {
@@ -23,18 +23,18 @@ class WireData<T> {
   String _key;
   String get key => _key;
 
-  DataLock _dataLock;
-  bool get isLocked => _dataLock != null;
+  WireDataLockToken _lockToken;
+  bool get isLocked => _lockToken != null;
 
-  bool lock(DataLock lock) {
-    var locked = !isLocked || _dataLock.equal(lock);
-    if (locked) _dataLock = lock;
+  bool lock(WireDataLockToken token) {
+    var locked = !isLocked || _lockToken.equal(token);
+    if (locked) _lockToken = token;
     return locked; // throw ERROR__DATA_ALREADY_CLOSED
   }
 
-  bool unlock(DataLock lock) {
-    var opened = (isLocked && _dataLock.equal(lock)) || !isLocked;
-    if (opened) _dataLock = null;
+  bool unlock(WireDataLockToken token) {
+    var opened = (isLocked && _lockToken.equal(token)) || !isLocked;
+    if (opened) _lockToken = null;
     return opened; // throw ERROR__DATA_CANNOT_OPEN
   }
 
@@ -62,7 +62,7 @@ class WireData<T> {
     _key = null;
     // null value means remove element that listening on change (unsubscribe)
     value = null;
-    _dataLock = null;
+    _lockToken = null;
 
     _listeners.clear();
   }

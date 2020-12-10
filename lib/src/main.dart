@@ -10,7 +10,7 @@ part 'data.dart';
 /// Wire has simplest possible API - add, remove and send. Also it has data layer, universal container with key-value, where value is an object WireData type that holds dynamic value and can be subscribed for updates. This "data container" is something like Redis.
 ///
 /// Created by Vladimir Cores (Minkin) on 07/10/19.
-/// Github: https://github.com/DQvsRA
+/// Github: https://github.com/vladimircores
 /// License: APACHE LICENSE, VERSION 2.0
 ///
 
@@ -207,8 +207,8 @@ class Wire<T> {
   /// [WireData] can't be null and Wire.data(key) will always return WireData instance.
   /// Initial value will be null and special property of [WireData] isSet equal to false until any value is set
   /// If value is null then delete method of [WireData] will be called, object will be removed from system
-  /// To protect [WireData] from being set from unappropriated places the [DataLock] token introduced.
-  /// When only specific object want have rights to write/change value of [WireData] it can create [DataLock] object
+  /// To protect [WireData] from being set from unappropriated places the [WireDataLockToken] token introduced.
+  /// When only specific object want have rights to write/change value of [WireData] it can create [WireDataLockToken] object
   /// and pass it to [Wire.data] method as option parameter `token` to validate the assign action.
   /// [WireData] API:
   /// ```

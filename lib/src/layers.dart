@@ -2,7 +2,7 @@ part of wire;
 
 ///
 /// Created by Vladimir Cores (Minkin) on 07/10/19.
-/// Github: https://github.com/DQvsRA
+/// Github: https://github.com/vladimircores
 /// License: APACHE LICENSE, VERSION 2.0
 ///
 class WireCommunicateLayer {
