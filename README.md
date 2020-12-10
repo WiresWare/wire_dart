@@ -10,7 +10,7 @@ It has two layers:
 
 [![Shared code in Flutter mobile/web and custom HTML dart-web](https://img.youtube.com/vi/6e3OUaigjcw/0.jpg)](https://www.youtube.com/watch?v=6e3OUaigjcw)
 
-Also ported to (Work In Progress):
+Also, ported to (Work In Progress):
 - [Wire Haxe](https://github.com/wire-toolkit/wire_haxe) that can help to compile or better say transpile reusable code in one of the following language: __JavaScript, Java, C#, C++, HL, Lua, PHP__.
 
 ## Usage:
@@ -288,6 +288,9 @@ WireData unsubscribe(WireDataListener<T> listener)
 void refresh()
 void remove()
 T get value
+bool WireData.lock(WireDataLockToken token)
+bool WireData.unlock(WireDataLockToken token)
+bool get WireData.isLocked
 ```
 
 ### WireDataListener<T>:

@@ -1,3 +1,9 @@
+## 1.1.0
+- WireData new lock API: Now the owner of data can lock write operation with a special token - an instance of WireDataLockToken.
+- bool WireData.lock(WireDataLockToken token)
+- bool WireData.unlock(WireDataLockToken token)
+- bool get WireData.isLocked
+
 ## 1.0.2
 - Changes in WireListener: parameter name "wid" was replaced to "wireId" for better
 - Counter example structure updated
