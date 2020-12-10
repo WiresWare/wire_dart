@@ -6,3 +6,5 @@
 *node_modules/*
 pubspec.lock
 /example/todo/build/
+/example/todo/debug.log
+/example/todo_angular/debug.log

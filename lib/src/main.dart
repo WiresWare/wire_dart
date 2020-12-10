@@ -10,7 +10,7 @@ part 'data.dart';
 /// Wire has simplest possible API - add, remove and send. Also it has data layer, universal container with key-value, where value is an object WireData type that holds dynamic value and can be subscribed for updates. This "data container" is something like Redis.
 ///
 /// Created by Vladimir Cores (Minkin) on 07/10/19.
-/// Github: https://github.com/DQvsRA
+/// Github: https://github.com/vladimircores
 /// License: APACHE LICENSE, VERSION 2.0
 ///
 
@@ -204,19 +204,26 @@ class Wire<T> {
   /// Access to the data container, retrieve WireData object when value is null and set when is not
   /// [WireData] is a data container to changes of which anyone can subscribe/unsubscribe.
   /// It's associated with string key.
-  /// WireData can't be null and Wire.data(key) will always return WireData instance.
-  /// Initial value will be null and special property of WireData isSet is false until not null value is set for the first time
+  /// [WireData] can't be null and Wire.data(key) will always return WireData instance.
+  /// Initial value will be null and special property of [WireData] isSet equal to false until any value is set
+  /// If value is null then delete method of [WireData] will be called, object will be removed from system
+  /// To protect [WireData] from being set from unappropriated places the [WireDataLockToken] token introduced.
+  /// When only specific object want have rights to write/change value of [WireData] it can create [WireDataLockToken] object
+  /// and pass it to [Wire.data] method as option parameter `token` to validate the assign action.
   /// [WireData] API:
   /// ```
   /// WireData subscribe(WireDataListener listener)
   /// WireData unsubscribe([WireDataListener listener])
+  /// void setValue(T input, { DataModificationToken token })
   /// void refresh()
   /// void remove()
   /// ```
   /// Returns [WireData]
-  static WireData data<T>(String key, [T value]) {
-    final wireData = _DATA_CONTAINER_LAYER.get(key);
-    if (value != null) {
+  static WireData data<T>(String key, { T value }) {
+    final wireData = _DATA_CONTAINER_LAYER.has(key)
+        ? _DATA_CONTAINER_LAYER.get(key)
+        : _DATA_CONTAINER_LAYER.create(key);
+    if (value != null && !wireData.isLocked) {
       final prevValue = wireData.value;
       final nextValue = value is Function ? value(prevValue) : value;
       _MIDDLEWARE_LIST.forEach((m) => m.onData(key, prevValue, nextValue));

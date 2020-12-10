@@ -134,4 +134,37 @@ void main() {
   group('3. Data Layer', () {
 
   });
+
+  group('4. Data Modification - Lock/Unlock', () {
+
+    final DATA_KEY = 'DATA_KEY';
+
+    final data_lockToken_one = WireDataLockToken();
+    final data_lockToken_two = WireDataLockToken();
+
+    setUp(() {
+      Wire.purge(withMiddleware: true);
+
+      Wire.data(DATA_KEY).subscribe((value) {
+        print('> $DATA_KEY -> updated: $value');
+      });
+
+      Wire.data(DATA_KEY, value: 'initial value');
+      Wire.data(DATA_KEY).lock(data_lockToken_one);
+    });
+
+    test('4.1 Lock data with token', () {
+      expect(Wire.data(DATA_KEY).isLocked, isTrue);
+      expect(Wire.data(DATA_KEY).unlock(data_lockToken_one), isTrue);
+      expect(Wire.data(DATA_KEY).isLocked, isFalse);
+
+      Wire.data(DATA_KEY, value: 'can be changed');
+      expect(Wire.data(DATA_KEY).lock(data_lockToken_one), isTrue);
+      expect(Wire.data(DATA_KEY, value: 'cant be changed').isLocked, isTrue);
+
+      expect(Wire.data(DATA_KEY).lock(data_lockToken_one), isTrue);
+      expect(Wire.data(DATA_KEY).lock(data_lockToken_one), isTrue);
+      expect(Wire.data(DATA_KEY).lock(data_lockToken_two), isFalse);
+    });
+  });
 }

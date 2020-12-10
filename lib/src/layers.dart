@@ -2,7 +2,7 @@ part of wire;
 
 ///
 /// Created by Vladimir Cores (Minkin) on 07/10/19.
-/// Github: https://github.com/DQvsRA
+/// Github: https://github.com/vladimircores
 /// License: APACHE LICENSE, VERSION 2.0
 ///
 class WireCommunicateLayer {
@@ -128,12 +128,11 @@ class WireCommunicateLayer {
 
 class WireDataContainerLayer {
   final Map<String, WireData> _map = <String, WireData>{};
-  WireData get(String key) {
-    if (!_map.containsKey(key)) {
-      _map[key] = WireData(key, _map.remove);
-    }
 
-    return _map[key];
+  WireData get(String key) => _map[key];
+  bool has(String key) => _map.containsKey(key);
+  WireData create(String key) {
+    return _map[key] = WireData(key, _map.remove);
   }
 
   void clear() {
