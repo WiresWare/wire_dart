@@ -26,12 +26,18 @@ class WireData<T> {
   WireDataLockToken _lockToken;
   bool get isLocked => _lockToken != null;
 
+  /// Prevent any value modifications inside specific of [WireData] instance.
+  /// [WireDataLockToken] token should be stored in some controller or responsible
+  /// for modification entity. The purpose of this method is to restrict data changes
+  /// only to the place where business logic or model related operations take place.
   bool lock(WireDataLockToken token) {
     var locked = !isLocked || _lockToken.equal(token);
     if (locked) _lockToken = token;
     return locked; // throw ERROR__DATA_ALREADY_CLOSED
   }
 
+  /// After calling this method with proper token [WireDataLockToken]
+  /// changes to the [WireData] value will be allowed from anywhere of the system
   bool unlock(WireDataLockToken token) {
     var opened = (isLocked && _lockToken.equal(token)) || !isLocked;
     if (opened) _lockToken = null;
