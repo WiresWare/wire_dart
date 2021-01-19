@@ -11,14 +11,16 @@ import '../view/base/page.dart';
 import '../view/pages/login.page.dart';
 import '../view/pages/main.page.dart';
 
-class NavigatorController {
+class RoutesController {
   Page _currentPage;
   DivElement _routerDOM;
   String _templatePath;
 
-  NavigatorController(DivElement dom, templatesPath) {
+  void set templatePath(String value) => _templatePath = value;
+
+  RoutesController(DivElement dom, String path) {
     _routerDOM = dom;
-    _templatePath = templatesPath;
+    _templatePath = path;
 
     Wire.add<String>(this, Signals.NAVIGATE_ACTION,
       (action, wid) async => Wire.data<RouterStates>(Data.STATES_ROUTER)
@@ -27,18 +29,19 @@ class NavigatorController {
   }
 
   void initialize() {
-    final routerStates = Wire.data<RouterStates>(Data.STATES_ROUTER).value;
+    final WireData routerStatesData = Wire.data(Data.STATES_ROUTER);
+    if (!routerStatesData.isSet) routerStatesData.value = new RouterStates();
+
+    final routerStates = routerStatesData.value;
     routerStates.when(
-      at: RouterStates.INITIAL,
-      to: RouterStates.PAGE_LOGIN,
-      on: Action.NAVIGATE_TO_LOGIN,
-      handler: (StatesTransition transition) => navigateFromTo(LoginPage())
+      at: RouterStates.INITIAL, to: RouterStates.PAGE_LOGIN,
+      on: Action.NAVIGATE_TO_LOGIN, handler: (StatesTransition transition) => {
+        navigateFromTo(LoginPage()) }
     );
     routerStates.when(
-      at: RouterStates.INITIAL,
-      to: RouterStates.PAGE_MAIN,
-      on: Action.NAVIGATE_TO_MAIN,
-      handler: (StatesTransition transition) => navigateFromTo(MainPage())
+      at: RouterStates.INITIAL, to: RouterStates.PAGE_MAIN,
+      on: Action.NAVIGATE_TO_MAIN, handler: (StatesTransition transition) => {
+        navigateFromTo(MainPage()) }
     );
   }
 

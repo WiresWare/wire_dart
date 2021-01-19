@@ -11,6 +11,9 @@ class UserController {
   }
 
   void initialize() {
-    final userStates = Wire.data<UserStates>(Data.STATES_USER).value;
+    final WireData userStatesData = Wire.data(Data.STATES_ROUTER);
+    if (!userStatesData.isSet) userStatesData.value = new UserStates();
+
+    final userStates = userStatesData.value;
   }
 }

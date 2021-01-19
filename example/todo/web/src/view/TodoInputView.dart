@@ -13,7 +13,7 @@ class TodoInputView extends DomElement {
         e.keyCode == KeyCode.ENTER &&
           await Wire.send(
             ViewSignals.INPUT,
-            payload: InputDTO(dom.value, '')
+            payload: InputDTO(dom.value!, '')
           ));
   }
 }

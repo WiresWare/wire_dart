@@ -15,7 +15,10 @@ class AuthController {
   }
 
   void initialize() {
-    final authStates = Wire.data<AuthStates>(Data.STATES_AUTH).value;
+    final WireData authStatesData = Wire.data(Data.STATES_ROUTER);
+    if (!authStatesData.isSet) authStatesData.value = new AuthStates();
+
+    final authStates = authStatesData.value;
     authStates.when(
       at: AuthStates.USER_LOGGED_OUT, to: AuthStates.USER_LOGIN_VALIDATE,
       on: Action.USER_LOGIN_VALIDATE, handler: (StatesTransition t) => {

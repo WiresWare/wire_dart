@@ -8,8 +8,7 @@ environment:
 
 dependencies:
   wire: ^1.1.0
-  states:
-    path: C:\Users\Vladimir\Projects\_\States
+  states: ^1.0.0
   sporran: ^5.0.0
   tuple: ^1.0.3
 
