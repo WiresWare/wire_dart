@@ -6,8 +6,8 @@ part of wire;
 /// License: APACHE LICENSE, VERSION 2.0
 ///
 class WireCommunicateLayer {
-  final _wireById = <int, Wire>{};
-  final _wireIdsBySignal = <String, List<int>>{};
+  final _wireById = <int?, Wire>{};
+  final _wireIdsBySignal = <String?, List<int?>>{};
 
   Wire add(Wire wire) {
     final wireId = wire.id;
@@ -20,15 +20,15 @@ class WireCommunicateLayer {
     _wireById[wireId] = wire;
 
     if (!_wireIdsBySignal.containsKey(signal)) {
-      _wireIdsBySignal[signal] = <int>[];
+      _wireIdsBySignal[signal] = <int?>[];
     }
 
-    _wireIdsBySignal[signal].add(wireId);
+    _wireIdsBySignal[signal]!.add(wireId);
 
     return wire;
   }
 
-  bool hasSignal(String signal) {
+  bool hasSignal(String? signal) {
     return _wireIdsBySignal.containsKey(signal);
   }
 
@@ -39,31 +39,31 @@ class WireCommunicateLayer {
   bool send(String signal, [payload, scope]) {
     var noMoreSubscribers = true;
     if (hasSignal(signal)) {
-      var wiresToRemove = <Wire>[];
-      _wireIdsBySignal[signal].forEach((wireId) {
+      var wiresToRemove = <Wire?>[];
+      _wireIdsBySignal[signal]!.forEach((wireId) {
         final wire = _wireById[wireId];
-        if (scope != null && wire.scope != scope) return;
-        noMoreSubscribers = wire.replies > 0 && --wire.replies == 0;
+        if (scope != null && wire!.scope != scope) return;
+        noMoreSubscribers = wire!.replies > 0 && --wire.replies == 0;
         if (noMoreSubscribers) wiresToRemove.add(wire);
         wire.transfer(payload);
       });
-      wiresToRemove.forEach((r) => noMoreSubscribers = _removeWire(r));
+      wiresToRemove.forEach((r) => noMoreSubscribers = _removeWire(r!));
     }
     return noMoreSubscribers;
   }
 
-  bool remove(String signal, [Object scope, WireListener listener]) {
+  bool remove(String? signal, [Object? scope, WireListener? listener]) {
     var exists = hasSignal(signal);
     if (exists) {
-      var toRemove = <Wire>[];
-      _wireIdsBySignal[signal].forEach((wireId) {
+      var toRemove = <Wire?>[];
+      _wireIdsBySignal[signal]!.forEach((wireId) {
         var wire = _wireById[wireId];
-        var isWrongScope = scope != null && scope != wire.scope;
-        var isWrongListener = listener != null && listener != wire.listener;
+        var isWrongScope = scope != null && scope != wire!.scope;
+        var isWrongListener = listener != null && listener != wire!.listener;
         if (isWrongScope || isWrongListener) return;
         toRemove.add(wire);
       });
-      toRemove.forEach((r) => _removeWire(r));
+      toRemove.forEach((r) => _removeWire(r!));
     }
     return exists;
   }
@@ -76,16 +76,16 @@ class WireCommunicateLayer {
     _wireIdsBySignal.clear();
   }
 
-  List<Wire> getBySignal(String signal) {
+  List<Wire?> getBySignal(String signal) {
     return hasSignal(signal)
-        ? _wireIdsBySignal[signal].map((wid) => _wireById[wid])
+        ? _wireIdsBySignal[signal]!.map((wid) => _wireById[wid])
+            as List<Wire<dynamic>?>
         : <Wire>[];
   }
 
   List<Wire> getByScope(Object scope) {
     var result = <Wire>[];
-    _wireById
-        .forEach((_, wire) => {if (wire.scope == scope) result.add(wire)});
+    _wireById.forEach((_, wire) => {if (wire.scope == scope) result.add(wire)});
     return result;
   }
 
@@ -96,7 +96,7 @@ class WireCommunicateLayer {
     return result;
   }
 
-  Wire getByWID(int wireId) {
+  Wire? getByWID(int wireId) {
     return _wireById.containsKey(wireId) ? _wireById[wireId] : null;
   }
 
@@ -114,7 +114,7 @@ class WireCommunicateLayer {
     _wireById.remove(wireId);
 
     // Remove wid for Wire signal
-    var wireIdsForSignal = _wireIdsBySignal[signal];
+    var wireIdsForSignal = _wireIdsBySignal[signal]!;
     wireIdsForSignal.remove(wireId);
 
     var noMoreSignals = wireIdsForSignal.isEmpty;
@@ -129,7 +129,7 @@ class WireCommunicateLayer {
 class WireDataContainerLayer {
   final Map<String, WireData> _map = <String, WireData>{};
 
-  WireData get(String key) => _map[key];
+  WireData get(String key) => _map[key]!;
   bool has(String key) => _map.containsKey(key);
   WireData create(String key) {
     return _map[key] = WireData(key, _map.remove);

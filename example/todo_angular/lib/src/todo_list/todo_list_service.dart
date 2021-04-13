@@ -7,5 +7,5 @@ import 'package:wire_example_shared/todo/const/DataKeys.dart';
 /// Mock service emulating access to a to-do list stored on a server.
 @Injectable()
 class TodoListService {
-  Future<List<String>> get() async => Wire.data(DataKeys.LIST).value;
+  Future<List<String>> get() async => Wire.data(DataKeys.LIST_OF_IDS).value;
 }

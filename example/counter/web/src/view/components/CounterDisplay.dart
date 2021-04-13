@@ -1,12 +1,12 @@
 import 'dart:html';
-
 import 'package:wire/wire.dart';
 
-import '../const/CounterParams.dart';
-import 'base/dom_element.dart';
+import '../../const/CounterDataKeys.dart';
+
+import '../base/dom_element.dart';
 
 class CounterDisplay extends DomElement {
-  CounterDisplay():super(DivElement()) {
+  CounterDisplay() : super(DivElement()) {
     dom.className = 'spectrum-Body spectrum-Body--L';
 
     final wireData = Wire.data(CounterDataKeys.COUNT);
@@ -14,6 +14,7 @@ class CounterDisplay extends DomElement {
     update(wireData.value ?? 0);
   }
 
-  void update(value) { dom.text = value.toString(); }
+  void update(value) {
+    dom.text = value.toString();
+  }
 }
-

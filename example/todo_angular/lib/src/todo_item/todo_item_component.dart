@@ -23,14 +23,15 @@ import 'package:wire_example_shared/todo/data/vo/TodoVO.dart';
     MaterialIconComponent,
   ],
 )
-
 class TodoItemComponent implements OnInit {
   @Input()
   String id;
 
   @override
-  Future<Null> ngOnInit() async { }
+  Future<Null> ngOnInit() async {}
 
   TodoVO get todo => Wire.data(id).value;
-  void delete() { Wire.send(ViewSignals.DELETE, payload: id); }
+  void delete() {
+    Wire.send(ViewSignals.DELETE, payload: id);
+  }
 }

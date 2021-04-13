@@ -4,9 +4,9 @@ part 'const.dart';
 part 'layers.dart';
 part 'data.dart';
 
-/// Wire - communication and data layers
+/// Wire - communication and data layers which consist of string keys, thus realization of String API when each component of the system - logical or visual - represented as a set of Strings - what it consumes is Data API and what it produces or reacts to is Signals API.
 ///
-/// Dart pub/sub library - communication layer or "bus" to which you can attach a wire and listen for signal associated with it.
+/// Wire is a kind of "pub/sub" library - communication layer or "bus" to which you can attach a wire and listen for signal associated with it.
 /// Wire has simplest possible API - add, remove and send. Also it has data layer, universal container with key-value, where value is an object WireData type that holds dynamic value and can be subscribed for updates. This "data container" is something like Redis.
 ///
 /// Created by Vladimir Cores (Minkin) on 07/10/19.
@@ -14,13 +14,13 @@ part 'data.dart';
 /// License: APACHE LICENSE, VERSION 2.0
 ///
 
-typedef WireListener<T> = void Function(T payload, int wireId);
+typedef WireListener<T> = void Function(T? payload, int wireId);
 
 abstract class WireMiddleware {
   void onAdd(Wire wire);
-  void onSend(String signal, [payload, scope]);
-  void onRemove(String signal, [Object scope, WireListener listener]);
-  void onData(String key, dynamic prevValue, dynamic nextValue);
+  void onSend(String signal, [Object? payload, Object? scope]);
+  void onRemove(String signal, [Object? scope, WireListener? listener]);
+  void onData(String key, dynamic? prevValue, dynamic? nextValue);
 }
 
 class Wire<T> {
@@ -45,32 +45,32 @@ class Wire<T> {
   /// The SIGNAL associated with this Wire.
   ///
   /// @private
-  String _signal;
-  String get signal => _signal;
+  String? _signal;
+  String get signal => _signal!;
 
   ///
   /// [read-only]
-  /// The closure method that this item was associated.
+  /// The closure method, reaction to the Wire instance changes.
   ///
   /// @private
-  WireListener<T> _listener;
-  WireListener<T> get listener => _listener;
+  WireListener<T>? _listener;
+  WireListener<T> get listener => _listener!;
 
   ///
   /// [read-only] [internal use]
   /// Unique identification for wire instance.
   ///
   /// @private
-  int _id;
-  int get id => _id;
+  int? _id;
+  int get id => _id!;
 
   ///
   /// [read-only] [internal use]
   /// Scope to which wire belongs to
   ///
   /// @private
-  Object _scope;
-  Object get scope => _scope;
+  Object? _scope;
+  Object get scope => _scope!;
 
   ///
   /// The number of times that wire instance will respond on signal before being removed.
@@ -84,10 +84,8 @@ class Wire<T> {
   /// But it wont react on signal until it is attached to the communication layer with [attach]
   /// However you still can send data through it by calling [transfer]
   ///
-  Wire(Object scope, String signal, WireListener<T> listener, [int replies = 0])
-      : assert(scope != null),
-        assert(signal != null),
-        assert(listener != null) {
+  Wire(Object scope, String signal, WireListener<T> listener,
+      [int replies = 0]) {
     _scope = scope;
     _signal = signal;
     _listener = listener;
@@ -99,7 +97,7 @@ class Wire<T> {
   void transfer(dynamic payload) {
     // Call a listener in this Wire only in case data type match it's listener type.
     if (payload is T || payload == null) {
-      _listener(payload, _id);
+      _listener!(payload, _id!);
     }
   }
 
@@ -137,7 +135,7 @@ class Wire<T> {
   }
 
   /// Check if signal string or wire instance exists in communication layer
-  static bool has({String signal, Wire wire}) {
+  static bool has({String? signal, Wire? wire}) {
     if (signal != null) return _COMMUNICATION_LAYER.hasSignal(signal);
     if (wire != null) return _COMMUNICATION_LAYER.hasWire(wire);
     return false;
@@ -148,14 +146,14 @@ class Wire<T> {
   /// If use scope then only wire with this scope value will receive the payload
   /// All middleware will be informed from [WireMiddleware.onSend] before signal sent on wires
   /// Returns true when no wire for the signal has found
-  static bool send<T>(String signal, {T payload, Object scope}) {
+  static bool send<T>(String signal, {T? payload, Object? scope}) {
     _MIDDLEWARE_LIST.forEach((m) => m.onSend(signal, payload));
     return _COMMUNICATION_LAYER.send(signal, payload, scope);
   }
 
   /// Remove all entities from Communication Layer and Data Container Layer
   /// @param [withMiddleware] used to remove all middleware
-  static void purge({bool withMiddleware}) {
+  static void purge({bool? withMiddleware}) {
     _COMMUNICATION_LAYER.clear();
     _DATA_CONTAINER_LAYER.clear();
     if (withMiddleware ?? false) _MIDDLEWARE_LIST.clear();
@@ -164,7 +162,7 @@ class Wire<T> {
   /// Remove all wires for specific signal, for more precise target to remove add scope and/or listener
   /// All middleware will be informed from [WireMiddleware.onRemove] after signal removed, only if existed
   /// Returns [bool] telling signal existed in communication layer
-  static bool remove(String signal, {Object scope, WireListener listener}) {
+  static bool remove(String signal, {Object? scope, WireListener? listener}) {
     final existed = _COMMUNICATION_LAYER.remove(signal, scope, listener);
     if (existed) {
       _MIDDLEWARE_LIST.forEach((m) => m.onRemove(signal, scope, listener));
@@ -183,9 +181,9 @@ class Wire<T> {
 
   /// When you need Wires associated with signal or scope or listener
   /// Returns [List<Wire>]
-  static List<Wire> get(
-      {String signal, Object scope, WireListener listener, int wireId}) {
-    var result = <Wire>[];
+  static List<Wire?> get(
+      {String? signal, Object? scope, WireListener? listener, int? wireId}) {
+    var result = <Wire?>[];
     if (signal != null) {
       result.addAll(_COMMUNICATION_LAYER.getBySignal(signal));
     }
@@ -219,7 +217,7 @@ class Wire<T> {
   /// void remove()
   /// ```
   /// Returns [WireData]
-  static WireData data<T>(String key, { T value }) {
+  static WireData data<T>(String key, {T? value}) {
     final wireData = _DATA_CONTAINER_LAYER.has(key)
         ? _DATA_CONTAINER_LAYER.get(key)
         : _DATA_CONTAINER_LAYER.create(key);

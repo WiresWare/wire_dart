@@ -20,4 +20,3 @@ class AppComponent {
     TodoController(TodoModel(WebDatabaseService()));
   }
 }
-

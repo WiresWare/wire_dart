@@ -1,3 +1,8 @@
+## 1.2.0
+- Transition to Dart null-safety
+- Clarification of the API and minor renaming
+- Corrections in variables names in examples
+
 ## 1.1.0
 - WireData new lock API: Now the owner of data can lock write operation with a special token - an instance of WireDataLockToken.
 - bool WireData.lock(WireDataLockToken token)

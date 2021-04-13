@@ -1,4 +1,6 @@
 # Wire - communication and data-container layers
+Wire - communication and data layers which consist of string keys thus realization of String API when each component of the system - logical or visual - represented as a set of Strings - what it consumes is Data API and what it produces or reacts to is Signals API.
+
 ### Library aimed to decouple UI from business logic
 ![Schema](assets/wire-schema.jpeg)
 

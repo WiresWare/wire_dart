@@ -16,7 +16,6 @@ import 'package:wire_example_shared/todo/data/dto/InputDTO.dart';
     materialInputDirectives,
   ],
 )
-
 class TodoInputComponent implements OnInit {
   String text = '';
 
@@ -27,5 +26,7 @@ class TodoInputComponent implements OnInit {
     });
   }
 
-  void enter() { Wire.send(ViewSignals.INPUT, payload: InputDTO(text, '')); }
+  void enter() {
+    Wire.send(ViewSignals.INPUT, payload: InputDTO(text, ''));
+  }
 }

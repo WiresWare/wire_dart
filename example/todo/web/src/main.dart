@@ -26,25 +26,32 @@ void main() {
 
 void init() {
   Wire.middleware(TodoMiddleware());
-  var databaseService = WebDatabaseService();
-  todoModel = TodoModel(databaseService, isFlutter: false);
+
+  todoModel = TodoModel(WebDatabaseService(), isFlutter: false);
   todoView = TodoView();
+
   todoController = TodoController(todoModel);
   routeController = RouteController();
 }
 
 void ready() {
-  document.querySelector('#loading').remove();
+  document.querySelector('#loading')?.remove();
 }
 
 class TodoView {
-  TodoView()
-  {
-    TodoInputView(document.querySelector('.new-todo'));
-    TodoListView(document.querySelector('.todo-list'));
-    TodoCountView(document.querySelector('.todo-count'));
-    TodoFilterView(document.querySelector('.filters'));
-    CompleteAllView(document.querySelector('.toggle-all'));
-    ClearCompletedView(document.querySelector('.clear-completed'));
+  TodoView() {
+    final domNewTodoInput = document.querySelector('.new-todo')!;
+    final domTodoList = document.querySelector('.todo-list')!;
+    final domTodoCount = document.querySelector('.todo-count')!.firstChild;
+    final domFiltersList = document.querySelector('.filters')!;
+    final domToggleAll = document.querySelector('.toggle-all')!;
+    final domClearCompleted = document.querySelector('.clear-completed')!;
+
+    TodoInputView(domNewTodoInput as InputElement);
+    TodoListView(domTodoList as UListElement);
+    TodoCountView(domTodoCount as Element);
+    TodoFilterView(domFiltersList as UListElement);
+    CompleteAllView(domToggleAll as CheckboxInputElement);
+    ClearCompletedView(domClearCompleted as ButtonElement);
   }
 }
