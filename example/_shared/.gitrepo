@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:wire-toolkit/wire_dart.git
 	branch = subrepo/example/_shared
-	commit = 5c3f5055dfc64def3b6ce5381fa8a76d2938d0bd
+	commit = ddbdd4841222f1b6af2c71dab0287cd71ea7f800
 	method = merge
 	cmdver = 0.4.3
-	parent = ae88f5901cccb86fe396e552620745c07ed59dc0
+	parent = 37779ccd68df06ff387d30e9c7338e96c5367d1c
