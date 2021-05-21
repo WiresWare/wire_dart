@@ -159,22 +159,31 @@ class TodoModel {
     _saveChanges();
   }
 
-  void clearCompleted() {
-    final todoIdsList = Wire.data(DataKeys.LIST_OF_IDS).value as List;
-
-    todoIdsList.removeWhere((id) {
-      var wireDateTodoVO = Wire.data(id);
-      var todoVO = wireDateTodoVO.value as TodoVO;
-      if (todoVO.completed) wireDateTodoVO.remove();
-
-      return todoVO.completed;
+  void clearCompleted() async {
+    final List<String> todoIdsList = Wire.data(DataKeys.LIST_OF_IDS).value;
+    final List<WireData> listToRemove = [];
+    // Future.forEach<String>(todoIdsList, (String tid) async {
+    //   final todoWireData = Wire.data(tid);
+    //   if (todoWireData.value.completed)
+    //     await todoWireData.remove();
+    // });
+    todoIdsList.removeWhere((tid) {
+      final todoWireData = Wire.data(tid);
+      final completed = todoWireData.value.completed;
+      if (completed) {
+        print('> \t\t completed: $tid');
+        listToRemove.add(todoWireData);
+      }
+      return completed;
     });
+
+    Future.forEach(listToRemove, (WireData todoWireData) async => await todoWireData.remove());
 
     if (_isFlutter) {
       Wire.data(DataKeys.LIST_OF_IDS, value: todoIdsList);
     }
 
-    _saveChanges();
+    // _saveChanges();
 
     print('> TodoModel -> clearCompleted: length = ' +
         todoIdsList.length.toString());
