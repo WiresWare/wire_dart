@@ -8,11 +8,14 @@ import 'base/DomElementView.dart';
 
 class ClearCompletedView extends DomElement {
   ClearCompletedView(ButtonElement dom) : super(dom) {
-    var wireDataTodoList = Wire.data(DataKeys.LIST_OF_IDS);
-    var wireDataCount = Wire.data(DataKeys.COUNT);
+    final wireDataTodoList = Wire.data(DataKeys.LIST_OF_IDS);
+    final wireDataCount = Wire.data(DataKeys.COUNT);
 
-    var updateComponentVisibility = (value) =>
-        setComponentVisibilityFrom(wireDataTodoList.value, wireDataCount.value);
+    final updateComponentVisibility = (value) async =>
+      setComponentVisibilityFrom(
+        wireDataTodoList.value,
+        wireDataCount.value
+      );
 
     wireDataTodoList.subscribe(updateComponentVisibility);
     wireDataCount.subscribe(updateComponentVisibility);

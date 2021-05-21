@@ -8,10 +8,11 @@ class TodoListView extends DomElement {
   TodoListView(UListElement dom) : super(dom) {
     var wireDataTodoList = Wire.data(DataKeys.LIST_OF_IDS);
     var todoList = (wireDataTodoList.value as List);
-    var append = (id) => dom.append(TodoListItemView(id).dom);
+    var append = (id) async => dom.insertBefore(
+        TodoListItemView(id).dom, dom.firstChild);
     if (todoList.isNotEmpty) todoList.forEach(append);
 
-    wireDataTodoList.subscribe((value) {
+    wireDataTodoList.subscribe((value) async {
       var list = value as List;
       print('> TodoListView ${list}');
       if (list.isNotEmpty) append(list.last);

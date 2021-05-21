@@ -5,7 +5,7 @@ part of wire;
 /// Github: https://github.com/vladimircores
 /// License: APACHE LICENSE, VERSION 2.0
 ///
-typedef WireDataListener<T> = void Function(T value);
+typedef WireDataListener<T> = Future<void> Function(T value);
 
 class WireDataLockToken {
   bool equal(WireDataLockToken token) => this == token;
@@ -56,13 +56,15 @@ class WireData<T> {
   WireData(this._key, this._onRemove);
 
   Future<void> refresh() async {
-    _listeners.forEach((l) async => await l(_value));
+    for (final listener in _listeners) {
+      await listener(_value);
+    }
   }
 
-  void remove() {
+  Future<void> remove() async {
     _guardian();
 
-    _onRemove!(_key); // never null because its a reference to the map.remove
+    await _onRemove!(_key); // never null because its a reference to the map.remove
     _onRemove = null;
 
     _key = null;

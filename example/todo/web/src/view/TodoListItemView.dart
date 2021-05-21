@@ -13,21 +13,15 @@ class TodoListItemView extends DomElement {
     ..type = 'checkbox';
 
   final lblContent = LabelElement()..className = 'todo-content';
-
   final btnDelete = ButtonElement()..className = 'destroy';
-
   final inpEdit = InputElement()..className = 'edit';
-
   final container = DivElement()..className = 'view';
-
   final listeners = <StreamSubscription>[];
 
   TodoListItemView(String id) : super(LIElement()) {
     listeners.addAll([
-      inpToggle.onClick
-          .listen((e) => Wire.send(ViewSignals.TOGGLE, payload: id)),
-      btnDelete.onClick
-          .listen((e) => Wire.send(ViewSignals.DELETE, payload: id)),
+      inpToggle.onClick.listen((e) => Wire.send(ViewSignals.TOGGLE, payload: id)),
+      btnDelete.onClick.listen((e) => Wire.send(ViewSignals.DELETE, payload: id)),
       inpEdit.onKeyDown.listen((e) {
         if (e.keyCode == KeyCode.ENTER) {
           Wire.send(ViewSignals.EDIT, payload: getEditData());
@@ -50,6 +44,7 @@ class TodoListItemView extends DomElement {
   }
 
   void remove() {
+    print('> TodoListItemView -> remove');
     Wire.data(dom.id).unsubscribe(_OnTodoDataChanged);
     listeners.removeWhere((element) {
       element.cancel();
@@ -74,7 +69,7 @@ class TodoListItemView extends DomElement {
 
   EditDTO getEditData() => EditDTO(dom.id, inpEdit.value!.trim(), '');
 
-  void _OnTodoDataChanged(dynamic todoVO) =>
+  Future<void> _OnTodoDataChanged(dynamic todoVO) async =>
       todoVO != null ? update(todoVO as TodoVO) : remove();
 
   void _OnEditBegin() {

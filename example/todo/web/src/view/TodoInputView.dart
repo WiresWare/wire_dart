@@ -6,7 +6,7 @@ import 'base/DomElementView.dart';
 
 class TodoInputView extends DomElement {
   TodoInputView(InputElement dom) : super(dom) {
-    Wire.add(this, ViewSignals.CLEAR_INPUT, (data, wid) => dom.value = '');
+    Wire.add(this, ViewSignals.CLEAR_INPUT, (data, wid) async => dom.value = '');
     dom
       ..text = ''
       ..onKeyPress.listen((e) async =>
