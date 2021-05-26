@@ -32,8 +32,10 @@ class TodoListItemView extends DomElement {
     ]);
 
     var todoWireData = Wire.data(id);
-    todoWireData.subscribe(_OnTodoDataChanged);
-    if (todoWireData.isSet) _OnTodoDataChanged(todoWireData.value);
+    todoWireData.subscribe(_OnDataChanged);
+    if (todoWireData.isSet) {
+      _OnDataChanged(todoWireData.value);
+    }
 
     container.append(inpToggle);
     container.append(lblContent);
@@ -44,12 +46,13 @@ class TodoListItemView extends DomElement {
   }
 
   void remove() {
-    print('> TodoListItemView -> remove');
-    Wire.data(dom.id).unsubscribe(_OnTodoDataChanged);
-    listeners.removeWhere((element) {
-      element.cancel();
-      return true;
-    });
+    final todoWireData = Wire.data(dom.id);
+    final hasListener = todoWireData.hasListener(_OnDataChanged);
+    print('> TodoListItemView -> remove: hasListener = ${hasListener}');
+    if (hasListener) todoWireData.unsubscribe(_OnDataChanged);
+    listeners.removeWhere((element) { element.cancel(); return true; });
+    container.remove();
+    inpEdit.remove();
     dom.remove();
   }
 
@@ -69,8 +72,10 @@ class TodoListItemView extends DomElement {
 
   EditDTO getEditData() => EditDTO(dom.id, inpEdit.value!.trim(), '');
 
-  Future<void> _OnTodoDataChanged(dynamic todoVO) async =>
-      todoVO != null ? update(todoVO as TodoVO) : remove();
+  Future<void> _OnDataChanged(todoVO) async {
+    print('> TodoListItemView -> _OnTodoDataChanged = ${todoVO}');
+    todoVO != null ? update(todoVO as TodoVO) : remove();
+  }
 
   void _OnEditBegin() {
     dom.classes.add('editing');

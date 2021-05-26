@@ -69,9 +69,9 @@ class WireData<T> {
 
     _key = null;
     // null value means remove element that listening on change (unsubscribe)
-    value = null;
+    _value = null;
     _lockToken = null;
-
+    await refresh();
     _listeners.clear();
   }
 

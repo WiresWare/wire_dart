@@ -56,14 +56,14 @@ class TodoModel {
     return newTodoVO;
   }
 
-  TodoVO remove(String id) {
+  Future<TodoVO> remove(String id) async {
     final todoIdsList = Wire.data<List<String>>(DataKeys.LIST_OF_IDS).value!;
     final count = Wire.data<int>(DataKeys.COUNT).value as int;
     final wireDataTodoVO = Wire.data<TodoVO>(id);
     final todoVO = wireDataTodoVO.value;
 
     todoIdsList.remove(id);
-    wireDataTodoVO.remove();
+    await wireDataTodoVO.remove();
 
     if (todoVO.completed == false) {
       Wire.data(DataKeys.COUNT, value: count - 1);
@@ -190,7 +190,8 @@ class TodoModel {
   }
 
   void _checkOnCompleteAll() {
-    final completeAll = Wire.data(DataKeys.COMPLETE_ALL).value;
+    final completeAllWireData = Wire.data<bool>(DataKeys.COMPLETE_ALL);
+    final completeAll = completeAllWireData.isSet ? completeAllWireData.value : false;
     if (completeAll) {
       Wire.data(DataKeys.COMPLETE_ALL, value: false);
       Wire.send(ViewSignals.COMPLETE_ALL_FORCED, payload: false);
