@@ -8,11 +8,11 @@ environment:
 
 dependencies:
   wire: ^1.2.0
-  states: ^1.0.0
-  sporran: ^5.0.0
-  tuple: ^1.0.3
+  states: ^1.1.0
+  sporran: ^6.0.0
+  tuple: ^2.0.0
 
 dev_dependencies:
-  build_runner: ^1.10.0
-  build_web_compilers: ^2.11.0
+  build_runner: ^1.12.2
+  build_web_compilers: ^2.16.5
   pedantic: ^1.9.0

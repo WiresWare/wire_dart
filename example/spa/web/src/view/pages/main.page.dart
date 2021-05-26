@@ -3,12 +3,10 @@ import 'dart:html';
 import '../base/page.dart';
 
 class MainPage extends Page {
-  ButtonElement _btnIndex;
-  ButtonElement _btnGallery;
+  ButtonElement _btnIndex = ButtonElement();
+  ButtonElement _btnGallery = ButtonElement();
 
   MainPage() : super('main.html') {
-    _btnIndex = ButtonElement();
-    _btnGallery = ButtonElement();
     dom.style.backgroundColor = 'wheat';
   }
 
@@ -25,7 +23,9 @@ class MainPage extends Page {
 
   void destroy() {
     _btnIndex.removeEventListener("click", _handleClickEvent);
-    _btnIndex = null;
+    _btnGallery.removeEventListener("click", _handleClickEvent);
+    _btnIndex.remove();
+    _btnGallery.remove();
 
     super.destroy();
   }

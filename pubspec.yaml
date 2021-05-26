@@ -6,8 +6,6 @@ homepage: https://github.com/wire-toolkit/wire_dart
 environment:
   sdk: '>=2.12.0 <3.0.0'
 
-dependencies:
-
 dev_dependencies:
   test: ^1.16.5
   build_web_compilers:

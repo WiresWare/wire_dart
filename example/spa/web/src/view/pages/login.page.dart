@@ -9,7 +9,7 @@ class LoginPage extends Page {
 
   @override
   void initialize() {
-    dom.querySelector('#btnConfirm')
+    (dom.querySelector('#btnConfirm') as ButtonElement)
       .addEventListener('click', (event) => {
         print('Confirm')
       });

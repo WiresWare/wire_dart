@@ -8,16 +8,17 @@ import 'src/constants/Dom.dart';
 import 'src/constants/Pages.dart';
 
 void main() async {
-  DivElement rootDOM = querySelector(DOM.ID_ROOT);
-  DivElement routerDOM = rootDOM.querySelector(DOM.ID_ROUTER);
-
+  print('> main -> step 1 - get the dom');
+  DivElement rootDOM = querySelector(DOM.ID_ROOT) as DivElement;
+  DivElement routerDOM = rootDOM.querySelector(DOM.ID_ROUTER) as DivElement;
+  print('> main -> step 2 - instantiate controllers');
   final authController = AuthController();
   final routesController = RoutesController(routerDOM, Pages.TEMPLATES_PATH);
-
+  print('> main -> step 3 - instantiate application');
   final application = Application(rootDOM);
-
+  print('> main -> step 4 - initialize controllers');
   authController.initialize();
   routesController.initialize();
-
+  print('> main -> step 5 - initialize application');
   application.initialize();
 }

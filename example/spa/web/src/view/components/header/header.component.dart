@@ -3,12 +3,10 @@ import 'dart:html';
 import '../../base/component.dart';
 
 class Header extends Component {
-  ButtonElement _btnIndex;
-  ButtonElement _btnGallery;
+  ButtonElement _btnIndex = ButtonElement();
+  ButtonElement _btnGallery = ButtonElement();
 
   Header() : super('header') {
-    _btnIndex = ButtonElement();
-    _btnGallery = ButtonElement();
     dom.style.backgroundColor = "wheat";
   }
 
@@ -25,7 +23,9 @@ class Header extends Component {
 
   void destroy() {
     _btnIndex.removeEventListener("click", _handleClickEvent);
-    _btnIndex = null;
+    _btnGallery.removeEventListener("click", _handleClickEvent);
+    _btnIndex.remove();
+    _btnGallery.remove();
 
     super.destroy();
   }

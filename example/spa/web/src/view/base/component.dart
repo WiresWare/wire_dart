@@ -1,10 +1,9 @@
 import 'dart:html';
 
 abstract class Component {
-  DivElement dom;
+  DivElement dom = DivElement();
 
   Component(String className) {
-    dom = DivElement();
     dom.className = '${className} ';
   }
 
@@ -14,6 +13,6 @@ abstract class Component {
 
   void render() {}
   void destroy() {
-    dom = null;
+    dom.remove();
   }
 }

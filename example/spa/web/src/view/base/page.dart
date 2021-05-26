@@ -3,7 +3,7 @@ import 'dart:html';
 import 'component.dart';
 
 abstract class Page extends Component {
-  String _path;
+  late String _path;
   String get path => _path;
 
   Page(String path):super('page') {

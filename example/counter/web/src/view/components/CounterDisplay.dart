@@ -9,12 +9,12 @@ class CounterDisplay extends DomElement {
   CounterDisplay() : super(DivElement()) {
     dom.className = 'spectrum-Body spectrum-Body--L';
 
-    final wireData = Wire.data(CounterDataKeys.COUNT);
+    final wireData = Wire.data<int>(CounterDataKeys.COUNT);
     wireData.subscribe(update);
     update(wireData.value ?? 0);
   }
 
-  void update(value) {
+  Future<void> update(value) async {
     dom.text = value.toString();
   }
 }

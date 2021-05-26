@@ -8,15 +8,13 @@ class CounterStorageMiddleware extends WireMiddleware {
   final storage = window.localStorage;
 
   @override
-  void onAdd(Wire wire) {
-    print(
-        '> CounterMiddleware -> onAdd: signal = ${wire.signal} | scope = ${wire.scope}');
+  Future<void> onAdd(Wire wire) async {
+    print('> CounterMiddleware -> onAdd: signal = ${wire.signal} | scope = ${wire.scope}');
   }
 
   @override
-  void onData(String key, prevValue, nextValue) {
-    print(
-        '> CounterMiddleware -> onData - key: ${key} = ${nextValue} (${prevValue})');
+  Future<void> onData(String key, prevValue, nextValue) async {
+    print('> CounterMiddleware -> onData - key: ${key} = ${nextValue} (${prevValue})');
     if (key == CounterDataKeys.COUNT) {
       if (nextValue != null)
         storage[CounterDataKeys.COUNT] = nextValue.toString();
@@ -29,20 +27,18 @@ class CounterStorageMiddleware extends WireMiddleware {
   }
 
   @override
-  void onRemove(String signal, [Object? scope, listener]) {
-    print(
-        '> CounterMiddleware -> onRemove: signal = ${signal} | ${scope} | ${listener}');
+  Future<void> onRemove(String signal, [Object? scope, listener]) async {
+    print('> CounterMiddleware -> onRemove: signal = ${signal} | ${scope} | ${listener}');
   }
 
   @override
-  void onSend(String? signal, [data, scope]) {
-    print(
-        '> CounterMiddleware -> onSend: signal = ${signal} | data = ${data} | scope = ${scope}');
+  Future<void> onSend(String? signal, [data, scope]) async {
+    print('> CounterMiddleware -> onSend: signal = ${signal} | data = ${data} | scope = ${scope}');
   }
 
   int getInitialValue() {
     return storage.containsKey(CounterDataKeys.COUNT)
-        ? int.parse(storage[CounterDataKeys.COUNT]!)
-        : 0;
+      ? int.parse(storage[CounterDataKeys.COUNT]!)
+      : 0;
   }
 }

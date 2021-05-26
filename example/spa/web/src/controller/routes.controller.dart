@@ -12,9 +12,9 @@ import '../view/pages/login.page.dart';
 import '../view/pages/main.page.dart';
 
 class RoutesController {
-  Page _currentPage;
-  DivElement _routerDOM;
-  String _templatePath;
+  Page? _currentPage;
+  late DivElement _routerDOM;
+  late String _templatePath;
 
   void set templatePath(String value) => _templatePath = value;
 
@@ -47,15 +47,16 @@ class RoutesController {
 
   Future<void> navigateFromTo(Page toPage) async {
     final hasCurrentPage = _currentPage != null;
-    if (hasCurrentPage) await _currentPage.beforeLeave();
+    if (hasCurrentPage) await _currentPage?.beforeLeave();
 
     final template = await HttpRequest.getString('${_templatePath}${toPage.path}.html');
     toPage.dom.setInnerHtml(template, treeSanitizer: NodeTreeSanitizer.trusted);
     toPage.initialize();
 
     if (hasCurrentPage) {
-      _currentPage.dom.remove();
-      _currentPage.destroy();
+      _currentPage!
+        ..dom.remove()
+        ..destroy();
     }
 
     if (toPage.shouldRender()) toPage.render();

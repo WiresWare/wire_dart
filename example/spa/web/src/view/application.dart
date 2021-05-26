@@ -8,8 +8,8 @@ import '../constants/Data.dart';
 import '../constants/Signals.dart';
 
 class Application {
-  DivElement _root;
-  DivElement _header;
+  late DivElement _root;
+  late DivElement _header;
 
   Application(DivElement root) {
     _root = root;

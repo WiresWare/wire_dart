@@ -3,11 +3,10 @@ import 'dart:async';
 import '../base/page.dart';
 
 class LogoutPage extends Page {
-  Timer _timer;
+  late Timer _timer = Timer.periodic(Duration(seconds: 1), _handleTimerTick);
   int _counter = 3;
 
   LogoutPage() : super('page/logout.html') {
-    _timer = Timer.periodic(Duration(seconds: 1), _handleTimerTick);
     dom.style.backgroundColor = 'coral';
   }
 
@@ -19,7 +18,6 @@ class LogoutPage extends Page {
   @override
   void destroy() {
     _timer.cancel();
-    _timer = null;
     super.destroy();
   }
 
