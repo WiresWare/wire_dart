@@ -16,14 +16,12 @@ class TodoFilterView extends DomElement {
   final CLASS_NAME_SELECTED = 'selected';
 
   TodoFilterView(UListElement dom) : super(dom) {
-    Wire.data(DataKeys.FILTER).subscribe((value) async {
+    Wire.data<FilterValues>(DataKeys.FILTER).subscribe((value) async {
       final filter = value as FilterValues;
       final selectedChildIndex = _FILTER_TO_VALUE[filter];
-      (dom.querySelector('.$CLASS_NAME_SELECTED') as AnchorElement).className = '';
-      if (selectedChildIndex) {
-        (dom.children[selectedChildIndex].children[0] as AnchorElement)
-            .className = CLASS_NAME_SELECTED;
-      }
+      print('> TodoFilterView -> DataKeys.FILTER subscribe: ${value} - ${selectedChildIndex}');
+      (dom.querySelector('.$CLASS_NAME_SELECTED') as HtmlElement).className = '';
+      (dom.children[selectedChildIndex].children[0] as HtmlElement).className = CLASS_NAME_SELECTED;
     });
   }
 }
