@@ -8,3 +8,5 @@ pubspec.lock
 /example/todo/build/
 /example/todo/debug.log
 /example/todo_angular/debug.log
+/example/spa/node_modules/
+/example/spa/storybook-static/
