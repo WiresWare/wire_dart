@@ -9,7 +9,7 @@ environment:
 dependencies:
   glob: ^2.0.0
   angular: ^6.0.1
-  wire: ^1.2.0
+  wire: ^1.3.0
   wire_example_shared:
     path: ../_shared
 
