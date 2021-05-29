@@ -1,3 +1,8 @@
+## 1.3.0
+- Async API implementation
+- Examples modified to be async
+- SPA example with states (WIP)
+
 ## 1.2.0
 - Transition to Dart null-safety
 - Clarification of the API and minor renaming
