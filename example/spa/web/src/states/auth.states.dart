@@ -1,7 +1,4 @@
 import 'package:states/states.dart';
-import 'package:wire/wire.dart';
-
-import '../constants/Data.dart';
 
 class AuthStates extends States {
 
@@ -21,9 +18,6 @@ class AuthStates extends States {
     add(USER_LOGIN_VALIDATE);
     add(USER_LOGIN_REJECTED);
     add(USER_LOGIN_ERROR);
-
-    Wire.data(Data.STATES_AUTH, value: this)
-        .lock(WireDataLockToken());
   }
 }
 

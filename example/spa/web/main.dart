@@ -9,7 +9,7 @@ import 'src/constants/Pages.dart';
 
 void main() async {
   print('> main -> step 1 - get the dom');
-  DivElement rootDOM = querySelector(DOM.ID_ROOT) as DivElement;
+  HtmlElement rootDOM = querySelector(DOM.ID_ROOT) as HtmlElement;
   DivElement routerDOM = rootDOM.querySelector(DOM.ID_ROUTER) as DivElement;
   print('> main -> step 2 - instantiate controllers');
   final authController = AuthController();

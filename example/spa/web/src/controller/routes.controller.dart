@@ -22,7 +22,7 @@ class RoutesController {
     _routerDOM = dom;
     _templatePath = path;
 
-    Wire.add<String>(this, Signals.NAVIGATE_ACTION,
+    Wire.add<String>(this, Signals.STATES_ACTION__NAVIGATE,
       (action, wid) async => Wire.data<RouterStates>(Data.STATES_ROUTER)
         .value.execute(action)
     );
@@ -30,7 +30,10 @@ class RoutesController {
 
   void initialize() {
     final WireData routerStatesData = Wire.data(Data.STATES_ROUTER);
-    if (!routerStatesData.isSet) routerStatesData.value = new RouterStates();
+    if (!routerStatesData.isSet) {
+      Wire.data(Data.STATES_ROUTER, value: new RouterStates())
+          .lock(WireDataLockToken());
+    }
 
     final routerStates = routerStatesData.value;
     routerStates.when(

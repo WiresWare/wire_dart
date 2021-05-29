@@ -1,4 +1,4 @@
 class Signals {
-  static String NAVIGATE_ACTION = 'signal_navigate_action';
-  static String USER_AUTH_ACTION = 'signal_user_auth_action';
+  static String STATES_ACTION__NAVIGATE = 'signal__states_action__navigate';
+  static String STATES_ACTION__AUTH = 'signal__states_action__auth';
 }

@@ -1,7 +1,4 @@
 import 'package:states/states.dart';
-import 'package:wire/wire.dart';
-
-import '../constants/Data.dart';
 
 class RouterStates extends States {
 
@@ -26,9 +23,6 @@ class RouterStates extends States {
     add(PAGE_LOGOUT);
     add(PAGE_PROFILES);
     add(PAGE_TRIALS);
-
-    Wire.data(Data.STATES_ROUTER, value: this)
-        .lock(WireDataLockToken());
   }
 }
 

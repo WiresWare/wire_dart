@@ -1,0 +1,73 @@
+{
+  "name": "@storybook/components",
+  "version": "5.3.21",
+  "description": "Core Storybook Components",
+  "keywords": [
+    "storybook"
+  ],
+  "homepage": "https://github.com/storybookjs/storybook/tree/master/lib/components",
+  "bugs": {
+    "url": "https://github.com/storybookjs/storybook/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/storybookjs/storybook.git",
+    "directory": "lib/components"
+  },
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "*.js",
+    "*.d.ts",
+    "ts3.5/**/*"
+  ],
+  "scripts": {
+    "prepare": "node ../../scripts/prepare.js"
+  },
+  "dependencies": {
+    "@storybook/client-logger": "5.3.21",
+    "@storybook/theming": "5.3.21",
+    "@types/react-syntax-highlighter": "11.0.4",
+    "@types/react-textarea-autosize": "^4.3.3",
+    "core-js": "^3.0.1",
+    "global": "^4.3.2",
+    "lodash": "^4.17.15",
+    "markdown-to-jsx": "^6.11.4",
+    "memoizerific": "^1.11.3",
+    "polished": "^3.3.1",
+    "popper.js": "^1.14.7",
+    "prop-types": "^15.7.2",
+    "react": "^16.8.3",
+    "react-dom": "^16.8.3",
+    "react-focus-lock": "^2.1.0",
+    "react-helmet-async": "^1.0.2",
+    "react-popper-tooltip": "^2.8.3",
+    "react-syntax-highlighter": "^11.0.2",
+    "react-textarea-autosize": "^7.1.0",
+    "simplebar-react": "^1.0.0-alpha.6",
+    "ts-dedent": "^1.1.0"
+  },
+  "devDependencies": {
+    "enzyme": "^3.9.0",
+    "jest": "^24.7.1",
+    "jest-enzyme": "^7.0.2"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-dom": "*"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": "a939e7204a448e9d24e5431f1c9dba8dd7ec05e9",
+  "typesVersions": {
+    "<=3.5": {
+      "*": [
+        "ts3.5/*"
+      ]
+    }
+  }
+}
