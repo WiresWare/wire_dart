@@ -12,7 +12,7 @@ class TodoCountView extends DomElement {
     updateCount(wireDataCount.value);
   }
 
-  void updateCount<int>(int value) {
+  Future<void> updateCount<int>(int value) async {
     dom.text = value.toString();
   }
 }

@@ -14,13 +14,13 @@ part 'data.dart';
 /// License: APACHE LICENSE, VERSION 2.0
 ///
 
-typedef WireListener<T> = void Function(T? payload, int wireId);
+typedef WireListener<T> = Future<void> Function(T? payload, int wireId);
 
 abstract class WireMiddleware {
-  void onAdd(Wire wire);
-  void onSend(String signal, [Object? payload, Object? scope]);
-  void onRemove(String signal, [Object? scope, WireListener? listener]);
-  void onData(String key, dynamic? prevValue, dynamic? nextValue);
+  Future<void> onAdd(Wire wire);
+  Future<void> onSend(String signal, [Object? payload, Object? scope]);
+  Future<void> onRemove(String signal, [Object? scope, WireListener? listener]);
+  Future<void> onData(String key, dynamic prevValue, dynamic nextValue);
 }
 
 class Wire<T> {
@@ -84,8 +84,12 @@ class Wire<T> {
   /// But it wont react on signal until it is attached to the communication layer with [attach]
   /// However you still can send data through it by calling [transfer]
   ///
-  Wire(Object scope, String signal, WireListener<T> listener,
-      [int replies = 0]) {
+  Wire(
+    Object scope,
+    String signal,
+    WireListener<T> listener,
+    [int replies = 0]
+  ) {
     _scope = scope;
     _signal = signal;
     _listener = listener;
@@ -94,17 +98,15 @@ class Wire<T> {
   }
 
   /// Call associated WireListener with data.
-  void transfer(dynamic payload) {
+  Future<void> transfer(dynamic payload) async {
     // Call a listener in this Wire only in case data type match it's listener type.
-    if (payload is T || payload == null) {
-      _listener!(payload, _id!);
-    }
+    final filterByPayloadType = payload is T || payload == null;
+    if (filterByPayloadType) await _listener!(payload, _id!);
   }
 
   /// Nullify all relations
-  void clear() {
+  Future<void> clear() async {
     _scope = null;
-    _signal = null;
     _listener = null;
   }
 
@@ -119,9 +121,10 @@ class Wire<T> {
     _COMMUNICATION_LAYER.add(wire);
   }
 
-  /// Remove wire object from communication layer, returns existence.
-  static bool detach(Wire wire) {
-    return _COMMUNICATION_LAYER.remove(wire.signal, wire.scope, wire.listener);
+  /// Remove wire object from communication layer, then inform all middlewares with
+  /// Returns existence of another wires with that signal.
+  static Future<bool> detach(Wire wire) {
+    return remove(wire.signal, scope: wire.scope, listener: wire.listener);
   }
 
   /// Create wire object from params and [attach] it to the communication layer
@@ -145,27 +148,31 @@ class Wire<T> {
   /// Payload is optional, default is null, passed to WireListener from [transfer]
   /// If use scope then only wire with this scope value will receive the payload
   /// All middleware will be informed from [WireMiddleware.onSend] before signal sent on wires
+  ///
   /// Returns true when no wire for the signal has found
-  static bool send<T>(String signal, {T? payload, Object? scope}) {
-    _MIDDLEWARE_LIST.forEach((m) => m.onSend(signal, payload));
+  static Future<bool> send<T>(String signal, {T? payload, Object? scope}) async {
+    _MIDDLEWARE_LIST.forEach((m) async => await m.onSend(signal, payload));
     return _COMMUNICATION_LAYER.send(signal, payload, scope);
   }
 
   /// Remove all entities from Communication Layer and Data Container Layer
   /// @param [withMiddleware] used to remove all middleware
-  static void purge({bool? withMiddleware}) {
-    _COMMUNICATION_LAYER.clear();
-    _DATA_CONTAINER_LAYER.clear();
-    if (withMiddleware ?? false) _MIDDLEWARE_LIST.clear();
+  static Future<void> purge({bool? withMiddleware}) async {
+    await _COMMUNICATION_LAYER.clear();
+    await _DATA_CONTAINER_LAYER.clear();
+    if (withMiddleware ?? false)
+      _MIDDLEWARE_LIST.clear();
   }
 
   /// Remove all wires for specific signal, for more precise target to remove add scope and/or listener
   /// All middleware will be informed from [WireMiddleware.onRemove] after signal removed, only if existed
   /// Returns [bool] telling signal existed in communication layer
-  static bool remove(String signal, {Object? scope, WireListener? listener}) {
-    final existed = _COMMUNICATION_LAYER.remove(signal, scope, listener);
+  static Future<bool> remove(String signal, {Object? scope, WireListener? listener}) async {
+    final existed = await _COMMUNICATION_LAYER.remove(signal, scope, listener);
     if (existed) {
-      _MIDDLEWARE_LIST.forEach((m) => m.onRemove(signal, scope, listener));
+      await Future.forEach(_MIDDLEWARE_LIST, (WireMiddleware middleware) async {
+        await middleware.onRemove(signal, scope, listener);
+      });
     }
     return existed;
   }
@@ -224,8 +231,9 @@ class Wire<T> {
     if (value != null && !wireData.isLocked) {
       final prevValue = wireData.value;
       final nextValue = value is Function ? value(prevValue) : value;
-      _MIDDLEWARE_LIST.forEach((m) => m.onData(key, prevValue, nextValue));
       wireData.value = nextValue;
+      _MIDDLEWARE_LIST.forEach((m) async =>
+        await m.onData(key, prevValue, nextValue));
     }
     return wireData;
   }

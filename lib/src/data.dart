@@ -5,7 +5,7 @@ part of wire;
 /// Github: https://github.com/vladimircores
 /// License: APACHE LICENSE, VERSION 2.0
 ///
-typedef WireDataListener<T> = void Function(T value);
+typedef WireDataListener<T> = Future<void> Function(T value);
 
 class WireDataLockToken {
   bool equal(WireDataLockToken token) => this == token;
@@ -55,21 +55,23 @@ class WireData<T> {
 
   WireData(this._key, this._onRemove);
 
-  void refresh() {
-    _listeners.forEach((l) => l(_value));
+  Future<void> refresh() async {
+    for (final listener in _listeners) {
+      await listener(_value);
+    }
   }
 
-  void remove() {
+  Future<void> remove() async {
     _guardian();
 
-    _onRemove!(_key); // never null because its a reference to the map.remove
+    await _onRemove!(_key); // never null because its a reference to the map.remove
     _onRemove = null;
 
     _key = null;
     // null value means remove element that listening on change (unsubscribe)
-    value = null;
+    _value = null;
     _lockToken = null;
-
+    await refresh();
     _listeners.clear();
   }
 
@@ -77,12 +79,12 @@ class WireData<T> {
     if (isLocked) throw ERROR__DATA_IS_LOCKED;
   }
 
-  WireData subscribe(WireDataListener<T?> listener) {
+  WireData<T> subscribe(WireDataListener<T?> listener) {
     if (!hasListener(listener)) _listeners.add(listener);
     return this;
   }
 
-  WireData unsubscribe([WireDataListener<T>? listener]) {
+  WireData<T> unsubscribe([WireDataListener<T>? listener]) {
     if (listener != null) {
       if (hasListener(listener)) _listeners.remove(listener);
     } else {

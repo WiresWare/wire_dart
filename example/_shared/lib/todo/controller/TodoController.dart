@@ -35,7 +35,7 @@ class TodoController {
     print('Processor Ready');
   }
 
-  void _signalProcessor(dynamic payload, int wireId) {
+  Future<void> _signalProcessor(dynamic payload, int wireId) async {
     final wire = Wire.get(wireId: wireId).single;
     print('> TodoProcessor -> ${wire!.signal}: data = ' + payload.toString());
     switch (wire.signal) {

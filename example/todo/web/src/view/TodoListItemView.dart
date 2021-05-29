@@ -13,21 +13,15 @@ class TodoListItemView extends DomElement {
     ..type = 'checkbox';
 
   final lblContent = LabelElement()..className = 'todo-content';
-
   final btnDelete = ButtonElement()..className = 'destroy';
-
   final inpEdit = InputElement()..className = 'edit';
-
   final container = DivElement()..className = 'view';
-
   final listeners = <StreamSubscription>[];
 
   TodoListItemView(String id) : super(LIElement()) {
     listeners.addAll([
-      inpToggle.onClick
-          .listen((e) => Wire.send(ViewSignals.TOGGLE, payload: id)),
-      btnDelete.onClick
-          .listen((e) => Wire.send(ViewSignals.DELETE, payload: id)),
+      inpToggle.onClick.listen((e) => Wire.send(ViewSignals.TOGGLE, payload: id)),
+      btnDelete.onClick.listen((e) => Wire.send(ViewSignals.DELETE, payload: id)),
       inpEdit.onKeyDown.listen((e) {
         if (e.keyCode == KeyCode.ENTER) {
           Wire.send(ViewSignals.EDIT, payload: getEditData());
@@ -38,8 +32,10 @@ class TodoListItemView extends DomElement {
     ]);
 
     var todoWireData = Wire.data(id);
-    todoWireData.subscribe(_OnTodoDataChanged);
-    if (todoWireData.isSet) _OnTodoDataChanged(todoWireData.value);
+    todoWireData.subscribe(_OnDataChanged);
+    if (todoWireData.isSet) {
+      _OnDataChanged(todoWireData.value);
+    }
 
     container.append(inpToggle);
     container.append(lblContent);
@@ -50,11 +46,13 @@ class TodoListItemView extends DomElement {
   }
 
   void remove() {
-    Wire.data(dom.id).unsubscribe(_OnTodoDataChanged);
-    listeners.removeWhere((element) {
-      element.cancel();
-      return true;
-    });
+    final todoWireData = Wire.data(dom.id);
+    final hasListener = todoWireData.hasListener(_OnDataChanged);
+    print('> TodoListItemView -> remove: hasListener = ${hasListener}');
+    if (hasListener) todoWireData.unsubscribe(_OnDataChanged);
+    listeners.removeWhere((element) { element.cancel(); return true; });
+    container.remove();
+    inpEdit.remove();
     dom.remove();
   }
 
@@ -74,8 +72,10 @@ class TodoListItemView extends DomElement {
 
   EditDTO getEditData() => EditDTO(dom.id, inpEdit.value!.trim(), '');
 
-  void _OnTodoDataChanged(dynamic todoVO) =>
-      todoVO != null ? update(todoVO as TodoVO) : remove();
+  Future<void> _OnDataChanged(todoVO) async {
+    print('> TodoListItemView -> _OnTodoDataChanged = ${todoVO}');
+    todoVO != null ? update(todoVO as TodoVO) : remove();
+  }
 
   void _OnEditBegin() {
     dom.classes.add('editing');

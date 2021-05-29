@@ -18,7 +18,7 @@ class CompleteAllView extends DomElement {
     Wire.send(ViewSignals.COMPLETE_ALL, payload: isChecked);
   }
 
-  void _onWireSignalForced(data, wid) {
+  Future<void> _onWireSignalForced(data, wid) async {
     print('> CompleteAllView -> onWireSignalForced: checked = $data');
     (dom as CheckboxInputElement).checked = data;
   }
