@@ -121,22 +121,16 @@ class TodoModel {
       var todoVO = todoWireData.value as TodoVO;
       var todoVisible = todoVO.visible;
       switch (filter) {
-        case FilterValues.ALL:
-          todoVisible = true;
-          break;
-        case FilterValues.ACTIVE:
-          todoVisible = !todoVO.completed;
-          break;
-        case FilterValues.COMPLETED:
-          todoVisible = todoVO.completed;
-          break;
+        case FilterValues.ALL: todoVisible = true; break;
+        case FilterValues.ACTIVE: todoVisible = !todoVO.completed; break;
+        case FilterValues.COMPLETED: todoVisible = todoVO.completed; break;
       }
       if (todoVO.visible != todoVisible) {
         todoVO.visible = todoVisible;
         Wire.data(id, value: todoVO);
       }
     });
-    Wire.data(DataKeys.FILTER, value: filter);
+    Wire.data<FilterValues>(DataKeys.FILTER, value: filter);
     print('> TodoModel -> filtered: ' + filter.toString());
   }
 
