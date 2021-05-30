@@ -1,3 +1,6 @@
+## 1.4.0
+- Getter implementation in WireData: getter is method returned in result of getting wireData.value, in this case wireData instance is locked and can't be changed (new value by key won't be set).
+
 ## 1.3.0
 - Async API implementation
 - Examples modified to be async
