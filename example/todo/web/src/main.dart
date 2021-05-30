@@ -5,13 +5,13 @@ import 'package:wire_example_shared/todo/middleware/TodoMiddleware.dart';
 import 'package:wire_example_shared/todo/model/TodoModel.dart';
 import 'package:wire_example_shared/todo/service/WebDatabaseService.dart';
 
-import 'controller/RouteController.dart';
-import 'view/ClearCompletedView.dart';
-import 'view/CompleteAllView.dart';
-import 'view/TodoCountView.dart';
-import 'view/TodoFilterView.dart';
-import 'view/TodoInputView.dart';
-import 'view/TodoListView.dart';
+import 'package:wire_example_shared/todo/controller/RouteController.dart';
+import 'package:wire_example_shared/todo/view/web/ClearCompletedView.dart';
+import 'package:wire_example_shared/todo/view/web/CompleteAllView.dart';
+import 'package:wire_example_shared/todo/view/web/TodoCountView.dart';
+import 'package:wire_example_shared/todo/view/web/TodoFilterView.dart';
+import 'package:wire_example_shared/todo/view/web/TodoInputView.dart';
+import 'package:wire_example_shared/todo/view/web/TodoListView.dart';
 
 var todoModel;
 var todoView;
