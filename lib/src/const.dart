@@ -1,9 +1,11 @@
 part of wire;
 
-final String ERROR__MIDDLEWARE_EXISTS =
-    'WR:2001 - Middleware already registered, middleware: ';
 final String ERROR__WIRE_ALREADY_REGISTERED =
     'WR:1001 - Wire already registered, wireId: ';
+
+final String ERROR__MIDDLEWARE_EXISTS =
+    'WR:2001 - Middleware already registered, middleware: ';
+
 final String ERROR__DATA_IS_LOCKED =
     'WR:3001 - WireData value change not allowed '
     '- data modification locked with token';
@@ -13,3 +15,6 @@ final String ERROR__DATA_ALREADY_LOCKED =
 final String ERROR__DATA_CANNOT_BE_OPEN =
     'WR:3002 - WireData tokens do not match'
     ' - to unlock data for modification use proper token';
+final String ERROR__DATA_IS_GETTER =
+    'WR:3003 - WireData is a getter'
+    ' - it cannot be modified only accessed' ;

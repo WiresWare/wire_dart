@@ -1,12 +1,14 @@
 # Created by .ignore support plugin (hsz.mobi)
 .dart_tool/
-.idea/
+**/.idea/
 .packages
 *.lock
 *node_modules/*
 pubspec.lock
 /example/todo/build/
+/example/todo/.dart_tool/
 /example/todo/debug.log
 /example/todo_angular/debug.log
+/example/spa/.dart_tool/
 /example/spa/node_modules/
 /example/spa/storybook-static/

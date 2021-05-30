@@ -27,7 +27,13 @@ class TestWireMiddleware extends WireMiddleware {
 }
 
 void main() {
-  group('1. Subscription tests', () {
+  final GROUP_1_TITLE = '1. Subscriptions';
+  final GROUP_2_TITLE = '2. Purge and remove';
+  final GROUP_3_TITLE = '3. Data access';
+  final GROUP_4_TITLE = '4. Data lock/unlock';
+  final GROUP_5_TITLE = '5. Data getters';
+
+  group(GROUP_1_TITLE, () {
     const SIGNAL_G1 = 'SIGNAL';
     const SIGNAL_COUNTER = 'SIGNAL_COUNTER';
     const SIGNAL_NOT_REGISTERED = 'SIGNAL_NOT_REGISTERED';
@@ -135,8 +141,6 @@ void main() {
     });
   });
 
-  final GROUP_2_TITLE = '2. Purge and remove tests';
-
   group(GROUP_2_TITLE, () {
 
     var SIGNAL_G2 = 'G2_SIGNAL_SUBSCRIPTION';
@@ -219,9 +223,7 @@ void main() {
     });
   });
 
-  group('3. Data Layer', () {});
-
-  final GROUP_4_TITLE = '4. Data Modification - Lock/Unlock';
+  group(GROUP_3_TITLE, () {});
 
   group(GROUP_4_TITLE, () {
     final DATA_KEY = 'DATA_KEY';
@@ -243,18 +245,70 @@ void main() {
       Wire.data(DATA_KEY).lock(data_lockToken_one);
     });
 
-    test('4.1 Lock data with token', () {
+    test('4.1 Lock data with token', () async {
       expect(Wire.data(DATA_KEY).isLocked, isTrue);
       expect(Wire.data(DATA_KEY).unlock(data_lockToken_one), isTrue);
       expect(Wire.data(DATA_KEY).isLocked, isFalse);
 
       Wire.data(DATA_KEY, value: 'can be changed');
+      print('>\t Wire.data(DATA_KEY).lock(data_lockToken_one)');
       expect(Wire.data(DATA_KEY).lock(data_lockToken_one), isTrue);
-      expect(Wire.data(DATA_KEY, value: 'cant be changed').isLocked, isTrue);
+      print('>\t Wire.data(DATA_KEY, value: cant be changed)');
+      // expect(Wire.data(DATA_KEY, value: 'cant be changed'), throwsA(Exception(ERROR__DATA_IS_LOCKED)));
+      // expect(Wire.data(DATA_KEY, value: 'cant be changed'), throwsA(TypeMatcher<Exception>()));
+      // expect(Wire.data(DATA_KEY, value: 'cant be changed'), throwsA(isA<Exception>()));
+      // expect(Wire.data(DATA_KEY, value: 'cant be changed'), throwsException);
+      // expect(Wire.data(DATA_KEY, value: 'cant be changed'), throwsA(equals(ERROR__DATA_IS_LOCKED)));
 
       expect(Wire.data(DATA_KEY).lock(data_lockToken_one), isTrue);
       expect(Wire.data(DATA_KEY).lock(data_lockToken_one), isTrue);
       expect(Wire.data(DATA_KEY).lock(data_lockToken_two), isFalse);
+    });
+  });
+
+  group(GROUP_5_TITLE, () {
+    final DATA_KEY_USER_VO = 'dataKeyUserVO';
+    final GET__USER_FULL_NAME = 'getUserFullName';
+    final UserVO = {
+      'firstName': 'Wires',
+      'lastName': 'Ware',
+    };
+
+    setUp(() async {
+      print('> ===========================================================================');
+      print('> $GROUP_5_TITLE ');
+      print('> ===========================================================================');
+      await Wire.purge(withMiddleware: true);
+
+      Wire.data(DATA_KEY_USER_VO, value: UserVO).subscribe((value) async {
+        print('> $DATA_KEY_USER_VO -> updated: $value');
+      });
+
+      WireDataGetter<String> wireDataGetter = (WireData that) {
+        final wireData = Wire.data(DATA_KEY_USER_VO);
+        final userVO = wireData.value;
+        print('> $GET__USER_FULL_NAME -> get: ${that.key} isSet ${that.isSet}');
+        wireData.subscribe(that.refresh);
+        return '${userVO['firstName']} ${userVO['lastName']}';
+      };
+      Wire.data<String>(GET__USER_FULL_NAME, getter: wireDataGetter).subscribe((value) async {
+        print('> $GET__USER_FULL_NAME -> updated: $value');
+      });
+    });
+
+    test('5.1 Getter', () {
+      print('>\t Wire.data(GET__USER_FULL_NAME).isLocked');
+      expect(Wire.data(GET__USER_FULL_NAME).isLocked, isTrue);
+      expect(Wire.data(GET__USER_FULL_NAME).isGetter, isTrue);
+      expect(Wire.data(GET__USER_FULL_NAME).value, equals('${UserVO['firstName']} ${UserVO['lastName']}'));
+      final wireData = Wire.data(DATA_KEY_USER_VO);
+      final userVO = wireData.value;
+      userVO['lastName'] = 'Cores';
+      Wire.data(DATA_KEY_USER_VO, value: userVO);
+      expect(Wire.data(GET__USER_FULL_NAME).value, equals('${UserVO['firstName']} Cores'));
+      // expect(Wire.data(GET__USER_FULL_NAME, value: 'new value'), throwsException);
+      // expect(Wire.data(GET__USER_FULL_NAME, value: 'new value'), throwsA(Exception(ERROR__DATA_IS_GETTER)));
+      // expect(Wire.data(GET__USER_FULL_NAME, value: 'new value'), throwsA(TypeMatcher<Exception>()));
     });
   });
 }

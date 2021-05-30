@@ -30,10 +30,8 @@ class Wire<T> {
   ///
   /// @private
   static int _INDEX = 0;
-  static final WireCommunicateLayer _COMMUNICATION_LAYER =
-      WireCommunicateLayer();
-  static final WireDataContainerLayer _DATA_CONTAINER_LAYER =
-      WireDataContainerLayer();
+  static final WireCommunicateLayer _COMMUNICATION_LAYER = WireCommunicateLayer();
+  static final WireDataContainerLayer _DATA_CONTAINER_LAYER = WireDataContainerLayer();
   static final _MIDDLEWARE_LIST = <WireMiddleware>[];
 
   ///**************************************************
@@ -182,27 +180,19 @@ class Wire<T> {
     if (!_MIDDLEWARE_LIST.contains(value)) {
       _MIDDLEWARE_LIST.add(value);
     } else {
-      throw ERROR__MIDDLEWARE_EXISTS + value.toString();
+      throw Exception(ERROR__MIDDLEWARE_EXISTS + value.toString());
     }
   }
 
   /// When you need Wires associated with signal or scope or listener
   /// Returns [List<Wire>]
-  static List<Wire?> get(
-      {String? signal, Object? scope, WireListener? listener, int? wireId}) {
+  static List<Wire?> get({String? signal, Object? scope, WireListener? listener, int? wireId}) {
     var result = <Wire?>[];
-    if (signal != null) {
-      result.addAll(_COMMUNICATION_LAYER.getBySignal(signal));
-    }
-    if (scope != null) {
-      result.addAll(_COMMUNICATION_LAYER.getByScope(scope));
-    }
-    if (listener != null) {
-      result.addAll(_COMMUNICATION_LAYER.getByListener(listener));
-    }
-    if (wireId != null) {
-      result.add(_COMMUNICATION_LAYER.getByWID(wireId));
-    }
+    if (signal != null) result.addAll(_COMMUNICATION_LAYER.getBySignal(signal));
+    if (scope != null) result.addAll(_COMMUNICATION_LAYER.getByScope(scope));
+    if (listener != null) result.addAll(_COMMUNICATION_LAYER.getByListener(listener));
+    if (wireId != null) result.add(_COMMUNICATION_LAYER.getByWID(wireId));
+
     return result;
   }
 
@@ -224,16 +214,23 @@ class Wire<T> {
   /// void remove()
   /// ```
   /// Returns [WireData]
-  static WireData data<T>(String key, {T? value}) {
-    final wireData = _DATA_CONTAINER_LAYER.has(key)
+  static WireData data<T>(String key, {T? value, WireDataGetter<T>? getter}) {
+    final WireData wireData = _DATA_CONTAINER_LAYER.has(key)
         ? _DATA_CONTAINER_LAYER.get(key)
         : _DATA_CONTAINER_LAYER.create(key);
-    if (value != null && !wireData.isLocked) {
-      final prevValue = wireData.value;
-      final nextValue = value is Function ? value(prevValue) : value;
-      wireData.value = nextValue;
-      _MIDDLEWARE_LIST.forEach((m) async =>
-        await m.onData(key, prevValue, nextValue));
+    // print('> Wire -> WireData - data key = ${key}, value = ${value}, getter = ${getter}');
+    if (getter != null) {
+      wireData.value = getter;
+      wireData.lock(WireDataLockToken());
+    }
+    if (value != null) {
+      if (!wireData.isGetter) {
+        final prevValue = wireData.value;
+        final nextValue = (value is Function) ? value(prevValue) : value;
+        wireData.value = nextValue;
+        Future.forEach(_MIDDLEWARE_LIST, (WireMiddleware m) async =>
+          await m.onData(key, prevValue, nextValue));
+      } else wireData.value = value;
     }
     return wireData;
   }

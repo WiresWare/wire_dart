@@ -14,7 +14,7 @@ class WireCommunicateLayer {
     final signal = wire.signal;
 
     if (_wireById.containsKey(wireId)) {
-      throw ERROR__WIRE_ALREADY_REGISTERED + wireId.toString();
+      throw Exception(ERROR__WIRE_ALREADY_REGISTERED + wireId.toString());
     }
 
     _wireById[wireId] = wire;
@@ -75,8 +75,8 @@ class WireCommunicateLayer {
   Future<void> clear() async {
     var wiresToRemove = <Wire>[];
     _wireById.forEach((hash, wire) => wiresToRemove.add(wire));
-    for (var wire in wiresToRemove)
-      await _removeWire(wire);
+    await Future.forEach(wiresToRemove, (Wire wire) async =>
+      await _removeWire(wire));
 
     _wireById.clear();
     _wireIdsBySignal.clear();
@@ -138,13 +138,16 @@ class WireDataContainerLayer {
   WireData get(String key) => _dataMap[key]!;
   bool has(String key) => _dataMap.containsKey(key);
   WireData create(String key) {
-    return _dataMap[key] = WireData(key, (id) async => await _dataMap.remove(id));
+    return _dataMap[key] = WireData(key, (id) async =>
+      await _dataMap.remove(id));
   }
 
   Future<void> clear() async {
-    _dataMap.forEach((key, wireData) async {
-      await wireData.remove();
-    });
+    var wireDataToRemove = <WireData>[];
+    _dataMap.forEach((key, wireData) => wireDataToRemove.add(wireData));
+    await Future.forEach(wireDataToRemove, (WireData wireData) async =>
+      await wireData.remove(clean: true));
+
     _dataMap.clear();
   }
 }

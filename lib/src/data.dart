@@ -6,6 +6,7 @@ part of wire;
 /// License: APACHE LICENSE, VERSION 2.0
 ///
 typedef WireDataListener<T> = Future<void> Function(T value);
+typedef WireDataGetter<T> = T Function(WireData that);
 
 class WireDataLockToken {
   bool equal(WireDataLockToken token) => this == token;
@@ -14,6 +15,8 @@ class WireDataLockToken {
 class WireData<T> {
   Function? _onRemove;
   final _listeners = <WireDataListener<T?>>{};
+
+  bool get isGetter => _value is WireDataGetter;
 
   /// This property needed to distinguish between newly created and not set WireData which has value of null at the beginning
   /// And with WireData at time when it's removed, because when removing the value also set to null
@@ -44,9 +47,9 @@ class WireData<T> {
     return opened; // throw ERROR__DATA_CANNOT_OPEN
   }
 
-  T? _value; // initial value is null
-  T? get value => _value;
-  set value(T? input) {
+  dynamic _value; // initial value is null
+  T? get value => isGetter ? _value(this) : _value;
+  set value(dynamic input) {
     _guardian();
     _value = input;
     _isSet = true;
@@ -55,14 +58,14 @@ class WireData<T> {
 
   WireData(this._key, this._onRemove);
 
-  Future<void> refresh() async {
+  Future<void> refresh([dynamic value = null]) async {
     for (final listener in _listeners) {
-      await listener(_value);
+      await listener(this.value);
     }
   }
 
-  Future<void> remove() async {
-    _guardian();
+  Future<void> remove({bool clean = false}) async {
+    if (!clean) _guardian();
 
     await _onRemove!(_key); // never null because its a reference to the map.remove
     _onRemove = null;
@@ -76,7 +79,7 @@ class WireData<T> {
   }
 
   void _guardian() {
-    if (isLocked) throw ERROR__DATA_IS_LOCKED;
+    if (isLocked) throw Exception(isGetter ? ERROR__DATA_IS_GETTER : ERROR__DATA_IS_LOCKED);
   }
 
   WireData<T> subscribe(WireDataListener<T?> listener) {
