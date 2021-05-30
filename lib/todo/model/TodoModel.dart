@@ -10,10 +10,8 @@ class TodoModel {
   static const String LOCAL_STORAGE_KEY_COMPLETE_ALL = '$LOCAL_STORAGE_KEY-complete-all';
 
   final IDatabaseService _dbService;
-  bool _isFlutter = true;
 
-  TodoModel(this._dbService, {bool isFlutter = true}) {
-    _isFlutter = isFlutter;
+  TodoModel(this._dbService) {
     var idsList = <String>[];
     var notCompletedCount = 0;
     if (_dbService.exist(LOCAL_STORAGE_KEY)) {
@@ -69,10 +67,7 @@ class TodoModel {
       Wire.data(DataKeys.COUNT, value: count - 1);
     }
 
-    if (_isFlutter) {
-      // The only difference with web version - in Wire repositories (example TodoMVC)
-      Wire.data<List<String>>(DataKeys.LIST_OF_IDS, value: todoIdsList);
-    }
+    Wire.data<List<String>>(DataKeys.LIST_OF_IDS, value: todoIdsList);
 
     _saveChanges();
 
@@ -86,8 +81,7 @@ class TodoModel {
     todoVO.text = text;
     todoVO.note = note;
 
-    wireDateTodoVO
-        .refresh(); // this way won't update middlewares only direct write will: Wire.data<TodoVO>(id, todoVO);
+    wireDateTodoVO.refresh(); // this way won't update middlewares only direct write will: Wire.data<TodoVO>(id, todoVO);
 
     _saveChanges();
 
@@ -156,11 +150,6 @@ class TodoModel {
   void clearCompleted() async {
     final List<String> todoIdsList = Wire.data(DataKeys.LIST_OF_IDS).value;
     final List<WireData> listToRemove = [];
-    // Future.forEach<String>(todoIdsList, (String tid) async {
-    //   final todoWireData = Wire.data(tid);
-    //   if (todoWireData.value.completed)
-    //     await todoWireData.remove();
-    // });
     todoIdsList.removeWhere((tid) {
       final todoWireData = Wire.data(tid);
       final completed = todoWireData.value.completed;
@@ -172,15 +161,11 @@ class TodoModel {
     });
 
     Future.forEach(listToRemove, (WireData todoWireData) async => await todoWireData.remove());
+    Wire.data(DataKeys.LIST_OF_IDS, value: todoIdsList);
 
-    if (_isFlutter) {
-      Wire.data(DataKeys.LIST_OF_IDS, value: todoIdsList);
-    }
+    _saveChanges();
 
-    // _saveChanges();
-
-    print('> TodoModel -> clearCompleted: length = ' +
-        todoIdsList.length.toString());
+    print('> TodoModel -> clearCompleted: length = ' + todoIdsList.length.toString());
   }
 
   void _checkOnCompleteAll() {
