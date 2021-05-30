@@ -19,6 +19,7 @@ class TodoListItemView extends DomElement {
   final listeners = <StreamSubscription>[];
 
   TodoListItemView(String id) : super(LIElement()) {
+    dom.id = id;
     listeners.addAll([
       inpToggle.onClick.listen((e) => Wire.send(ViewSignals.TOGGLE, payload: id)),
       btnDelete.onClick.listen((e) => Wire.send(ViewSignals.DELETE, payload: id)),

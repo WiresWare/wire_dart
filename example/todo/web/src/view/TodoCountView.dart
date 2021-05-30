@@ -7,12 +7,13 @@ import 'base/DomElementView.dart';
 
 class TodoCountView extends DomElement {
   TodoCountView(Element dom) : super(dom) {
-    final wireDataCount = Wire.data<int>(DataKeys.COUNT);
-    wireDataCount.subscribe(updateCount);
-    updateCount(wireDataCount.value);
+    final dataCount = Wire.data<int>(DataKeys.COUNT);
+    final getterCountCompleted = Wire.data<int>(DataKeys.GET_COUNT_COMPLETED);
+    getterCountCompleted.subscribe((value) => updateCount(dataCount.value, value));
+    updateCount(dataCount.value, getterCountCompleted.value);
   }
 
-  Future<void> updateCount<int>(int value) async {
-    dom.text = value.toString();
+  Future<void> updateCount<int>(int count, int completedCount) async {
+    dom.text = '${count.toString()} | ${completedCount.toString()}';
   }
 }

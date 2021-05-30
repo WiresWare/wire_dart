@@ -19,7 +19,6 @@ var todoController;
 var routeController;
 
 void main() {
-  /// COUNTER EXAMPLE ======================================
   init();
   ready();
 }
@@ -27,7 +26,7 @@ void main() {
 void init() {
   Wire.middleware(TodoMiddleware());
 
-  todoModel = TodoModel(WebDatabaseService(), isFlutter: false);
+  todoModel = TodoModel(WebDatabaseService());
   todoView = TodoView();
 
   todoController = TodoController(todoModel);
