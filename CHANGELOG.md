@@ -1,3 +1,10 @@
+## 1.4.1
+- Wire.add method made async
+- Throw exception from Wire.data when setting value on WireData.isGetter
+- Additional check for null listener before transfer data
+- License year updated
+- Unused NodeJS files removed
+
 ## 1.4.0
 - Getter implementation in WireData: getter is method returned in result of getting wireData.value, in this case wireData instance is locked and can't be changed (new value by key won't be set).
 

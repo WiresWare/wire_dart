@@ -97,6 +97,7 @@ class Wire<T> {
 
   /// Call associated WireListener with data.
   Future<void> transfer(dynamic payload) async {
+    if (_listener == null) throw new Exception(ERROR__LISTENER_IS_NULL);
     // Call a listener in this Wire only in case data type match it's listener type.
     final filterByPayloadType = payload is T || payload == null;
     if (filterByPayloadType) await _listener!(payload, _id!);
@@ -127,10 +128,16 @@ class Wire<T> {
 
   /// Create wire object from params and [attach] it to the communication layer
   /// All middleware will be informed from [WireMiddleware.onAdd] before wire is attached to the layer
-  static Wire add<T>(Object scope, String signal, WireListener<T> listener,
-      {int replies = 0}) {
+  static Future<Wire> add<T>(
+    Object scope,
+    String signal,
+    WireListener<T> listener,
+    {int replies = 0}
+  ) async {
     final wire = Wire<T>(scope, signal, listener, replies);
-    _MIDDLEWARE_LIST.forEach((m) => m.onAdd(wire));
+    await Future.forEach(_MIDDLEWARE_LIST, (WireMiddleware middleware) async {
+      await middleware.onAdd(wire);
+    });
     attach(wire);
     return wire;
   }
@@ -149,7 +156,9 @@ class Wire<T> {
   ///
   /// Returns true when no wire for the signal has found
   static Future<bool> send<T>(String signal, {T? payload, Object? scope}) async {
-    _MIDDLEWARE_LIST.forEach((m) async => await m.onSend(signal, payload));
+    await Future.forEach(_MIDDLEWARE_LIST, (WireMiddleware middleware) async {
+      await middleware.onSend(signal, payload);
+    });
     return _COMMUNICATION_LAYER.send(signal, payload, scope);
   }
 
@@ -186,7 +195,12 @@ class Wire<T> {
 
   /// When you need Wires associated with signal or scope or listener
   /// Returns [List<Wire>]
-  static List<Wire?> get({String? signal, Object? scope, WireListener? listener, int? wireId}) {
+  static List<Wire?> get({
+    String? signal,
+    Object? scope,
+    WireListener? listener,
+    int? wireId
+  }) {
     var result = <Wire?>[];
     if (signal != null) result.addAll(_COMMUNICATION_LAYER.getBySignal(signal));
     if (scope != null) result.addAll(_COMMUNICATION_LAYER.getByScope(scope));
@@ -224,13 +238,12 @@ class Wire<T> {
       wireData.lock(WireDataLockToken());
     }
     if (value != null) {
-      if (!wireData.isGetter) {
-        final prevValue = wireData.value;
-        final nextValue = (value is Function) ? value(prevValue) : value;
-        wireData.value = nextValue;
-        Future.forEach(_MIDDLEWARE_LIST, (WireMiddleware m) async =>
-          await m.onData(key, prevValue, nextValue));
-      } else wireData.value = value;
+      if (wireData.isGetter) throw Exception(ERROR__VALUE_IS_NOT_ALLOWED_TOGETHER_WITH_GETTER);
+      final prevValue = wireData.value;
+      final nextValue = (value is Function) ? value(prevValue) : value;
+      wireData.value = nextValue;
+      Future.forEach(_MIDDLEWARE_LIST, (WireMiddleware m) async =>
+        await m.onData(key, prevValue, nextValue));
     }
     return wireData;
   }

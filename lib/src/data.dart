@@ -34,7 +34,7 @@ class WireData<T> {
   /// for modification entity. The purpose of this method is to restrict data changes
   /// only to the place where business logic or model related operations take place.
   bool lock(WireDataLockToken token) {
-    var locked = !isLocked || _lockToken!.equal(token);
+    final locked = !isLocked || _lockToken!.equal(token);
     if (locked) _lockToken = token;
     return locked; // throw ERROR__DATA_ALREADY_CLOSED
   }
@@ -79,7 +79,8 @@ class WireData<T> {
   }
 
   void _guardian() {
-    if (isLocked) throw Exception(isGetter ? ERROR__DATA_IS_GETTER : ERROR__DATA_IS_LOCKED);
+    if (isLocked) throw Exception(isGetter
+        ? ERROR__DATA_IS_GETTER : ERROR__DATA_IS_LOCKED);
   }
 
   WireData<T> subscribe(WireDataListener<T?> listener) {

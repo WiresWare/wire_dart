@@ -6,6 +6,8 @@ final String ERROR__WIRE_ALREADY_REGISTERED =
 final String ERROR__MIDDLEWARE_EXISTS =
     'WR:2001 - Middleware already registered, middleware: ';
 
+final String ERROR__LISTENER_IS_NULL =
+    'WR:3000 - Listener is null';
 final String ERROR__DATA_IS_LOCKED =
     'WR:3001 - WireData value change not allowed '
     '- data modification locked with token';
@@ -18,3 +20,6 @@ final String ERROR__DATA_CANNOT_BE_OPEN =
 final String ERROR__DATA_IS_GETTER =
     'WR:3003 - WireData is a getter'
     ' - it cannot be modified only accessed' ;
+final String ERROR__VALUE_IS_NOT_ALLOWED_TOGETHER_WITH_GETTER =
+    'WR:3004 - WireData is a getter'
+    ' - setting value together with getter is not allowed' ;

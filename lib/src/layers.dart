@@ -135,12 +135,10 @@ class WireCommunicateLayer {
 class WireDataContainerLayer {
   final Map<String, WireData> _dataMap = <String, WireData>{};
 
-  WireData get(String key) => _dataMap[key]!;
-  bool has(String key) => _dataMap.containsKey(key);
-  WireData create(String key) {
-    return _dataMap[key] = WireData(key, (id) async =>
-      await _dataMap.remove(id));
-  }
+  bool      has(String key)     => _dataMap.containsKey(key);
+  WireData  get(String key)     => _dataMap[key]!;
+  WireData  create(String key)  => _dataMap[key] = WireData(key, remove);
+  bool      remove(String key)  => _dataMap.remove(key) != null;
 
   Future<void> clear() async {
     var wireDataToRemove = <WireData>[];
