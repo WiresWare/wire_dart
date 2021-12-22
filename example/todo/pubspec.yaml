@@ -16,6 +16,6 @@ dependency_overrides:
     path: ../..
 
 dev_dependencies:
-  build_runner: ^1.12.2
+  build_runner: ^2.1.7
   build_test:
-  build_web_compilers: ^2.16.5
+  build_web_compilers: ^3.2.2
