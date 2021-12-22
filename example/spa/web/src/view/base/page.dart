@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'component.dart';
 
 abstract class Page extends Component {

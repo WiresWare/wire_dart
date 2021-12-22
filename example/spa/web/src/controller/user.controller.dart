@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:wire/wire.dart';
 
 import '../constants/Data.dart';
@@ -14,6 +12,6 @@ class UserController {
     final WireData userStatesData = Wire.data(Data.STATES_ROUTER);
     if (!userStatesData.isSet) userStatesData.value = new UserStates();
 
-    final userStates = userStatesData.value;
+    // final userStates = userStatesData.value;
   }
 }

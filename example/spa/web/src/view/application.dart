@@ -8,12 +8,7 @@ import '../constants/Data.dart';
 import '../constants/Signals.dart';
 
 class Application {
-  late HtmlElement _root;
-  late DivElement _header;
-
-  Application(HtmlElement root) {
-    _root = root;
-  }
+  Application(HtmlElement root) { }
 
   void initialize() {
 

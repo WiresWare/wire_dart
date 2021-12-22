@@ -84,12 +84,12 @@ void main() {
 
   /// DATA TESTS ===============================================
   var key1 = 'SUPER_PARAM';
-  Wire.data(key1)!.subscribe((data) async => {print('\t Listener 1 -> ' + data)});
+  Wire.data(key1).subscribe((data) async => {print('\t Listener 1 -> ' + data)});
 
-  Wire.data(key1)!.subscribe((data) async => {print('\t Listener 2 -> ' + data)});
+  Wire.data(key1).subscribe((data) async => {print('\t Listener 2 -> ' + data)});
 
   print('> Wire.data Listeners: where initial data = ' +
-      Wire.data(key1)!.value.toString());
+      Wire.data(key1).value.toString());
   Wire.data(key1, value: 'Set VALUE to key1: ' + key1);
   Wire.data(key1, value: (value) => value + ' | APPENDED from function call');
 }

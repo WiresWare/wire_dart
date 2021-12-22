@@ -111,6 +111,7 @@ yarn-error.log*
 *.sln
 *.sw*
 .history
+.dart_tool
 
 yarn.lock
 

@@ -1,3 +1,6 @@
+## 1.0.0
+- ONC-4425: Improve checkboxes styles. 
+
 ## 1.4.1
 - Wire.add method made async
 - Throw exception from Wire.data when setting value on WireData.isGetter
