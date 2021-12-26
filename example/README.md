@@ -16,6 +16,18 @@ For every project in example folder you have to run `pub get` from terminal or f
 - Path to: example/todo/index.html
 - Run Debug
 
+In case an error like: 
+```
+Building package executable...
+Failed to build webdev:webdev:
+../../.pub-cache/hosted/pub.dartlang.org/dds-2.1.6/lib/src/cpu_samples_manager.dart:54:21: Error: Type 'CpuSamplesEvent' not found.
+void cacheSamples(CpuSamplesEvent samples) {
+^^^^^^^^^^^^^^^
+../../.pub-cache/hosted/pub.dartlang.org/dds-2.1.6/lib/src/cpu_samples_manager.dart:54:21: Error: 'CpuSamplesEvent' isn't a type.
+void cacheSamples(CpuSamplesEvent samples) {
+```
+Edited cpu_samples_manager.dart in ~/.pub-cache/hosted/pub.dartlang.org/dds-2.1.6/lib/src/ and remove type CpuSamplesEvent.
+
 ### 3. API calls variations (console): Possible variation of Wire API use
 - Open IDEA
 - Select build target - Dart Command Line App, point to example/api/wire_api_example.dart
