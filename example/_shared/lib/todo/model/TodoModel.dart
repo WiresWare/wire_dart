@@ -1,22 +1,23 @@
 import 'package:wire/wire.dart';
 import 'package:wire_example_shared/todo/const/ViewSignals.dart';
+
 import '../const/DataKeys.dart';
 import '../const/FilterValues.dart';
-import '../service/IDatabaseService.dart';
 import '../data/vo/TodoVO.dart';
+import '../service/IDatabaseService.dart';
 
 class TodoModel {
-  static const String LOCAL_STORAGE_KEY = 'todo-mvc-dart-wire';
-  static const String LOCAL_STORAGE_KEY_COMPLETE_ALL = '$LOCAL_STORAGE_KEY-complete-all';
+  static const String STORAGE_KEY = 'todo-mvc-dart-wire';
+  static const String STORAGE_KEY_COMPLETE_ALL = '$STORAGE_KEY-complete-all';
 
   final IDatabaseService _dbService;
 
   TodoModel(this._dbService) {
     var idsList = <String>[];
     var notCompletedCount = 0;
-    if (_dbService.exist(LOCAL_STORAGE_KEY)) {
+    if (_dbService.exist(STORAGE_KEY)) {
       try {
-        _dbService.retrieve(LOCAL_STORAGE_KEY).forEach((obj) {
+        _dbService.retrieve(STORAGE_KEY).forEach((obj) {
           if (obj != null) {
             var todoVO = TodoVO.fromJson(obj);
             Wire.data<TodoVO>(todoVO.id, value: todoVO);
@@ -32,7 +33,8 @@ class TodoModel {
     print('> TodoModel count: ${notCompletedCount}');
     Wire.data<List<String>>(DataKeys.LIST_OF_IDS, value: idsList);
     Wire.data<int>(DataKeys.COUNT, value: notCompletedCount);
-    Wire.data(DataKeys.COMPLETE_ALL, value: _dbService.retrieve(LOCAL_STORAGE_KEY_COMPLETE_ALL));
+    Wire.data<bool>(DataKeys.COMPLETE_ALL,
+        value: _dbService.retrieve(STORAGE_KEY_COMPLETE_ALL) ?? notCompletedCount == 0);
   }
 
   TodoVO create(String text, String note, bool completed) {
@@ -81,7 +83,8 @@ class TodoModel {
     todoVO.text = text;
     todoVO.note = note;
 
-    wireDateTodoVO.refresh(); // this way won't update middlewares only direct write will: Wire.data<TodoVO>(id, todoVO);
+    wireDateTodoVO
+        .refresh(); // this way won't update middlewares only direct write will: Wire.data<TodoVO>(id, todoVO);
 
     _saveChanges();
 
@@ -104,7 +107,7 @@ class TodoModel {
 
     _saveChanges();
 
-    print('> TodoModel -> toggled: ' + todoVO.id + ' - ' + todoVO.text);
+    print('> TodoModel -> toggled: id = ${todoVO.id} - ${todoVO.completed} - ${todoVO.text}');
     return todoVO;
   }
 
@@ -115,9 +118,15 @@ class TodoModel {
       var todoVO = todoWireData.value as TodoVO;
       var todoVisible = todoVO.visible;
       switch (filter) {
-        case FilterValues.ALL: todoVisible = true; break;
-        case FilterValues.ACTIVE: todoVisible = !todoVO.completed; break;
-        case FilterValues.COMPLETED: todoVisible = todoVO.completed; break;
+        case FilterValues.ALL:
+          todoVisible = true;
+          break;
+        case FilterValues.ACTIVE:
+          todoVisible = !todoVO.completed;
+          break;
+        case FilterValues.COMPLETED:
+          todoVisible = todoVO.completed;
+          break;
       }
       if (todoVO.visible != todoVisible) {
         todoVO.visible = todoVisible;
@@ -170,7 +179,8 @@ class TodoModel {
 
   void _checkOnCompleteAll() {
     final completeAllWireData = Wire.data<bool>(DataKeys.COMPLETE_ALL);
-    final completeAll = completeAllWireData.isSet ? completeAllWireData.value : false;
+    final bool completeAll = completeAllWireData.isSet ? completeAllWireData.value : false;
+    print('> TodoModel -> _checkOnCompleteAll: completeAll = $completeAll');
     if (completeAll) {
       Wire.data(DataKeys.COMPLETE_ALL, value: false);
       Wire.send(ViewSignals.COMPLETE_ALL_FORCED, payload: false);
@@ -179,10 +189,8 @@ class TodoModel {
 
   void _saveChanges() {
     var listOfTodoVO = <TodoVO>[];
-    (Wire.data(DataKeys.LIST_OF_IDS).value as List)
-        .forEach((id) => listOfTodoVO.add(Wire.data(id).value));
-
-    _dbService.save(LOCAL_STORAGE_KEY, listOfTodoVO);
-    _dbService.save(LOCAL_STORAGE_KEY_COMPLETE_ALL, Wire.data(DataKeys.COMPLETE_ALL).value);
+    (Wire.data(DataKeys.LIST_OF_IDS).value as List).forEach((id) => listOfTodoVO.add(Wire.data(id).value));
+    _dbService.save(STORAGE_KEY, listOfTodoVO);
+    _dbService.save(STORAGE_KEY_COMPLETE_ALL, Wire.data(DataKeys.COMPLETE_ALL).value as bool);
   }
 }
