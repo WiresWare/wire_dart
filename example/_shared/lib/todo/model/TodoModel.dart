@@ -1,6 +1,5 @@
 import 'package:wire/wire.dart';
-import 'package:wire_example_shared/todo/const/ViewSignals.dart';
-
+import '../const/ViewSignals.dart';
 import '../const/DataKeys.dart';
 import '../const/FilterValues.dart';
 import '../data/vo/TodoVO.dart';
@@ -12,29 +11,38 @@ class TodoModel {
 
   final IDatabaseService _dbService;
 
+  late Future<bool> whenReady;
+
   TodoModel(this._dbService) {
-    var idsList = <String>[];
-    var notCompletedCount = 0;
-    if (_dbService.exist(STORAGE_KEY)) {
-      try {
-        _dbService.retrieve(STORAGE_KEY).forEach((obj) {
-          if (obj != null) {
-            var todoVO = TodoVO.fromJson(obj);
-            Wire.data<TodoVO>(todoVO.id, value: todoVO);
-            idsList.add(todoVO.id);
-            if (!todoVO.completed) notCompletedCount++;
-          }
-        });
-      } catch (e) {
-        print('Error loading form local storage: ' + e.toString());
+    whenReady = Future(() async {
+      var idsList = <String>[];
+      var notCompletedCount = 0;
+      print('> TodoModel -> init: _dbService.exist = ${_dbService.exist(STORAGE_KEY)}');
+      if (_dbService.exist(STORAGE_KEY)) {
+        try {
+          (await _dbService.retrieve(STORAGE_KEY) as List).forEach((obj) {
+            print('> TodoModel -> init: todo = $obj');
+            if (obj != null) {
+              var todoVO = TodoVO.fromJson(obj);
+              Wire.data<TodoVO>(todoVO.id, value: todoVO);
+              idsList.add(todoVO.id);
+              if (!todoVO.completed) notCompletedCount++;
+            }
+          });
+        } catch (e) {
+          print('> TodoModel -> init: Error loading form local storage: ' + e.toString());
+          return Future.value(false);
+        }
       }
-    }
-    print('> TodoModel list: ${idsList.length}');
-    print('> TodoModel count: ${notCompletedCount}');
-    Wire.data<List<String>>(DataKeys.LIST_OF_IDS, value: idsList);
-    Wire.data<int>(DataKeys.COUNT, value: notCompletedCount);
-    Wire.data<bool>(DataKeys.COMPLETE_ALL,
-        value: _dbService.retrieve(STORAGE_KEY_COMPLETE_ALL) ?? notCompletedCount == 0);
+      print('> TodoModel -> init: list = ${idsList.length}');
+      print('> TodoModel -> init: count = $notCompletedCount');
+      final isCompleteAll = await _dbService.retrieve(STORAGE_KEY_COMPLETE_ALL) ?? notCompletedCount == 0;
+
+      Wire.data<List<String>>(DataKeys.LIST_OF_IDS, value: idsList);
+      Wire.data<int>(DataKeys.COUNT, value: notCompletedCount);
+      Wire.data<bool>(DataKeys.COMPLETE_ALL, value: isCompleteAll);
+      return Future.value(true);
+    });
   }
 
   TodoVO create(String text, String note, bool completed) {
@@ -188,8 +196,9 @@ class TodoModel {
   }
 
   void _saveChanges() {
-    var listOfTodoVO = <TodoVO>[];
-    (Wire.data(DataKeys.LIST_OF_IDS).value as List).forEach((id) => listOfTodoVO.add(Wire.data(id).value));
+    var listOfTodoVO = [];
+    (Wire.data(DataKeys.LIST_OF_IDS).value as List).forEach((id) =>
+        listOfTodoVO.add(Wire.data(id).value.toJson()));
     _dbService.save(STORAGE_KEY, listOfTodoVO);
     _dbService.save(STORAGE_KEY_COMPLETE_ALL, Wire.data(DataKeys.COMPLETE_ALL).value as bool);
   }
