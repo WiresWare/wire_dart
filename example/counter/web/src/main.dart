@@ -1,11 +1,11 @@
-import 'package:wire/wire.dart';
 import 'dart:html';
+
+import 'package:wire/wire.dart';
 
 import 'const/CounterDataKeys.dart';
 import 'const/CounterSignalsKeys.dart';
-
-import 'model/middleware/CounterStorageMiddleware.dart';
 import 'controller/CounterController.dart';
+import 'model/middleware/CounterStorageMiddleware.dart';
 import 'view/components/CounterButton.dart';
 import 'view/components/CounterDisplay.dart';
 
@@ -17,13 +17,11 @@ void main() {
   final counterStorageMiddleware = CounterStorageMiddleware();
 
   // Set initial value from local storage
-  Wire.data(CounterDataKeys.COUNT,
-      value: counterStorageMiddleware.getInitialValue());
+  Wire.data(CounterDataKeys.COUNT, value: counterStorageMiddleware.getInitialValue());
   // Register middleware after setting initial value to prevent saving initial value
   Wire.middleware(counterStorageMiddleware);
 
-  print(
-      'Init Ready: initial value = ${Wire.data(CounterDataKeys.COUNT).value}');
+  print('Init Ready: initial value = ${Wire.data(CounterDataKeys.COUNT).value}');
 
   init();
 }
