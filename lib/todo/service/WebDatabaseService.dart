@@ -1,18 +1,20 @@
-import 'dart:html';
 import 'dart:convert';
+import 'dart:html';
 
 import 'IDatabaseService.dart';
 
 class WebDatabaseService extends IDatabaseService {
   @override
   bool exist(String key) {
-    return window.localStorage.containsKey(key);
+    final result = !!window.localStorage.containsKey(key);
+    print('> WebDatabaseService -> exist: $key = $result');
+    return result;
   }
 
   @override
-  dynamic retrieve(String key) {
+  Future<dynamic> retrieve(String key) {
     final value = window.localStorage[key];
-    return value != null ? jsonDecode(value) : null;
+    return Future.value(value != null ? jsonDecode(value) : null);
   }
 
   @override
