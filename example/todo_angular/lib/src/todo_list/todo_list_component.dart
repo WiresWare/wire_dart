@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:angular/angular.dart';
-import 'package:angular_components/angular_components.dart';
 import 'package:wire_example_angular_todo/src/todo_item/todo_item_component.dart';
 
 import 'todo_list_service.dart';

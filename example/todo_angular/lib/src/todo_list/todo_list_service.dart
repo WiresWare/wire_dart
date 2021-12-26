@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:angular/core.dart';
+import 'package:angular/angular.dart';
 import 'package:wire/wire.dart';
 import 'package:wire_example_shared/todo/const/DataKeys.dart';
 

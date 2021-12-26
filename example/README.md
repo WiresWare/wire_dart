@@ -22,7 +22,7 @@ For every project in example folder you have to run `pub get` from terminal or f
 - Run Debug
 
 ### 4. Todo with AngularDart web 
-#### (**NO SUPPORT FOR NULL-SAFETY**)
+#### (**NO SUPPORT FOR NULL-SAFETY - DEPRECATED**)
 
 ![Todo with Wire](../assets/wire_example_todo_angular.gif)
 - Open folder from IDEA
