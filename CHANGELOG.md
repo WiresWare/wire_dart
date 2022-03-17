@@ -1,3 +1,7 @@
+## 1.4.3
+- Reset WireData value to null with and call listeners: Wire.data(DataKey.SOMETHING).reset()
+- WireViewer in progress
+
 ## 1.4.2
 - Examples shared code updated to work with wire_flutter (https://pub.dev/packages/wire_flutter)
 - Angular Example is deprecated

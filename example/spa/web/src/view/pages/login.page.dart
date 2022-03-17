@@ -1,5 +1,9 @@
 import 'dart:html';
 
+import 'package:wire/wire.dart';
+
+import '../../constants/Action.dart';
+import '../../constants/Signals.dart';
 import '../base/page.dart';
 
 class LoginPage extends Page {
@@ -10,8 +14,9 @@ class LoginPage extends Page {
   @override
   void initialize() {
     (dom.querySelector('#btnConfirm') as HtmlElement)
-      .addEventListener('click', (event) => {
-        print('Confirm')
+      .addEventListener('click', (event) {
+        print('Confirm');
+        Wire.send(Signals.STATES_ACTION__NAVIGATE, payload: Action.NAVIGATE_TO_MAIN);
       });
   }
 

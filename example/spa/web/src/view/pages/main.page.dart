@@ -6,7 +6,7 @@ class MainPage extends Page {
   ButtonElement _btnIndex = ButtonElement();
   ButtonElement _btnGallery = ButtonElement();
 
-  MainPage() : super('main.html') {
+  MainPage() : super('main') {
     dom.style.backgroundColor = 'wheat';
   }
 

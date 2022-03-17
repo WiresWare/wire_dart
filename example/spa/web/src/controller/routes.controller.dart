@@ -31,10 +31,11 @@ class RoutesController {
   void initialize() {
     final WireData routerStatesData = Wire.data(Data.STATES_ROUTER);
     if (!routerStatesData.isSet) {
-      Wire.data(Data.STATES_ROUTER, value: new RouterStates()).lock(WireDataLockToken());
+      Wire.data(Data.STATES_ROUTER, value: new RouterStates())
+          .lock(WireDataLockToken());
     }
 
-    final routerStates = routerStatesData.value;
+    RouterStates routerStates = routerStatesData.value;
     routerStates.when(
       at: RouterStates.INITIAL, to: RouterStates.PAGE_LOGIN,
       on: Action.NAVIGATE_TO_LOGIN, handler: (StatesTransition transition) => {
@@ -44,6 +45,12 @@ class RoutesController {
       at: RouterStates.INITIAL, to: RouterStates.PAGE_MAIN,
       on: Action.NAVIGATE_TO_MAIN, handler: (StatesTransition transition) => {
         navigateFromTo(MainPage()) }
+    );
+
+    routerStates.when(
+        at: RouterStates.PAGE_LOGIN, to: RouterStates.PAGE_MAIN,
+        on: Action.NAVIGATE_TO_MAIN, handler: (StatesTransition transition) => {
+      navigateFromTo(MainPage()) }
     );
   }
 

@@ -20,8 +20,7 @@ class WireData<T> {
 
   /// This property needed to distinguish between newly created and not set WireData which has value of null at the beginning
   /// And with WireData at time when it's removed, because when removing the value also set to null
-  bool _isSet = false;
-  bool get isSet => _isSet;
+  bool get isSet => _value != null;
 
   String? _key;
   String? get key => _key;
@@ -52,16 +51,21 @@ class WireData<T> {
   set value(dynamic input) {
     _guardian();
     _value = input;
-    _isSet = true;
     refresh();
   }
 
   WireData(this._key, this._onRemove);
 
-  Future<void> refresh([dynamic value = null]) async {
+  Future<void> refresh([dynamic value]) async {
     for (final listener in _listeners) {
       await listener(this.value);
     }
+  }
+
+  Future<void> reset() async {
+    _guardian();
+    _value = null;
+    await refresh();
   }
 
   Future<void> remove({bool clean = false}) async {
@@ -79,8 +83,7 @@ class WireData<T> {
   }
 
   void _guardian() {
-    if (isLocked) throw Exception(isGetter
-        ? ERROR__DATA_IS_GETTER : ERROR__DATA_IS_LOCKED);
+    if (isLocked) throw Exception(isGetter ? ERROR__DATA_IS_GETTER : ERROR__DATA_IS_LOCKED);
   }
 
   WireData<T> subscribe(WireDataListener<T?> listener) {
