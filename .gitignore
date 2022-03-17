@@ -9,6 +9,7 @@ pubspec.lock
 /example/todo/.dart_tool/
 /example/todo/debug.log
 /example/todo_angular/debug.log
+example/todo_angular/pubspec.lock
 /example/spa/.dart_tool/
 /example/spa/node_modules/
 /example/spa/storybook-static/
