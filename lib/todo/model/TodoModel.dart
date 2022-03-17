@@ -48,13 +48,17 @@ class TodoModel {
   TodoVO create(String text, String note, bool completed) {
     final newTodoId = DateTime.now().millisecondsSinceEpoch.toString();
     final newTodoVO = TodoVO(newTodoId, text, note, completed);
+    
     final todoIdsList = Wire.data(DataKeys.LIST_OF_IDS).value!;
     final count = Wire.data<int>(DataKeys.COUNT).value;
 
     todoIdsList.add(newTodoId);
 
+    // Add Todo to data layer
     Wire.data<TodoVO>(newTodoVO.id, value: newTodoVO);
+    // Update TodoList in data layer
     Wire.data<List<String>>(DataKeys.LIST_OF_IDS, value: todoIdsList);
+    // Update Todo complete counter
     Wire.data<int>(DataKeys.COUNT, value: count + (completed ? 0 : 1));
 
     _checkOnCompleteAll();
