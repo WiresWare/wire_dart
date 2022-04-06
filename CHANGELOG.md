@@ -1,3 +1,6 @@
+## 1.4.5
+- Print removal
+
 ## 1.4.4
 - Working version on await Wire.send
 - Code refactoring and clarifications

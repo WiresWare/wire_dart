@@ -107,7 +107,7 @@ class Wire<T> {
     if (_listener == null) throw Exception(ERROR__LISTENER_IS_NULL);
     // Call a listener in this Wire only in case data type match it's listener type.
     final filterByPayloadType =  payload is T || payload == null;
-    print('> Wire -> transfer(${T}): filterByPayloadType = ${filterByPayloadType}');
+    // print('> Wire -> transfer(${T}): filterByPayloadType = ${filterByPayloadType}');
     if (filterByPayloadType) await _listener!(payload, _id!);
   }
 
