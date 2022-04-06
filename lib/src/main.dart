@@ -74,7 +74,14 @@ class Wire<T> {
   /// The number of times that wire instance will respond on signal before being removed.
   /// Default is 0 that means infinity times.
   ///
-  int replies = 0;
+  int _replies = 0;
+  int get replies => _replies;
+  set replies(int value) {
+    _withReplies = value > 0;
+    _replies = value;
+  }
+  bool _withReplies = false;
+  bool get withReplies => _withReplies;
 
   /// Wire object is a communication unit of the system, each instance associated with a signal
   ///
@@ -97,9 +104,10 @@ class Wire<T> {
 
   /// Call associated WireListener with data.
   Future<void> transfer(dynamic payload) async {
-    if (_listener == null) throw new Exception(ERROR__LISTENER_IS_NULL);
+    if (_listener == null) throw Exception(ERROR__LISTENER_IS_NULL);
     // Call a listener in this Wire only in case data type match it's listener type.
-    final filterByPayloadType = payload is T || payload == null;
+    final filterByPayloadType =  payload is T || payload == null;
+    print('> Wire -> transfer(${T}): filterByPayloadType = ${filterByPayloadType}');
     if (filterByPayloadType) await _listener!(payload, _id!);
   }
 
@@ -135,9 +143,9 @@ class Wire<T> {
     {int replies = 0}
   ) async {
     final wire = Wire<T>(scope, signal, listener, replies);
-    await Future.forEach(_MIDDLEWARE_LIST, (WireMiddleware middleware) async {
-      await middleware.onAdd(wire);
-    });
+    if (_MIDDLEWARE_LIST.isNotEmpty) {
+      await Future.forEach(_MIDDLEWARE_LIST, (WireMiddleware middleware) => middleware.onAdd(wire));
+    }
     attach(wire);
     return wire;
   }
@@ -156,9 +164,9 @@ class Wire<T> {
   ///
   /// Returns true when no wire for the signal has found
   static Future<bool> send<T>(String signal, {T? payload, Object? scope}) async {
-    await Future.forEach(_MIDDLEWARE_LIST, (WireMiddleware middleware) async {
-      await middleware.onSend(signal, payload);
-    });
+    if (_MIDDLEWARE_LIST.isNotEmpty) {
+      await Future.forEach(_MIDDLEWARE_LIST, (WireMiddleware middleware) => middleware.onSend(signal, payload));
+    }
     return _COMMUNICATION_LAYER.send(signal, payload, scope);
   }
 
@@ -167,8 +175,9 @@ class Wire<T> {
   static Future<void> purge({bool? withMiddleware}) async {
     await _COMMUNICATION_LAYER.clear();
     await _DATA_CONTAINER_LAYER.clear();
-    if (withMiddleware ?? false)
+    if (withMiddleware ?? false) {
       _MIDDLEWARE_LIST.clear();
+    }
   }
 
   /// Remove all wires for specific signal, for more precise target to remove add scope and/or listener

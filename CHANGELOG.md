@@ -1,3 +1,7 @@
+## 1.4.4
+- Working version on await Wire.send
+- Code refactoring and clarifications
+
 ## 1.4.3
 - Reset WireData value to null with and call listeners: Wire.data(DataKey.SOMETHING).reset()
 - WireViewer in progress

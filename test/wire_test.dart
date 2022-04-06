@@ -136,7 +136,7 @@ void main() {
       }, replies: 2);
       print('> 1.4.1 -> Wire.send(SIGNAL_COUNTER) == isFalse');
       expect(await Wire.send(SIGNAL_COUNTER), isFalse);
-      print('> 1.4.1 -> Wire.send(SIGNAL_COUNTER) == isTrue - True means that there is not more wires with that signal left');
+      print('> 1.4.2 -> Wire.send(SIGNAL_COUNTER) == isTrue - True means that there is not more wires with that signal left');
       expect(await Wire.send(SIGNAL_COUNTER), isTrue);
     });
   });
