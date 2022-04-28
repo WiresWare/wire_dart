@@ -256,4 +256,18 @@ class Wire<T> {
     }
     return wireData;
   }
+
+  /// Store an instance of the object by it's type, and lock it, so it can't be overwritten
+  static void put<T>(T instance, {WireDataLockToken? lock}) {
+    final key = instance.runtimeType.toString();
+    if (Wire.data(key).isLocked) throw AssertionError(ERROR__CANT_PUT_ALREADY_EXISTING_INSTANCE);
+    Wire.data(key, value: instance).lock(lock ?? WireDataLockToken());
+  }
+
+  /// Return an instance of an object by its type, throw an error in case it is not set
+  static T find<T>([T? instanceType]) {
+    final key = (instanceType ?? T).toString();
+    if (Wire.data(key).isSet == false) throw AssertionError(ERROR__CANT_FIND_INSTANCE_NULL);
+    return Wire.data(key).value as T;
+  }
 }

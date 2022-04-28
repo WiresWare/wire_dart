@@ -1,3 +1,6 @@
+## 1.4.6
+- API updated with two new methods: `put` which store an instance of the object by it's type, and lock it, so it can't be overwritten, and `find` returns an instance of an object by its type, throw an error in case it is not set
+
 ## 1.4.5
 - Print removal
 
