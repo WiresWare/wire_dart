@@ -131,7 +131,7 @@ class Wire<T> {
   /// Remove wire object from communication layer, then inform all middlewares with
   /// Returns existence of another wires with that signal.
   static Future<bool> detach(Wire wire) {
-    return remove(wire.signal, scope: wire.scope, listener: wire.listener);
+    return remove(signal: wire.signal, scope: wire.scope, listener: wire.listener);
   }
 
   /// Create wire object from params and [attach] it to the communication layer
@@ -148,6 +148,11 @@ class Wire<T> {
     }
     attach(wire);
     return wire;
+  }
+
+  /// Register many signals at once
+  static Future<List<Wire<dynamic>>> addMany(Object scope, Map<String, WireListener<dynamic>> signalToHandlerMap) {
+    return Future.wait(signalToHandlerMap.entries.map((e) async => await Wire.add(scope, e.key, e.value)));
   }
 
   /// Check if signal string or wire instance exists in communication layer
@@ -183,7 +188,13 @@ class Wire<T> {
   /// Remove all wires for specific signal, for more precise target to remove add scope and/or listener
   /// All middleware will be informed from [WireMiddleware.onRemove] after signal removed, only if existed
   /// Returns [bool] telling signal existed in communication layer
-  static Future<bool> remove(String signal, {Object? scope, WireListener? listener}) async {
+  static Future<bool> remove({String? signal, Object? scope, WireListener? listener}) async {
+    if (signal != null) return _removeAllBySignal(signal);
+    if (scope != null) return (await _removeAllByScope(scope)).isNotEmpty;
+    return false;
+  }
+
+  static Future<bool> _removeAllBySignal(String signal, {Object? scope, WireListener? listener}) async {
     final existed = await _COMMUNICATION_LAYER.remove(signal, scope, listener);
     if (existed) {
       await Future.forEach(_MIDDLEWARE_LIST, (WireMiddleware middleware) async {
@@ -191,6 +202,12 @@ class Wire<T> {
       });
     }
     return existed;
+  }
+
+  static Future<List<bool>> _removeAllByScope(Object scope) async {
+    final listOfWiresForScope = List.from(_COMMUNICATION_LAYER.getByScope(scope));
+    return Future.wait(listOfWiresForScope.map((wire) async =>
+      await _removeAllBySignal(wire.signal, scope: scope)));
   }
 
   /// Class extending [WireMiddleware] can listen to all processes in side Wire
@@ -204,17 +221,20 @@ class Wire<T> {
 
   /// When you need Wires associated with signal or scope or listener
   /// Returns [List<Wire>]
-  static List<Wire?> get({
+  static List<Wire> get({
     String? signal,
     Object? scope,
     WireListener? listener,
     int? wireId
   }) {
-    var result = <Wire?>[];
+    var result = <Wire>[];
     if (signal != null) result.addAll(_COMMUNICATION_LAYER.getBySignal(signal));
     if (scope != null) result.addAll(_COMMUNICATION_LAYER.getByScope(scope));
     if (listener != null) result.addAll(_COMMUNICATION_LAYER.getByListener(listener));
-    if (wireId != null) result.add(_COMMUNICATION_LAYER.getByWID(wireId));
+    if (wireId != null) {
+      Wire? wire = _COMMUNICATION_LAYER.getByWireId(wireId);
+      if (wire != null) result.add(wire);
+    }
 
     return result;
   }

@@ -1,3 +1,8 @@
+## 1.4.7
+- API updated with new methods: `addMany` which allow to add (create) wires from Map<String, WireListener>
+- Wire.remove rewritten to allow remove all wires related to scope without specifying each signal with scope
+- Tests updated with coverage of new method `addMany`
+
 ## 1.4.6
 - API updated with two new methods: `put` which store an instance of the object by it's type, and lock it, so it can't be overwritten, and `find` returns an instance of an object by its type, throw an error in case it is not set
 

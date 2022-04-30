@@ -44,6 +44,7 @@ void main() {
     final TEST_CASE_1_3 = '1.3. Detach Signal';
     final TEST_CASE_1_4 = '1.4. Counter Signal with 2 replies';
     final TEST_CASE_1_5 = '1.5. Test put/find';
+    final TEST_CASE_1_6 = '1.6. Add many and remove by scope';
 
     const SCOPE = Object();
 
@@ -153,6 +154,38 @@ void main() {
       print('> 1.5.2 -> Find object of type ${putFindTestObject.runtimeType}');
       expect(Wire.find<PutFindTestObject>() == putFindTestObject, isTrue);
     });
+
+    test(TEST_CASE_1_6, () async {
+      print('> ===========================================================================');
+      print('> $TEST_CASE_1_6 ');
+      print('> ===========================================================================');
+      print('> TEST for add many signals/listener for the scope and remove them all by that scope');
+
+      final scope = PutFindTestObject();
+      final SIGNAL_NEW = 'SIGNAL_NEW';
+
+      await Wire.addMany(scope, {
+        SIGNAL_G1: (_, __) async { print('> $TEST_CASE_1_6 -> Hello from $SIGNAL_G1'); },
+        SIGNAL_NEW: (_, __) async { print('> $TEST_CASE_1_6 -> Hello from $SIGNAL_NEW'); },
+        SIGNAL_COUNTER: (_, __) async { print('> $TEST_CASE_1_6 -> Hello from $SIGNAL_COUNTER'); },
+      });
+
+      print('> 1.6.1 -> Check if added signals exist');
+      expect(Wire.get(signal: SIGNAL_G1).isNotEmpty, isTrue);
+      expect(Wire.get(signal: SIGNAL_NEW).isNotEmpty, isTrue);
+      expect(Wire.get(signal: SIGNAL_COUNTER).isNotEmpty, isTrue);
+
+      print('> 1.6.2 -> Send signal to verify their work');
+      await Wire.send(SIGNAL_G1);
+      await Wire.send(SIGNAL_NEW);
+      await Wire.send(SIGNAL_COUNTER);
+
+      print('> 1.6.3 -> Call Wire.removeAllByScope(scope)');
+      await Wire.remove(scope: scope);
+
+      print('> 1.6.4 -> Check no signals after removal');
+      expect(Wire.get(scope: scope).isEmpty, isTrue);
+    });
   });
 
   group(GROUP_2_TITLE, () {
@@ -230,7 +263,7 @@ void main() {
       print('> 2.2.2 -> Wire.has(signal: SIGNAL_G2) == isTrue');
       expect(Wire.has(signal: SIGNAL_G2), isTrue);
       print('> ======================= REMOVE SIGNAL_G2 =======================');
-      await Wire.remove(SIGNAL_G2);
+      await Wire.remove(signal: SIGNAL_G2);
       print('> 2.2.3 -> Wire.has(signal: SIGNAL_G2) == isFalse');
       expect(Wire.has(signal: SIGNAL_G2), isFalse);
       expect(Wire.get(signal: SIGNAL_G2), isEmpty);

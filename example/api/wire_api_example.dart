@@ -23,7 +23,7 @@ void main() {
   Wire.send(SIGNAL_1, payload: 'World');
   Wire.send(SIGNAL_1, payload: 'Dart');
   Wire.send(SIGNAL_1, payload: 'Vladimir');
-  Wire.remove(SIGNAL_1);
+  Wire.remove(signal: SIGNAL_1);
 
   /// SUBSCRIBER END =========================================
   ///
@@ -46,15 +46,15 @@ void main() {
       (bool? data, int? wid) async => print('> Remove: SIGNAL 2 -> Boolean data: ' + data.toString()));
 
   // *** (remove)
-  /* 1 */ Wire.remove(SIGNAL_3, listener: listener2);
-  /* 3 */ Wire.remove(SIGNAL_3, scope: SCOPE_2);
+  /* 1 */ Wire.remove(signal: SIGNAL_3, listener: listener2);
+  /* 3 */ Wire.remove(signal: SIGNAL_3, scope: SCOPE_2);
 
   /* 1, 3 */ Wire.send(SIGNAL_3, payload: 'SIGNAL_3');
   /* 4 */ Wire.send(SIGNAL_4, payload: 'SIGNAL_4');
   /* 5 */ Wire.send(SIGNAL_4, payload: false);
 
-  /* 2 */ Wire.remove(SIGNAL_1, scope: SCOPE);
-  /* 4 */ Wire.remove(SIGNAL_2, scope: SCOPE_2);
+  /* 2 */ Wire.remove(signal: SIGNAL_1, scope: SCOPE);
+  /* 4 */ Wire.remove(signal: SIGNAL_2, scope: SCOPE_2);
 
   /// ONCE EXAMPLE ===========================================
   Wire.add(SCOPE, SIGNAL_ONCE, (dynamic data, int? wid) async {

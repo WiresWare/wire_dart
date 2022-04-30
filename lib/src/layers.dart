@@ -94,7 +94,7 @@ class WireCommunicateLayer {
 
   List<Wire> getBySignal(String signal) {
     return hasSignal(signal) ? _wireIdsBySignal[signal]!.map((wid) =>
-      _wireById[wid]) as List<Wire<dynamic>> : <Wire>[];
+      _wireById[wid]!).toList() : <Wire>[];
   }
 
   List<Wire> getByScope(Object scope) {
@@ -109,7 +109,7 @@ class WireCommunicateLayer {
     return result;
   }
 
-  Wire? getByWID(int wireId) {
+  Wire? getByWireId(int wireId) {
     return _wireById.containsKey(wireId) ? _wireById[wireId] : null;
   }
 
