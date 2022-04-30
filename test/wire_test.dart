@@ -43,6 +43,7 @@ void main() {
     final TEST_CASE_1_2 = '1.2. Unregistered Signal';
     final TEST_CASE_1_3 = '1.3. Detach Signal';
     final TEST_CASE_1_4 = '1.4. Counter Signal with 2 replies';
+    final TEST_CASE_1_5 = '1.5. Test put/find';
 
     const SCOPE = Object();
 
@@ -138,6 +139,19 @@ void main() {
       expect(await Wire.send(SIGNAL_COUNTER), isFalse);
       print('> 1.4.2 -> Wire.send(SIGNAL_COUNTER) == isTrue - True means that there is not more wires with that signal left');
       expect(await Wire.send(SIGNAL_COUNTER), isTrue);
+    });
+
+    test(TEST_CASE_1_5, () async {
+      print('> ===========================================================================');
+      print('> $TEST_CASE_1_5 ');
+      print('> ===========================================================================');
+      print('> TEST put/find instances by their type, the instance should be preserved');
+
+      final putFindTestObject = PutFindTestObject();
+      print('> 1.5.1 -> Put object of type ${putFindTestObject.runtimeType} to Wire');
+      Wire.put(putFindTestObject);
+      print('> 1.5.2 -> Find object of type ${putFindTestObject.runtimeType}');
+      expect(Wire.find<PutFindTestObject>() == putFindTestObject, isTrue);
     });
   });
 
@@ -312,3 +326,5 @@ void main() {
     });
   });
 }
+
+class PutFindTestObject { }
