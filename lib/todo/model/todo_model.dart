@@ -1,42 +1,35 @@
 import 'package:wire/wire.dart';
-import '../const/ViewSignals.dart';
-import '../const/DataKeys.dart';
-import '../const/FilterValues.dart';
-import '../data/vo/TodoVO.dart';
-import '../service/IDatabaseService.dart';
+import 'package:wire_example_shared/todo/const/data_keys.dart';
+import 'package:wire_example_shared/todo/const/filter_values.dart';
+import 'package:wire_example_shared/todo/const/view_signals.dart';
+import 'package:wire_example_shared/todo/data/vo/todo_vo.dart';
+import 'package:wire_example_shared/todo/service/abstract_database_service.dart';
 
 class TodoModel {
-  static const String STORAGE_KEY = 'todo-mvc-dart-wire';
-  static const String STORAGE_KEY_COMPLETE_ALL = '$STORAGE_KEY-complete-all';
-
-  final IDatabaseService _dbService;
-
-  late Future<bool> whenReady;
-
   TodoModel(this._dbService) {
     whenReady = Future(() async {
-      var idsList = <String>[];
+      final idsList = <String>[];
       var notCompletedCount = 0;
       print('> TodoModel -> init: _dbService.exist = ${_dbService.exist(STORAGE_KEY)}');
       if (_dbService.exist(STORAGE_KEY)) {
         try {
-          (await _dbService.retrieve(STORAGE_KEY) as List).forEach((obj) {
+          for (final obj in await _dbService.retrieve(STORAGE_KEY) as List) {
             print('> TodoModel -> init: todo = $obj');
             if (obj != null) {
-              var todoVO = TodoVO.fromJson(obj);
+              final todoVO = TodoVO.fromJson(obj as Map<String, dynamic>);
               Wire.data<TodoVO>(todoVO.id, value: todoVO);
               idsList.add(todoVO.id);
               if (!todoVO.completed) notCompletedCount++;
             }
-          });
+          }
         } catch (e) {
-          print('> TodoModel -> init: Error loading form local storage: ' + e.toString());
+          print('> TodoModel -> init: Error loading form local storage: $e');
           return Future.value(false);
         }
       }
       print('> TodoModel -> init: list = ${idsList.length}');
       print('> TodoModel -> init: count = $notCompletedCount');
-      final isCompleteAll = await _dbService.retrieve(STORAGE_KEY_COMPLETE_ALL) ?? notCompletedCount == 0;
+      final bool isCompleteAll = await _dbService.retrieve(STORAGE_KEY_COMPLETE_ALL) as bool? ?? notCompletedCount == 0;
 
       Wire.data<List<String>>(DataKeys.LIST_OF_IDS, value: idsList);
       Wire.data<int>(DataKeys.COUNT, value: notCompletedCount);
@@ -45,11 +38,17 @@ class TodoModel {
     });
   }
 
+  static const String STORAGE_KEY = 'todo-mvc-dart-wire';
+  static const String STORAGE_KEY_COMPLETE_ALL = '$STORAGE_KEY-complete-all';
+
+  final IDatabaseService _dbService;
+  late Future<bool> whenReady;
+
   TodoVO create(String text, String note, bool completed) {
     final newTodoId = DateTime.now().millisecondsSinceEpoch.toString();
     final newTodoVO = TodoVO(newTodoId, text, note, completed);
-    
-    final todoIdsList = Wire.data(DataKeys.LIST_OF_IDS).value!;
+
+    final todoIdsList = Wire.data<List<String>>(DataKeys.LIST_OF_IDS).value;
     final count = Wire.data<int>(DataKeys.COUNT).value;
 
     todoIdsList.add(newTodoId);
@@ -64,13 +63,13 @@ class TodoModel {
     _checkOnCompleteAll();
     _saveChanges();
 
-    print('> TodoModel -> created: ' + newTodoVO.id + ' - ' + newTodoVO.text);
+    print('> TodoModel -> created: ${newTodoVO.id} - ${newTodoVO.text}');
     return newTodoVO;
   }
 
   Future<TodoVO> remove(String id) async {
-    final todoIdsList = Wire.data<List<String>>(DataKeys.LIST_OF_IDS).value!;
-    final count = Wire.data<int>(DataKeys.COUNT).value as int;
+    final todoIdsList = Wire.data<List<String>>(DataKeys.LIST_OF_IDS).value;
+    final count = Wire.data<int>(DataKeys.COUNT).value;
     final wireDataTodoVO = Wire.data<TodoVO>(id);
     final todoVO = wireDataTodoVO.value;
 
@@ -85,7 +84,7 @@ class TodoModel {
 
     _saveChanges();
 
-    print('> TodoModel -> removed: ' + id);
+    print('> TodoModel -> removed: $id');
     return todoVO;
   }
 
@@ -95,12 +94,11 @@ class TodoModel {
     todoVO.text = text;
     todoVO.note = note;
 
-    wireDateTodoVO
-        .refresh(); // this way won't update middlewares only direct write will: Wire.data<TodoVO>(id, todoVO);
+    wireDateTodoVO.refresh(); // this way won't update middlewares only direct write will: Wire.data<TodoVO>(id, todoVO);
 
     _saveChanges();
 
-    print('> TodoModel -> updated: ' + todoVO.id + ' - ' + todoVO.text);
+    print('> TodoModel -> updated: ${todoVO.id} - ${todoVO.text}');
     return todoVO;
   }
 
@@ -124,11 +122,11 @@ class TodoModel {
   }
 
   void filter(FilterValues filter) {
-    final todoList = Wire.data(DataKeys.LIST_OF_IDS).value as List;
-    todoList.forEach((id) {
-      var todoWireData = Wire.data(id);
-      var todoVO = todoWireData.value as TodoVO;
-      var todoVisible = todoVO.visible;
+    final todoList = Wire.data(DataKeys.LIST_OF_IDS).value as List<String>;
+    for (final id in todoList) {
+      final todoWireData = Wire.data(id);
+      final todoVO = todoWireData.value as TodoVO;
+      bool todoVisible = todoVO.visible;
       switch (filter) {
         case FilterValues.ALL:
           todoVisible = true;
@@ -144,35 +142,35 @@ class TodoModel {
         todoVO.visible = todoVisible;
         Wire.data(id, value: todoVO);
       }
-    });
+    }
     Wire.data<FilterValues>(DataKeys.FILTER, value: filter);
-    print('> TodoModel -> filtered: ' + filter.toString());
+    print('> TodoModel -> filtered: $filter');
   }
 
-  void setCompletionToAll(value) {
-    final todoList = Wire.data(DataKeys.LIST_OF_IDS).value as List;
+  void setCompletionToAll(bool value) {
+    final todoList = Wire.data(DataKeys.LIST_OF_IDS).value as List<String>;
     var count = Wire.data(DataKeys.COUNT).value as int;
-    print('> TodoModel -> setCompletionToAll: $value - ' + count.toString());
-    todoList.forEach((id) {
-      var todoWireData = Wire.data(id);
-      var todoVO = todoWireData.value as TodoVO;
+    print('> TodoModel -> setCompletionToAll: $value - $count');
+    for (final id in todoList) {
+      final todoWireData = Wire.data(id);
+      final todoVO = todoWireData.value as TodoVO;
       if (todoVO.completed != value) {
         count += value ? -1 : 1;
         todoVO.completed = value;
         Wire.data(id, value: todoVO);
       }
-    });
+    }
     Wire.data(DataKeys.COUNT, value: count);
     Wire.data(DataKeys.COMPLETE_ALL, value: value);
 
     _saveChanges();
   }
 
-  void clearCompleted() async {
-    final List<String> todoIdsList = Wire.data(DataKeys.LIST_OF_IDS).value;
-    final List<WireData> listToRemove = [];
+  void clearCompleted() {
+    final todoIdsList = Wire.data<List<String>>(DataKeys.LIST_OF_IDS).value;
+    final List<WireData<TodoVO>> listToRemove = [];
     todoIdsList.removeWhere((tid) {
-      final todoWireData = Wire.data(tid);
+      final todoWireData = Wire.data<TodoVO>(tid);
       final completed = todoWireData.value.completed;
       if (completed) {
         print('> \t\t completed: $tid');
@@ -181,17 +179,17 @@ class TodoModel {
       return completed;
     });
 
-    Future.forEach(listToRemove, (WireData todoWireData) async => await todoWireData.remove());
+    Future.forEach(listToRemove, (WireData<TodoVO> todoWireData) async => todoWireData.remove());
     Wire.data(DataKeys.LIST_OF_IDS, value: todoIdsList);
 
     _saveChanges();
 
-    print('> TodoModel -> clearCompleted: length = ' + todoIdsList.length.toString());
+    print('> TodoModel -> clearCompleted: length = ${todoIdsList.length}');
   }
 
   void _checkOnCompleteAll() {
     final completeAllWireData = Wire.data<bool>(DataKeys.COMPLETE_ALL);
-    final bool completeAll = completeAllWireData.isSet ? completeAllWireData.value : false;
+    final bool completeAll = completeAllWireData.isSet && completeAllWireData.value;
     print('> TodoModel -> _checkOnCompleteAll: completeAll = $completeAll');
     if (completeAll) {
       Wire.data(DataKeys.COMPLETE_ALL, value: false);
@@ -200,9 +198,10 @@ class TodoModel {
   }
 
   void _saveChanges() {
-    var listOfTodoVO = [];
-    (Wire.data(DataKeys.LIST_OF_IDS).value as List).forEach((id) =>
-        listOfTodoVO.add(Wire.data(id).value.toJson()));
+    final List<Map<String, dynamic>> listOfTodoVO = [];
+    for (final id in Wire.data<List<String>>(DataKeys.LIST_OF_IDS).value) {
+      listOfTodoVO.add(Wire.data<TodoVO>(id).value.toJson());
+    }
     _dbService.save(STORAGE_KEY, listOfTodoVO);
     _dbService.save(STORAGE_KEY_COMPLETE_ALL, Wire.data(DataKeys.COMPLETE_ALL).value as bool);
   }
