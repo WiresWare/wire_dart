@@ -7,15 +7,15 @@ void main() {
     SIGNAL_ONCE = 'SIGNAL_1_ONCE',
     SIGNAL_2 = 'SIGNAL_2';
 
-  var SCOPE = Object();
+  final SCOPE = Object();
 
   Wire.add(SCOPE, SIGNAL_1, (dynamic data, int? wid) async {
-    print('> SIGNAL 1 (subscriber 1) -> Hello: ' + data);
+    print('> SIGNAL 1 (subscriber 1) -> Hello: ${data}');
   });
 
-  var listener1 = (dynamic data, int? wid) async {
-    print('> SIGNAL 1 (subscriber 2) -> Hello: ' + data);
-  };
+  Future<void> listener1(dynamic data, int? wid) async {
+    print('> SIGNAL 1 (subscriber 2) -> Hello: ${data}');
+  }
 
   Wire.add(SCOPE, SIGNAL_1, listener1);
   Wire.middleware(TestWireMiddleware());
@@ -28,22 +28,22 @@ void main() {
   /// SUBSCRIBER END =========================================
   ///
   /// REMOVE EXAMPLE ===========================================
-  WireListener listener2 = (dynamic data, int? wid) async {
-    print('> Remove: SIGNAL (listener 2) -> data: ' + data);
-  };
-  var SCOPE_2 = Object();
-  var SIGNAL_3 = 'SIGNAL_3';
-  var SIGNAL_4 = 'SIGNAL_4';
+  Future<void> listener2(dynamic data, int? wid) async {
+    print('> Remove: SIGNAL (listener 2) -> data: ${data}');
+  }
+  final SCOPE_2 = Object();
+  const SIGNAL_3 = 'SIGNAL_3';
+  const SIGNAL_4 = 'SIGNAL_4';
 
   /* 1 */ Wire.add(SCOPE, SIGNAL_3, listener2); // Will be removed in ***
   /* 2 */ Wire.add(SCOPE, SIGNAL_4, listener2);
   /* 3 */ Wire.add(SCOPE_2, SIGNAL_3, listener2); // Will be removed in ***
   /* 4 */ Wire.add(SCOPE_2, SIGNAL_4,
-      (dynamic data, int? wid) async => print('> Remove: SIGNAL 2 -> dynamic data: ' + data));
+      (dynamic data, int? wid) async => print('> Remove: SIGNAL 2 -> dynamic data: ${data}'));
   /* 4 */ Wire.add<String>(SCOPE_2, SIGNAL_4,
-      (String? data, int? wid) async => print('> Remove: SIGNAL 2 -> String data: ' + data!));
+      (String? data, int? wid) async => print('> Remove: SIGNAL 2 -> String data: ${data}'));
   /* 5 */ Wire.add<bool>(SCOPE_2, SIGNAL_4,
-      (bool? data, int? wid) async => print('> Remove: SIGNAL 2 -> Boolean data: ' + data.toString()));
+      (bool? data, int? wid) async => print('> Remove: SIGNAL 2 -> Boolean data: ${data}'));
 
   // *** (remove)
   /* 1 */ Wire.remove(signal: SIGNAL_3, listener: listener2);
@@ -58,45 +58,43 @@ void main() {
 
   /// ONCE EXAMPLE ===========================================
   Wire.add(SCOPE, SIGNAL_ONCE, (dynamic data, int? wid) async {
-    print('> SIGNAL 1 (limit 1) -> Goodbye: ' + data);
+    print('> SIGNAL 1 (limit 1) -> Goodbye: ${data}');
   }, replies: 1);
 
-  print('\tNo ends: ' + Wire.send(SIGNAL_ONCE, payload: 'World').toString());
-  print('\tNo ends: ' + Wire.send(SIGNAL_ONCE, payload: 'Dart').toString());
-  print('\tNo ends: ' + Wire.send(SIGNAL_ONCE, payload: 'Peace').toString());
+  print('\tNo ends: ${Wire.send(SIGNAL_ONCE, payload: 'World')}');
+  print('\tNo ends: ${Wire.send(SIGNAL_ONCE, payload: 'Dart')}');
+  print('\tNo ends: ${Wire.send(SIGNAL_ONCE, payload: 'Peace')}');
 
   /// ONCE END ===============================================
 
   Wire.add(SCOPE, SIGNAL_2, (dynamic data, int? wid) async {
-    print('> SIGNAL 2 -> I do: ' + data);
+    print('> SIGNAL 2 -> I do: ${data}');
   });
 
   Wire.add(SCOPE, SIGNAL_2, (dynamic data, int? wid) async {
-    print('> SIGNAL 2 (limit 2) -> I do: ' + data);
+    print('> SIGNAL 2 (limit 2) -> I do: ${data}');
   }, replies: 2);
 
-  print('\tSend ends: ' + Wire.send(SIGNAL_2, payload: 'Code').toString());
-  print('\tSend ends: ' + Wire.send(SIGNAL_2, payload: 'Gym').toString());
-  print('\tSend ends: ' +
-      Wire.send(SIGNAL_2, payload: 'Eat (sometimes)').toString());
-  print('\tSend ends: ' + Wire.send(SIGNAL_2, payload: 'Sleep').toString());
-  print('\tSend ends: ' + Wire.send(SIGNAL_2, payload: 'Repeat').toString());
+  print('\tSend ends: ${Wire.send(SIGNAL_2, payload: 'Code')}');
+  print('\tSend ends: ${Wire.send(SIGNAL_2, payload: 'Gym')}');
+  print('\tSend ends: ${Wire.send(SIGNAL_2, payload: 'Eat (sometimes)')}');
+  print('\tSend ends: ${Wire.send(SIGNAL_2, payload: 'Sleep')}');
+  print('\tSend ends: ${Wire.send(SIGNAL_2, payload: 'Repeat')}');
 
   /// DATA TESTS ===============================================
-  var key1 = 'SUPER_PARAM';
-  Wire.data(key1).subscribe((data) async => {print('\t Listener 1 -> ' + data)});
+  const key1 = 'SUPER_PARAM';
+  Wire.data(key1).subscribe((data) async => {print('\t Listener 1 -> ${data}')});
 
-  Wire.data(key1).subscribe((data) async => {print('\t Listener 2 -> ' + data)});
+  Wire.data(key1).subscribe((data) async => {print('\t Listener 2 -> ${data}')});
 
-  print('> Wire.data Listeners: where initial data = ' +
-      Wire.data(key1).value.toString());
-  Wire.data(key1, value: 'Set VALUE to key1: ' + key1);
-  Wire.data(key1, value: (value) => value + ' | APPENDED from function call');
+  print('> Wire.data Listeners: where initial data = ${Wire.data(key1).value}');
+  Wire.data(key1, value: 'Set VALUE to key1: $key1');
+  Wire.data(key1, value: (value) => '${value} | APPENDED from function call');
 }
 
 class TestWireMiddleware extends WireMiddleware {
   @override
-  Future<void> onAdd(Wire wire) async {
+  Future<void> onAdd(Wire<dynamic> wire) async {
     print('> TestWireMiddleware -> onAdd: Wire.signal = ${wire.signal}');
   }
 

@@ -1,6 +1,5 @@
 class State {
-
-  static final String
+  static const String
     ROUTE__INITIAL = 'state_initial',
 
     ROUTE__PAGE_LOGIN = 'state_route__page_login',

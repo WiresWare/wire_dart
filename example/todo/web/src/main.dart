@@ -1,22 +1,17 @@
 import 'dart:html';
 
 import 'package:wire/wire.dart';
-import 'package:wire_example_shared/todo/controller/RouteController.dart';
-import 'package:wire_example_shared/todo/controller/TodoController.dart';
-import 'package:wire_example_shared/todo/middleware/TodoMiddleware.dart';
-import 'package:wire_example_shared/todo/model/TodoModel.dart';
-import 'package:wire_example_shared/todo/service/WebDatabaseService.dart';
-import 'package:wire_example_shared/todo/view/web/ClearCompletedView.dart';
-import 'package:wire_example_shared/todo/view/web/CompleteAllView.dart';
-import 'package:wire_example_shared/todo/view/web/TodoCountView.dart';
-import 'package:wire_example_shared/todo/view/web/TodoFilterView.dart';
-import 'package:wire_example_shared/todo/view/web/TodoInputView.dart';
-import 'package:wire_example_shared/todo/view/web/TodoListView.dart';
-
-var todoModel;
-var todoView;
-var todoController;
-var routeController;
+import 'package:wire_example_shared/todo/controller/route_controller.dart';
+import 'package:wire_example_shared/todo/controller/todo_controller.dart';
+import 'package:wire_example_shared/todo/middleware/todo_middleware.dart';
+import 'package:wire_example_shared/todo/model/todo_model.dart';
+import 'package:wire_example_shared/todo/service/web_database_service.dart';
+import 'package:wire_example_shared/todo/view/web/clear_completed_view.dart';
+import 'package:wire_example_shared/todo/view/web/complete_all_view.dart';
+import 'package:wire_example_shared/todo/view/web/todo_count_view.dart';
+import 'package:wire_example_shared/todo/view/web/todo_filter_view.dart';
+import 'package:wire_example_shared/todo/view/web/todo_input_view.dart';
+import 'package:wire_example_shared/todo/view/web/todo_list_view.dart';
 
 void main() async {
   Wire.middleware(TodoMiddleware());
@@ -41,7 +36,7 @@ class TodoView {
   TodoView() {
     final domNewTodoInput = document.querySelector('.new-todo')!;
     final domTodoList = document.querySelector('.todo-list')!;
-    final domTodoCount = document.querySelector('.todo-count')!.firstChild;
+    final domTodoCount = document.querySelector('.todo-count')!.firstChild!;
     final domFiltersList = document.querySelector('.filters')!;
     final domToggleAll = document.querySelector('.toggle-all')!;
     final domClearCompleted = document.querySelector('.clear-completed')!;

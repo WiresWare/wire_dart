@@ -1,13 +1,13 @@
 import 'dart:html';
 import 'package:wire/wire.dart';
-import 'package:wire_example_shared/todo/const/ViewSignals.dart';
-import 'package:wire_example_shared/todo/data/dto/InputDTO.dart';
-import 'base/DomElementView.dart';
+import 'package:wire_example_shared/todo/const/view_signals.dart';
+import 'package:wire_example_shared/todo/data/dto/input_dto.dart';
+import 'package:wire_example_shared/todo/view/web/base/dom_element_view.dart';
 
 class TodoInputView extends DomElement {
   TodoInputView(InputElement dom) : super(dom) {
     Wire.add(this, ViewSignals.CLEAR_INPUT, (data, wid) async => dom.value = '');
-    
+
     dom
       ..text = ''
       ..onKeyPress.listen((e) async =>

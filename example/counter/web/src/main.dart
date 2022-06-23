@@ -2,15 +2,15 @@ import 'dart:html';
 
 import 'package:wire/wire.dart';
 
-import 'const/CounterDataKeys.dart';
-import 'const/CounterSignalsKeys.dart';
-import 'controller/CounterController.dart';
-import 'model/middleware/CounterStorageMiddleware.dart';
-import 'view/components/CounterButton.dart';
-import 'view/components/CounterDisplay.dart';
+import 'const/counter_data_keys.dart';
+import 'const/counter_signals_keys.dart';
+import 'controller/counter_controller.dart';
+import 'model/middleware/counter_storage_middleware.dart';
+import 'view/components/counter_button.dart';
+import 'view/components/counter_display.dart';
 
-var processor;
-var application;
+late CounterController processor;
+late ApplicationView application;
 
 void main() {
   /// COUNTER EXAMPLE ======================================
@@ -34,10 +34,9 @@ void init() {
 }
 
 class ApplicationView {
-  DivElement? root;
   ApplicationView(this.root) {
     try {
-      var group = DivElement()..className = 'spectrum-ButtonGroup';
+      final group = DivElement()..className = 'spectrum-ButtonGroup';
       group.append(CounterButton('Increase', CounterSignalsKeys.INCREASE).dom);
       group.append(CounterButton('Decrease', CounterSignalsKeys.DECREASE).dom);
 
@@ -47,4 +46,6 @@ class ApplicationView {
       print(e);
     }
   }
+
+  final DivElement? root;
 }

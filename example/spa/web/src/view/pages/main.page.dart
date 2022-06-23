@@ -3,13 +3,14 @@ import 'dart:html';
 import '../base/page.dart';
 
 class MainPage extends Page {
-  ButtonElement _btnIndex = ButtonElement();
-  ButtonElement _btnGallery = ButtonElement();
-
   MainPage() : super('main') {
     dom.style.backgroundColor = 'wheat';
   }
 
+  final _btnIndex = ButtonElement();
+  final _btnGallery = ButtonElement();
+
+  @override
   void render() {
     _btnIndex.addEventListener('click', _handleClickEvent);
     _btnIndex.text = 'INDEX';
@@ -21,9 +22,10 @@ class MainPage extends Page {
     dom.append(_btnGallery);
   }
 
+  @override
   void destroy() {
-    _btnIndex.removeEventListener("click", _handleClickEvent);
-    _btnGallery.removeEventListener("click", _handleClickEvent);
+    _btnIndex.removeEventListener('click', _handleClickEvent);
+    _btnGallery.removeEventListener('click', _handleClickEvent);
     _btnIndex.remove();
     _btnGallery.remove();
 
@@ -31,7 +33,7 @@ class MainPage extends Page {
   }
 
   void _handleClickEvent(Event event) {
-    var ct = event.currentTarget;
+    final ct = event.currentTarget;
     if (ct == _btnIndex) {
       // dispatchAction(Action.LOGIN_PAGE_BUTTON_INDEX_CLICKED);
     } else if (ct == _btnGallery) {

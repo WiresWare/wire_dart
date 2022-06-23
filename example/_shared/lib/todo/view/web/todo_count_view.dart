@@ -1,16 +1,16 @@
 import 'dart:html';
 
 import 'package:wire/wire.dart';
-import 'package:wire_example_shared/todo/const/DataKeys.dart';
+import 'package:wire_example_shared/todo/const/data_keys.dart';
 
-import 'base/DomElementView.dart';
+import 'package:wire_example_shared/todo/view/web/base/dom_element_view.dart';
 
 class TodoCountView extends DomElement {
   TodoCountView(Element dom) : super(dom) {
-    
+
     final dataCount = Wire.data<int>(DataKeys.COUNT);
     final getterCountCompleted = Wire.data<int>(DataKeys.GET_COUNT_COMPLETED);
-    
+
     getterCountCompleted.subscribe((value) => updateCount(dataCount.value, value));
     updateCount(dataCount.value, getterCountCompleted.value);
   }

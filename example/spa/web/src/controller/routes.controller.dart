@@ -3,39 +3,41 @@ import 'dart:html';
 import 'package:states/states.dart';
 import 'package:wire/wire.dart';
 
-import '../constants/Action.dart';
-import '../constants/Data.dart';
-import '../constants/Signals.dart';
+import '../constants/action.dart';
+import '../constants/data.dart';
+import '../constants/signals.dart';
 import '../states/router.states.dart';
 import '../view/base/page.dart';
 import '../view/pages/login.page.dart';
 import '../view/pages/main.page.dart';
 
 class RoutesController {
-  Page? _currentPage;
-  late DivElement _routerDOM;
-  late String _templatePath;
-
-  void set templatePath(String value) => _templatePath = value;
 
   RoutesController(DivElement dom, String path) {
     _routerDOM = dom;
     _templatePath = path;
 
-    Wire.add<String>(this, Signals.STATES_ACTION__NAVIGATE,
-      (action, wid) async => Wire.data<RouterStates>(Data.STATES_ROUTER)
-        .value.execute(action)
+    Wire.add<String>(this, Signals.STATES_ACTION__NAVIGATE, (action, wid) async =>
+      (Wire.data(Data.STATES_ROUTER).value as RouterStates).execute(action!)
     );
   }
 
+  Page? _currentPage;
+  late DivElement _routerDOM;
+  late String _templatePath;
+
+  // ignore: avoid_setters_without_getters
+  set templatePath(String value) => _templatePath = value;
+
+
   void initialize() {
-    final WireData routerStatesData = Wire.data(Data.STATES_ROUTER);
-    if (!routerStatesData.isSet) {
-      Wire.data(Data.STATES_ROUTER, value: new RouterStates())
-          .lock(WireDataLockToken());
+    final routerStatesWireData = Wire.data<RouterStates>(Data.STATES_ROUTER);
+    if (!routerStatesWireData.isSet) {
+      Wire.data(Data.STATES_ROUTER, value: RouterStates())
+        .lock(WireDataLockToken());
     }
 
-    RouterStates routerStates = routerStatesData.value;
+    final routerStates = routerStatesWireData.value as RouterStates;
     routerStates.when(
       at: RouterStates.INITIAL, to: RouterStates.PAGE_LOGIN,
       on: Action.NAVIGATE_TO_LOGIN, handler: (StatesTransition transition) => {
@@ -48,9 +50,9 @@ class RoutesController {
     );
 
     routerStates.when(
-        at: RouterStates.PAGE_LOGIN, to: RouterStates.PAGE_MAIN,
-        on: Action.NAVIGATE_TO_MAIN, handler: (StatesTransition transition) => {
-      navigateFromTo(MainPage()) }
+      at: RouterStates.PAGE_LOGIN, to: RouterStates.PAGE_MAIN,
+      on: Action.NAVIGATE_TO_MAIN, handler: (StatesTransition transition) => {
+        navigateFromTo(MainPage()) }
     );
   }
 
@@ -59,6 +61,7 @@ class RoutesController {
     if (hasCurrentPage) await _currentPage?.beforeLeave();
 
     final template = await HttpRequest.getString('${_templatePath}${toPage.path}.html');
+    // ignore: unsafe_html
     toPage.dom.setInnerHtml(template, treeSanitizer: NodeTreeSanitizer.trusted);
     toPage.initialize();
 

@@ -61,7 +61,7 @@ void main() {
     };
 
     var wireToAttach = Wire<String>(SCOPE, 'wire_signal_attached', (dynamic data, wid) async {
-      final wire = Wire.get(wireId: wid).single!;
+      final wire = Wire.get(wireId: wid).single;
       print('> \t WireListener on attached wire: "${wire.signal}" with data: ${data}');
     });
 
@@ -133,7 +133,7 @@ void main() {
       print('> ===========================================================================');
       print('> TEST REPLIES for Wire.add(SCOPE, SIGNAL_COUNTER, (dynamic _, wid) {}, replies: 2');
       Wire.add(SCOPE, SIGNAL_COUNTER, (dynamic _, wid) async {
-        var wire = Wire.get(wireId: wid).single!;
+        var wire = Wire.get(wireId: wid).single;
         print('1.4. -> Response on ${wire.signal} replies left: ${wire.replies}');
       }, replies: 2);
       print('> 1.4.1 -> Wire.send(SIGNAL_COUNTER) == isFalse');
@@ -195,7 +195,7 @@ void main() {
     var SCOPE = Object();
 
     WireListener listener = (dynamic data, wid) async {
-      final wire = Wire.get(wireId: wid).single!;
+      final wire = Wire.get(wireId: wid).single;
       print('2. -> Response on ${wire.signal} with data: ${data}');
     };
 

@@ -2,13 +2,13 @@ import 'dart:html';
 
 import 'package:wire/src/main.dart';
 
-import '../../const/CounterDataKeys.dart';
+import '../../const/counter_data_keys.dart';
 
 class CounterStorageMiddleware extends WireMiddleware {
   final storage = window.localStorage;
 
   @override
-  Future<void> onAdd(Wire wire) async {
+  Future<void> onAdd(Wire<dynamic> wire) async {
     print('> CounterMiddleware -> onAdd: signal = ${wire.signal} | scope = ${wire.scope}');
   }
 

@@ -6,15 +6,19 @@ part of wire;
 /// License: APACHE LICENSE, VERSION 2.0
 ///
 typedef WireDataListener<T> = Future<void> Function(T value);
-typedef WireDataGetter<T> = T Function(WireData that);
+typedef WireDataGetter<T> = T Function(WireData<T> that);
 
 class WireDataLockToken {
   bool equal(WireDataLockToken token) => this == token;
 }
 
 class WireData<T> {
-  Function? _onRemove;
-  final _listeners = <WireDataListener<T?>>{};
+  WireData(this._key, this._onRemove);
+
+  final String _key;
+  final Function(String) _onRemove;
+
+  final _listeners = <WireDataListener<T>>{};
 
   bool get isGetter => _value is WireDataGetter;
 
@@ -22,8 +26,7 @@ class WireData<T> {
   /// And with WireData at time when it's removed, because when removing the value also set to null
   bool get isSet => _value != null;
 
-  String? _key;
-  String? get key => _key;
+  String get key => _key;
 
   WireDataLockToken? _lockToken;
   bool get isLocked => _lockToken != null;
@@ -41,22 +44,21 @@ class WireData<T> {
   /// After calling this method with proper token [WireDataLockToken]
   /// changes to the [WireData] value will be allowed from anywhere of the system
   bool unlock(WireDataLockToken token) {
-    var opened = (isLocked && _lockToken!.equal(token)) || !isLocked;
+    final opened = (isLocked && _lockToken!.equal(token)) || !isLocked;
     if (opened) _lockToken = null;
     return opened; // throw ERROR__DATA_CANNOT_OPEN
   }
 
-  dynamic _value; // initial value is null
-  T? get value => isGetter ? _value(this) : _value;
+  late dynamic _value; // initial value is null
+  T get value => (isGetter ? (_value as Function(WireData<dynamic>)).call(this) : _value) as T;
   set value(dynamic input) {
     _guardian();
     _value = input;
     refresh();
   }
 
-  WireData(this._key, this._onRemove);
-
   Future<void> refresh([dynamic value]) async {
+    if (_listeners.isEmpty) return;
     for (final listener in _listeners) {
       await listener(this.value);
     }
@@ -71,11 +73,8 @@ class WireData<T> {
   Future<void> remove({bool clean = false}) async {
     if (!clean) _guardian();
 
-    await _onRemove!(_key); // never null because its a reference to the map.remove
-    _onRemove = null;
+    await _onRemove.call(_key);
 
-    _key = null;
-    // null value means remove element that listening on change (unsubscribe)
     _value = null;
     _lockToken = null;
     await refresh();
@@ -86,7 +85,7 @@ class WireData<T> {
     if (isLocked) throw Exception(isGetter ? ERROR__DATA_IS_GETTER : ERROR__DATA_IS_LOCKED);
   }
 
-  WireData<T> subscribe(WireDataListener<T?> listener) {
+  WireData<T> subscribe(WireDataListener<T> listener) {
     if (!hasListener(listener)) _listeners.add(listener);
     return this;
   }

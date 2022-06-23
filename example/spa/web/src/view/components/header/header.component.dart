@@ -3,27 +3,29 @@ import 'dart:html';
 import '../../base/component.dart';
 
 class Header extends Component {
-  ButtonElement _btnIndex = ButtonElement();
-  ButtonElement _btnGallery = ButtonElement();
-
   Header() : super('header') {
-    dom.style.backgroundColor = "wheat";
+    dom.style.backgroundColor = 'wheat';
   }
 
-  void render() {
-    _btnIndex.addEventListener("click", _handleClickEvent);
-    _btnIndex.text = "INDEX";
+  final _btnIndex = ButtonElement();
+  final _btnGallery = ButtonElement();
 
-    _btnGallery.addEventListener("click", _handleClickEvent);
-    _btnGallery.text = "GALLERY";
+  @override
+  void render() {
+    _btnIndex.addEventListener('click', _handleClickEvent);
+    _btnIndex.text = 'INDEX';
+
+    _btnGallery.addEventListener('click', _handleClickEvent);
+    _btnGallery.text = 'GALLERY';
 
     dom.append(_btnIndex);
     dom.append(_btnGallery);
   }
 
+  @override
   void destroy() {
-    _btnIndex.removeEventListener("click", _handleClickEvent);
-    _btnGallery.removeEventListener("click", _handleClickEvent);
+    _btnIndex.removeEventListener('click', _handleClickEvent);
+    _btnGallery.removeEventListener('click', _handleClickEvent);
     _btnIndex.remove();
     _btnGallery.remove();
 
@@ -31,7 +33,7 @@ class Header extends Component {
   }
 
   void _handleClickEvent(Event event) {
-    var ct = event.currentTarget;
+    final ct = event.currentTarget;
     if (ct == _btnIndex) {
       // dispatchAction(Action.LOGIN_PAGE_BUTTON_INDEX_CLICKED);
     } else if (ct == _btnGallery) {

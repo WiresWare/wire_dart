@@ -1,16 +1,14 @@
 import 'package:wire/wire.dart';
 
-import '../constants/Data.dart';
+import '../constants/data.dart';
 import '../states/user.states.dart';
 
 class UserController {
-  UserController() {
-
-  }
+  UserController();
 
   void initialize() {
-    final WireData userStatesData = Wire.data(Data.STATES_ROUTER);
-    if (!userStatesData.isSet) userStatesData.value = new UserStates();
+    final userStatesData = Wire.data(Data.STATES_ROUTER);
+    if (!userStatesData.isSet) userStatesData.value = UserStates();
 
     // final userStates = userStatesData.value;
   }

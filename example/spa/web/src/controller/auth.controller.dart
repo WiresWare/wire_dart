@@ -1,27 +1,27 @@
 import 'package:states/states.dart';
 import 'package:wire/wire.dart';
 
-import '../constants/Action.dart';
-import '../constants/Data.dart';
-import '../constants/Signals.dart';
+import '../constants/action.dart';
+import '../constants/data.dart';
+import '../constants/signals.dart';
 import '../states/auth.states.dart';
 
 class AuthController {
   AuthController() {
     Wire.add<String>(this, Signals.STATES_ACTION__AUTH, (action, wid) async {
       final statesAuthWireData = Wire.data<AuthStates>(Data.STATES_AUTH);
-      statesAuthWireData.value.execute(action);
+      (statesAuthWireData.value as AuthStates).execute(action!);
     });
   }
 
   void initialize() {
-    final WireData authStatesData = Wire.data(Data.STATES_AUTH);
-    if (!authStatesData.isSet) {
-      Wire.data(Data.STATES_AUTH, value: new AuthStates())
-          .lock(WireDataLockToken());
+    final authStatesWireData = Wire.data<AuthStates>(Data.STATES_AUTH);
+    if (!authStatesWireData.isSet) {
+      Wire.data(Data.STATES_AUTH, value: AuthStates())
+        .lock(WireDataLockToken());
     }
 
-    final authStates = authStatesData.value;
+    final authStates = authStatesWireData.value as AuthStates;
     authStates.when(
       at: AuthStates.USER_LOGGED_OUT, to: AuthStates.USER_LOGIN_VALIDATE,
       on: Action.USER_LOGIN_VALIDATE, handler: (StatesTransition t) {

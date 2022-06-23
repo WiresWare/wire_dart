@@ -1,14 +1,12 @@
-import 'dart:html';
-
 import 'package:wire/wire.dart';
 
-import '../constants/Action.dart';
-import '../constants/Data.dart';
+import '../constants/action.dart';
+import '../constants/data.dart';
 
-import '../constants/Signals.dart';
+import '../constants/signals.dart';
 
 class Application {
-  Application(HtmlElement root) { }
+  Application();
 
   void initialize() {
 

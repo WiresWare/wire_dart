@@ -17,13 +17,32 @@ part 'data.dart';
 typedef WireListener<T> = Future<void> Function(T? payload, int wireId);
 
 abstract class WireMiddleware {
-  Future<void> onAdd(Wire wire);
+  Future<void> onAdd(Wire<dynamic> wire);
   Future<void> onSend(String signal, [Object? payload, Object? scope]);
-  Future<void> onRemove(String signal, [Object? scope, WireListener? listener]);
+  Future<void> onRemove(String signal, [Object? scope, WireListener<dynamic>? listener]);
   Future<void> onData(String key, dynamic prevValue, dynamic nextValue);
 }
 
 class Wire<T> {
+
+  /// Wire object is a communication unit of the system, each instance associated with a signal
+  ///
+  /// Wire object can be passed as a reference to any component of the your system
+  /// But it wont react on signal until it is attached to the communication layer with [attach]
+  /// However you still can send data through it by calling [transfer]
+  ///
+  Wire(
+    Object scope,
+    String signal,
+    WireListener<T> listener,
+    [int replies = 0]
+  ) {
+    _scope = scope;
+    _signal = signal;
+    _listener = listener;
+    this.replies = replies;
+    _id = ++_INDEX;
+  }
   ///
   /// [read-only] [static]
   /// Used to generate Wire wid
@@ -83,32 +102,13 @@ class Wire<T> {
   bool _withReplies = false;
   bool get withReplies => _withReplies;
 
-  /// Wire object is a communication unit of the system, each instance associated with a signal
-  ///
-  /// Wire object can be passed as a reference to any component of the your system
-  /// But it wont react on signal until it is attached to the communication layer with [attach]
-  /// However you still can send data through it by calling [transfer]
-  ///
-  Wire(
-    Object scope,
-    String signal,
-    WireListener<T> listener,
-    [int replies = 0]
-  ) {
-    _scope = scope;
-    _signal = signal;
-    _listener = listener;
-    this.replies = replies;
-    _id = ++_INDEX;
-  }
-
   /// Call associated WireListener with data.
   Future<void> transfer(dynamic payload) async {
     if (_listener == null) throw Exception(ERROR__LISTENER_IS_NULL);
     // Call a listener in this Wire only in case data type match it's listener type.
-    final filterByPayloadType =  payload is T || payload == null;
+    final isFilterByPayloadType =  payload is T || payload == null;
     // print('> Wire -> transfer(${T}): filterByPayloadType = ${filterByPayloadType}');
-    if (filterByPayloadType) await _listener!(payload, _id!);
+    if (isFilterByPayloadType) await _listener!(payload as T, _id!);
   }
 
   /// Nullify all relations
@@ -124,19 +124,19 @@ class Wire<T> {
   ///**********************************************************************************************************
 
   /// Add wire object to the communication layer
-  static void attach(Wire wire) {
+  static void attach(Wire<dynamic> wire) {
     _COMMUNICATION_LAYER.add(wire);
   }
 
   /// Remove wire object from communication layer, then inform all middlewares with
   /// Returns existence of another wires with that signal.
-  static Future<bool> detach(Wire wire) {
+  static Future<bool> detach(Wire<dynamic> wire) {
     return remove(signal: wire.signal, scope: wire.scope, listener: wire.listener);
   }
 
   /// Create wire object from params and [attach] it to the communication layer
   /// All middleware will be informed from [WireMiddleware.onAdd] before wire is attached to the layer
-  static Future<Wire> add<T>(
+  static Future<Wire<dynamic>> add<T>(
     Object scope,
     String signal,
     WireListener<T> listener,
@@ -151,12 +151,16 @@ class Wire<T> {
   }
 
   /// Register many signals at once
-  static Future<List<Wire<dynamic>>> addMany(Object scope, Map<String, WireListener<dynamic>> signalToHandlerMap) {
-    return Future.wait(signalToHandlerMap.entries.map((e) async => await Wire.add(scope, e.key, e.value)));
+  static Future<List<Wire<dynamic>>> addMany(
+    Object scope,
+    Map<String, WireListener<dynamic>> signalToHandlerMap
+  ) {
+    return Future.wait(signalToHandlerMap.entries.map((e) async =>
+      Wire.add(scope, e.key, e.value)));
   }
 
   /// Check if signal string or wire instance exists in communication layer
-  static bool has({String? signal, Wire? wire}) {
+  static bool has({String? signal, Wire<dynamic>? wire}) {
     if (signal != null) return _COMMUNICATION_LAYER.hasSignal(signal);
     if (wire != null) return _COMMUNICATION_LAYER.hasWire(wire);
     return false;
@@ -170,7 +174,8 @@ class Wire<T> {
   /// Returns true when no wire for the signal has found
   static Future<bool> send<T>(String signal, {T? payload, Object? scope}) async {
     if (_MIDDLEWARE_LIST.isNotEmpty) {
-      await Future.forEach(_MIDDLEWARE_LIST, (WireMiddleware middleware) => middleware.onSend(signal, payload));
+      await Future.forEach(_MIDDLEWARE_LIST, (WireMiddleware middleware) =>
+        middleware.onSend(signal, payload));
     }
     return _COMMUNICATION_LAYER.send(signal, payload, scope);
   }
@@ -188,26 +193,25 @@ class Wire<T> {
   /// Remove all wires for specific signal, for more precise target to remove add scope and/or listener
   /// All middleware will be informed from [WireMiddleware.onRemove] after signal removed, only if existed
   /// Returns [bool] telling signal existed in communication layer
-  static Future<bool> remove({String? signal, Object? scope, WireListener? listener}) async {
+  static Future<bool> remove({String? signal, Object? scope, WireListener<dynamic>? listener}) async {
     if (signal != null) return _removeAllBySignal(signal);
     if (scope != null) return (await _removeAllByScope(scope)).isNotEmpty;
     return false;
   }
 
-  static Future<bool> _removeAllBySignal(String signal, {Object? scope, WireListener? listener}) async {
+  static Future<bool> _removeAllBySignal(String signal, {Object? scope, WireListener<dynamic>? listener}) async {
     final existed = await _COMMUNICATION_LAYER.remove(signal, scope, listener);
     if (existed) {
-      await Future.forEach(_MIDDLEWARE_LIST, (WireMiddleware middleware) async {
-        await middleware.onRemove(signal, scope, listener);
-      });
+      await Future.forEach(_MIDDLEWARE_LIST, (WireMiddleware middleware) =>
+        middleware.onRemove(signal, scope, listener));
     }
     return existed;
   }
 
-  static Future<List<bool>> _removeAllByScope(Object scope) async {
-    final listOfWiresForScope = List.from(_COMMUNICATION_LAYER.getByScope(scope));
-    return Future.wait(listOfWiresForScope.map((wire) async =>
-      await _removeAllBySignal(wire.signal, scope: scope)));
+  static Future<List<bool>> _removeAllByScope<T>(Object scope) async {
+    final List<Wire<dynamic>> listOfWiresForScope = List.from(_COMMUNICATION_LAYER.getByScope(scope));
+    return Future.wait(listOfWiresForScope.map((Wire<dynamic> wire) async =>
+      _removeAllBySignal(wire.signal, scope: scope)));
   }
 
   /// Class extending [WireMiddleware] can listen to all processes in side Wire
@@ -221,21 +225,20 @@ class Wire<T> {
 
   /// When you need Wires associated with signal or scope or listener
   /// Returns [List<Wire>]
-  static List<Wire> get({
+  static List<Wire<dynamic>> get({
     String? signal,
     Object? scope,
-    WireListener? listener,
+    WireListener<dynamic>? listener,
     int? wireId
   }) {
-    var result = <Wire>[];
+    final result = <Wire<dynamic>>[];
     if (signal != null) result.addAll(_COMMUNICATION_LAYER.getBySignal(signal));
     if (scope != null) result.addAll(_COMMUNICATION_LAYER.getByScope(scope));
     if (listener != null) result.addAll(_COMMUNICATION_LAYER.getByListener(listener));
     if (wireId != null) {
-      Wire? wire = _COMMUNICATION_LAYER.getByWireId(wireId);
+      final wire = _COMMUNICATION_LAYER.getByWireId(wireId);
       if (wire != null) result.add(wire);
     }
-
     return result;
   }
 
@@ -257,10 +260,10 @@ class Wire<T> {
   /// void remove()
   /// ```
   /// Returns [WireData]
-  static WireData data<T>(String key, {T? value, WireDataGetter<T>? getter}) {
-    final WireData wireData = _DATA_CONTAINER_LAYER.has(key)
-        ? _DATA_CONTAINER_LAYER.get(key)
-        : _DATA_CONTAINER_LAYER.create(key);
+  static WireData<T> data<T>(String key, {T? value, WireDataGetter<T>? getter}) {
+    final WireData<T> wireData = _DATA_CONTAINER_LAYER.has(key)
+      ? _DATA_CONTAINER_LAYER.get(key)
+      : _DATA_CONTAINER_LAYER.create(key);
     // print('> Wire -> WireData - data key = ${key}, value = ${value}, getter = ${getter}');
     if (getter != null) {
       wireData.value = getter;
@@ -269,10 +272,10 @@ class Wire<T> {
     if (value != null) {
       if (wireData.isGetter) throw Exception(ERROR__VALUE_IS_NOT_ALLOWED_TOGETHER_WITH_GETTER);
       final prevValue = wireData.value;
-      final nextValue = (value is Function) ? value(prevValue) : value;
+      final nextValue = (value is Function) ? (value as Function(T)).call(prevValue) : value;
       wireData.value = nextValue;
       Future.forEach(_MIDDLEWARE_LIST, (WireMiddleware m) async =>
-        await m.onData(key, prevValue, nextValue));
+        m.onData(key, prevValue, nextValue));
     }
     return wireData;
   }
