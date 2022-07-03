@@ -7,16 +7,18 @@ part of wire;
 ///
 typedef WireDataListener = Future<void> Function(dynamic value);
 typedef WireDataGetter = dynamic Function(WireData that);
+typedef WireDataOnReset = void Function(String, dynamic);
 
 class WireDataLockToken {
   bool equal(WireDataLockToken token) => this == token;
 }
 
 class WireData {
-  WireData(this._key, this._onRemove);
+  WireData(this._key, this._onRemove, this._onReset);
 
   final String _key;
   final Function(String) _onRemove;
+  final WireDataOnReset _onReset;
 
   final _listeners = <WireDataListener>{};
 
@@ -70,17 +72,17 @@ class WireData {
 
   Future<void> reset() async {
     _guardian();
+    final previousValue = _value;
     _value = null;
+    _onReset(_key, previousValue);
     await refresh();
   }
 
   Future<void> remove({bool clean = false}) async {
     if (!clean) _guardian();
-
-    await _onRemove.call(_key);
-
     _value = null;
     _lockToken = null;
+    _onRemove(_key);
     await refresh();
     _listeners.clear();
   }

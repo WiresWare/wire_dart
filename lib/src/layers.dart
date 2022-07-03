@@ -141,12 +141,40 @@ class WireCommunicateLayer {
   }
 }
 
+class WireMiddlewaresLayer {
+  final _MIDDLEWARE_LIST = <WireMiddleware>[];
+
+  bool has(WireMiddleware middleware) => _MIDDLEWARE_LIST.contains(middleware);
+  void add(WireMiddleware middleware) => _MIDDLEWARE_LIST.add(middleware);
+  void clear() => _MIDDLEWARE_LIST.clear();
+
+  void onData(String key, dynamic prevValue, dynamic nextValue) {
+    _process((WireMiddleware m) => m.onData(key, prevValue, nextValue));
+  }
+  void onReset(String key, dynamic prevValue) {
+    _process((WireMiddleware m) => m.onData(key, prevValue, null));
+  }
+  void onRemove(String signal, {Object? scope, WireListener<dynamic>? listener}) {
+    _process((WireMiddleware mw) => mw.onRemove(signal, scope, listener));
+  }
+  void onSend(String signal, dynamic payload) {
+    _process((WireMiddleware mw) => mw.onSend(signal, payload));
+  }
+  void onAdd(Wire<dynamic> wire) {
+    _process((WireMiddleware mw) => mw.onAdd(wire));
+  }
+
+  void _process(Function(WireMiddleware mw) p) {
+    if (_MIDDLEWARE_LIST.isNotEmpty) { Future.forEach(_MIDDLEWARE_LIST, p); }
+  }
+}
+
 class WireDataContainerLayer {
   final Map<String, WireData> _dataMap = <String, WireData>{};
 
   bool has(String key) => _dataMap.containsKey(key);
   WireData get(String key) => _dataMap[key]!;
-  WireData create(String key) => _dataMap[key] = WireData(key, remove);
+  WireData create(String key, WireDataOnReset onReset) => _dataMap[key] = WireData(key, remove, onReset);
   bool remove(String key) => _dataMap.remove(key) != null;
 
   Future<void> clear() async {
