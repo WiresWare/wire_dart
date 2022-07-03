@@ -52,7 +52,6 @@ class Wire<T> {
   static int _INDEX = 0;
   static final _COMMUNICATION_LAYER = WireCommunicateLayer();
   static final _DATA_CONTAINER_LAYER = WireDataContainerLayer();
-  static final _MIDDLEWARE_LIST = <WireMiddleware>[];
   static final _MIDDLEWARE_LAYER = WireMiddlewaresLayer();
 
   ///**************************************************
