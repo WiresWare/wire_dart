@@ -31,7 +31,7 @@ class RoutesController {
 
 
   void initialize() {
-    final routerStatesWireData = Wire.data<RouterStates>(Data.STATES_ROUTER);
+    final routerStatesWireData = Wire.data(Data.STATES_ROUTER);
     if (!routerStatesWireData.isSet) {
       Wire.data(Data.STATES_ROUTER, value: RouterStates())
         .lock(WireDataLockToken());

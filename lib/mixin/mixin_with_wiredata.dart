@@ -6,9 +6,9 @@ mixin MixinWithWireData {
   bool hasNot(String dataKey) => !has(dataKey);
   bool has(String dataKey) => Wire.data(dataKey).isSet;
 
-  Future<T> get<T>(String dataKey) => Future(() {
+  Future<dynamic> get(String dataKey) => Future(() {
     if (has(dataKey)) {
-      return Future.value(Wire.data<T>(dataKey).value);
+      return Future.value(Wire.data(dataKey).value);
     } else {
       return Future.error('Error: missing data on key - ${dataKey}');
     }

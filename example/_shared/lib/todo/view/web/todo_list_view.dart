@@ -6,14 +6,14 @@ import 'package:wire_example_shared/todo/view/web/todo_list_item_view.dart';
 
 class TodoListView extends DomElement {
   TodoListView(UListElement dom) : super(dom) {
-    final wireDataTodoList = Wire.data<List<String>>(DataKeys.LIST_OF_IDS);
-    final todoList = wireDataTodoList.value;
+    final wireDataTodoList = Wire.data(DataKeys.LIST_OF_IDS);
+    final todoList = wireDataTodoList.value as List<String>;
 
     if (todoList.isNotEmpty) todoList.forEach(append);
     _renderedIds = todoList.toList();
 
     wireDataTodoList.subscribe((list) async {
-      for (final id in list) {
+      for (final id in list as List<String>) {
         if (!_renderedIds.contains(id)) {
           append(id);
         }

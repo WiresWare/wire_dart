@@ -8,13 +8,13 @@ import 'package:wire_example_shared/todo/view/web/base/dom_element_view.dart';
 
 class ClearCompletedView extends DomElement {
   ClearCompletedView(ButtonElement dom) : super(dom) {
-    final wireDataTodoList = Wire.data<List<String>>(DataKeys.LIST_OF_IDS);
-    final wireDataCount = Wire.data<int>(DataKeys.COUNT);
+    final wireDataTodoList = Wire.data(DataKeys.LIST_OF_IDS);
+    final wireDataCount = Wire.data(DataKeys.COUNT);
 
     Future<void> updateComponentVisibility(_) async =>
       setComponentVisibilityFrom(
-        wireDataTodoList.value,
-        wireDataCount.value
+        wireDataTodoList.value as List<String>,
+        wireDataCount.value as int
       );
 
     wireDataTodoList.subscribe(updateComponentVisibility);

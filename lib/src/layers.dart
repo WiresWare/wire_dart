@@ -43,7 +43,7 @@ class WireCommunicateLayer {
       final hasWires = _wireIdsBySignal.containsKey(signal);
       // print('> Wire -> WireCommunicateLayer: send - hasWires = ${hasWires}');
       if (hasWires) {
-        final wiresToRemove = [] as List<Wire<dynamic>>;
+        final wiresToRemove = <Wire<dynamic>>[];
         final isLookingInScope = scope != null;
         await Future.forEach<int>(_wireIdsBySignal[signal]!, (wireId) async {
           final wire = _wireById[wireId]!;
@@ -63,7 +63,7 @@ class WireCommunicateLayer {
     return noMoreSubscribers;
   }
 
-  Future<bool> remove(String signal, [Object? scope, WireListener<dynamic>? listener]) async {
+  Future<bool> remove<T>(String signal, [Object? scope, WireListener<T>? listener]) async {
     final exists = hasSignal(signal);
     if (exists) {
       final withScope = scope != null;
@@ -142,17 +142,17 @@ class WireCommunicateLayer {
 }
 
 class WireDataContainerLayer {
-  final Map<String, WireData<dynamic>> _dataMap = <String, WireData<dynamic>>{};
+  final Map<String, WireData> _dataMap = <String, WireData>{};
 
   bool has(String key) => _dataMap.containsKey(key);
-  WireData<T> get<T>(String key) => _dataMap[key]! as WireData<T>;
-  WireData<T> create<T>(String key) => _dataMap[key] = WireData<T>(key, remove);
+  WireData get(String key) => _dataMap[key]!;
+  WireData create(String key) => _dataMap[key] = WireData(key, remove);
   bool remove(String key) => _dataMap.remove(key) != null;
 
   Future<void> clear() async {
-    final wireDataToRemove = <WireData<dynamic>>[];
+    final wireDataToRemove = <WireData>[];
     _dataMap.forEach((key, wireData) => wireDataToRemove.add(wireData));
-    await Future.forEach(wireDataToRemove, (WireData<dynamic> wireData) async =>
+    await Future.forEach(wireDataToRemove, (WireData wireData) async =>
       wireData.remove(clean: true));
 
     _dataMap.clear();

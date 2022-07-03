@@ -8,7 +8,7 @@ import 'package:wire_example_shared/todo/view/web/base/dom_element_view.dart';
 
 class TodoFilterView extends DomElement {
   TodoFilterView(UListElement dom) : super(dom) {
-    Wire.data<FilterValues?>(DataKeys.FILTER).subscribe((filter) async {
+    Wire.data(DataKeys.FILTER).subscribe((filter) async {
       if (filter == null) return;
       final selectedChildIndex = _FILTER_TO_VALUE[filter]!;
       print('> TodoFilterView -> DataKeys.FILTER subscribe: ${filter} - ${selectedChildIndex}');

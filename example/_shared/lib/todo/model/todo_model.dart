@@ -17,7 +17,7 @@ class TodoModel {
             print('> TodoModel -> init: todo = $obj');
             if (obj != null) {
               final todoVO = TodoVO.fromJson(obj as Map<String, dynamic>);
-              Wire.data<TodoVO>(todoVO.id, value: todoVO);
+              Wire.data(todoVO.id, value: todoVO);
               idsList.add(todoVO.id);
               if (!todoVO.completed) notCompletedCount++;
             }
@@ -31,9 +31,9 @@ class TodoModel {
       print('> TodoModel -> init: count = $notCompletedCount');
       final bool isCompleteAll = await _dbService.retrieve(STORAGE_KEY_COMPLETE_ALL) as bool? ?? notCompletedCount == 0;
 
-      Wire.data<List<String>>(DataKeys.LIST_OF_IDS, value: idsList);
-      Wire.data<int>(DataKeys.COUNT, value: notCompletedCount);
-      Wire.data<bool>(DataKeys.COMPLETE_ALL, value: isCompleteAll);
+      Wire.data(DataKeys.LIST_OF_IDS, value: idsList);
+      Wire.data(DataKeys.COUNT, value: notCompletedCount);
+      Wire.data(DataKeys.COMPLETE_ALL, value: isCompleteAll);
       return Future.value(true);
     });
   }
@@ -48,17 +48,17 @@ class TodoModel {
     final newTodoId = DateTime.now().millisecondsSinceEpoch.toString();
     final newTodoVO = TodoVO(newTodoId, text, note, completed);
 
-    final todoIdsList = Wire.data<List<String>>(DataKeys.LIST_OF_IDS).value;
-    final count = Wire.data<int>(DataKeys.COUNT).value;
+    final todoIdsList = Wire.data(DataKeys.LIST_OF_IDS).value as List<String>;
+    final count = Wire.data(DataKeys.COUNT).value as int;
 
     todoIdsList.add(newTodoId);
 
     // Add Todo to data layer
-    Wire.data<TodoVO>(newTodoVO.id, value: newTodoVO);
+    Wire.data(newTodoVO.id, value: newTodoVO);
     // Update TodoList in data layer
-    Wire.data<List<String>>(DataKeys.LIST_OF_IDS, value: todoIdsList);
+    Wire.data(DataKeys.LIST_OF_IDS, value: todoIdsList);
     // Update Todo complete counter
-    Wire.data<int>(DataKeys.COUNT, value: count + (completed ? 0 : 1));
+    Wire.data(DataKeys.COUNT, value: count + (completed ? 0 : 1));
 
     _checkOnCompleteAll();
     _saveChanges();
@@ -68,10 +68,10 @@ class TodoModel {
   }
 
   Future<TodoVO> remove(String id) async {
-    final todoIdsList = Wire.data<List<String>>(DataKeys.LIST_OF_IDS).value;
-    final count = Wire.data<int>(DataKeys.COUNT).value;
-    final wireDataTodoVO = Wire.data<TodoVO>(id);
-    final todoVO = wireDataTodoVO.value;
+    final todoIdsList = Wire.data(DataKeys.LIST_OF_IDS).value as List<String>;
+    final count = Wire.data(DataKeys.COUNT).value as int;
+    final wireDataTodoVO = Wire.data(id);
+    final todoVO = wireDataTodoVO.value as TodoVO;
 
     todoIdsList.remove(id);
     await wireDataTodoVO.remove();
@@ -80,7 +80,7 @@ class TodoModel {
       Wire.data(DataKeys.COUNT, value: count - 1);
     }
 
-    Wire.data<List<String>>(DataKeys.LIST_OF_IDS, value: todoIdsList);
+    Wire.data(DataKeys.LIST_OF_IDS, value: todoIdsList);
 
     _saveChanges();
 
@@ -89,8 +89,8 @@ class TodoModel {
   }
 
   TodoVO update(String id, String text, String note) {
-    final wireDateTodoVO = Wire.data<TodoVO>(id);
-    final todoVO = wireDateTodoVO.value;
+    final wireDateTodoVO = Wire.data(id);
+    final todoVO = wireDateTodoVO.value as TodoVO;
     todoVO.text = text;
     todoVO.note = note;
 
@@ -143,7 +143,7 @@ class TodoModel {
         Wire.data(id, value: todoVO);
       }
     }
-    Wire.data<FilterValues>(DataKeys.FILTER, value: filter);
+    Wire.data(DataKeys.FILTER, value: filter);
     print('> TodoModel -> filtered: $filter');
   }
 
@@ -167,11 +167,11 @@ class TodoModel {
   }
 
   void clearCompleted() {
-    final todoIdsList = Wire.data<List<String>>(DataKeys.LIST_OF_IDS).value;
-    final List<WireData<TodoVO>> listToRemove = [];
+    final todoIdsList = Wire.data(DataKeys.LIST_OF_IDS).value as List<String>;
+    final List<WireData> listToRemove = [];
     todoIdsList.removeWhere((tid) {
-      final todoWireData = Wire.data<TodoVO>(tid);
-      final completed = todoWireData.value.completed;
+      final todoWireData = Wire.data(tid);
+      final completed = (todoWireData.value as TodoVO).completed;
       if (completed) {
         print('> \t\t completed: $tid');
         listToRemove.add(todoWireData);
@@ -179,7 +179,7 @@ class TodoModel {
       return completed;
     });
 
-    Future.forEach(listToRemove, (WireData<TodoVO> todoWireData) async => todoWireData.remove());
+    Future.forEach(listToRemove, (WireData todoWireData) async => todoWireData.remove());
     Wire.data(DataKeys.LIST_OF_IDS, value: todoIdsList);
 
     _saveChanges();
@@ -188,8 +188,8 @@ class TodoModel {
   }
 
   void _checkOnCompleteAll() {
-    final completeAllWireData = Wire.data<bool>(DataKeys.COMPLETE_ALL);
-    final bool completeAll = completeAllWireData.isSet && completeAllWireData.value;
+    final completeAllWireData = Wire.data(DataKeys.COMPLETE_ALL);
+    final bool completeAll = completeAllWireData.isSet && (completeAllWireData.value as bool);
     print('> TodoModel -> _checkOnCompleteAll: completeAll = $completeAll');
     if (completeAll) {
       Wire.data(DataKeys.COMPLETE_ALL, value: false);
@@ -199,8 +199,8 @@ class TodoModel {
 
   void _saveChanges() {
     final List<Map<String, dynamic>> listOfTodoVO = [];
-    for (final id in Wire.data<List<String>>(DataKeys.LIST_OF_IDS).value) {
-      listOfTodoVO.add(Wire.data<TodoVO>(id).value.toJson());
+    for (final id in Wire.data(DataKeys.LIST_OF_IDS).value as List<String>) {
+      listOfTodoVO.add((Wire.data(id).value as TodoVO).toJson());
     }
     _dbService.save(STORAGE_KEY, listOfTodoVO);
     _dbService.save(STORAGE_KEY_COMPLETE_ALL, Wire.data(DataKeys.COMPLETE_ALL).value as bool);

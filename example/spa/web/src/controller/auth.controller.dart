@@ -9,13 +9,13 @@ import '../states/auth.states.dart';
 class AuthController {
   AuthController() {
     Wire.add<String>(this, Signals.STATES_ACTION__AUTH, (action, wid) async {
-      final statesAuthWireData = Wire.data<AuthStates>(Data.STATES_AUTH);
+      final statesAuthWireData = Wire.data(Data.STATES_AUTH);
       (statesAuthWireData.value as AuthStates).execute(action!);
     });
   }
 
   void initialize() {
-    final authStatesWireData = Wire.data<AuthStates>(Data.STATES_AUTH);
+    final authStatesWireData = Wire.data(Data.STATES_AUTH);
     if (!authStatesWireData.isSet) {
       Wire.data(Data.STATES_AUTH, value: AuthStates())
         .lock(WireDataLockToken());

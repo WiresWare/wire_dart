@@ -72,9 +72,9 @@ void main() {
       print('> \t\t Dynamic listener (with specified data type) will react on any signal');
       Wire.add(SCOPE, SIGNAL_G1, listener_dynamic);
       print('> 1: Setup -> Add signal $SIGNAL_G1 with string WireListener');
-      Wire.add<String>(SCOPE, SIGNAL_G1, listener_string);
+      Wire.add(SCOPE, SIGNAL_G1, listener_string);
       print('> 1: Setup -> Add signal $SIGNAL_G1 with boolean WireListener');
-      Wire.add<bool>(SCOPE, SIGNAL_G1, listener_boolean);
+      Wire.add(SCOPE, SIGNAL_G1, listener_boolean);
       print('> 1: Setup -> Attach pre-created signal ${wireToAttach.signal} with string WireListener');
       Wire.attach(wireToAttach);
     });
@@ -150,7 +150,7 @@ void main() {
 
       final putFindTestObject = PutFindTestObject();
       print('> 1.5.1 -> Put object of type ${putFindTestObject.runtimeType} to Wire');
-      Wire.put(putFindTestObject);
+      Wire.put<PutFindTestObject>(putFindTestObject);
       print('> 1.5.2 -> Find object of type ${putFindTestObject.runtimeType}');
       expect(Wire.find<PutFindTestObject>() == putFindTestObject, isTrue);
     });
@@ -316,7 +316,7 @@ void main() {
   group(GROUP_5_TITLE, () {
     final DATA_KEY_USER_VO = 'dataKeyUserVO';
     final GET__USER_FULL_NAME = 'getUserFullName';
-    final UserVO = {
+    final dataUserVO = {
       'firstName': 'Wires',
       'lastName': 'Ware',
     };
@@ -327,18 +327,18 @@ void main() {
       print('> ===========================================================================');
       await Wire.purge(withMiddleware: true);
 
-      Wire.data(DATA_KEY_USER_VO, value: UserVO).subscribe((value) async {
+      Wire.data(DATA_KEY_USER_VO, value: dataUserVO).subscribe((value) async {
         print('> $DATA_KEY_USER_VO -> updated: $value');
       });
 
-      WireDataGetter<String> wireDataGetter = (WireData that) {
+      WireDataGetter wireDataGetter = (WireData that) {
         final wireData = Wire.data(DATA_KEY_USER_VO);
-        final userVO = wireData.value;
+        final userVO = wireData.value!;
         print('> $GET__USER_FULL_NAME -> get: ${that.key} isSet ${that.isSet}');
         wireData.subscribe(that.refresh);
         return '${userVO['firstName']} ${userVO['lastName']}';
       };
-      Wire.data<String>(GET__USER_FULL_NAME, getter: wireDataGetter).subscribe((value) async {
+      Wire.data(GET__USER_FULL_NAME, getter: wireDataGetter).subscribe((value) async {
         print('> $GET__USER_FULL_NAME -> updated: $value');
       });
     });
@@ -347,12 +347,14 @@ void main() {
       print('>\t Wire.data(GET__USER_FULL_NAME).isLocked');
       expect(Wire.data(GET__USER_FULL_NAME).isLocked, isTrue);
       expect(Wire.data(GET__USER_FULL_NAME).isGetter, isTrue);
-      expect(Wire.data(GET__USER_FULL_NAME).value, equals('${UserVO['firstName']} ${UserVO['lastName']}'));
+      expect(Wire.data(GET__USER_FULL_NAME).value, equals('${dataUserVO['firstName']} ${dataUserVO['lastName']}'));
+
       final wireData = Wire.data(DATA_KEY_USER_VO);
       final userVO = wireData.value;
       userVO['lastName'] = 'Cores';
       Wire.data(DATA_KEY_USER_VO, value: userVO);
-      expect(Wire.data(GET__USER_FULL_NAME).value, equals('${UserVO['firstName']} Cores'));
+
+      expect(Wire.data(GET__USER_FULL_NAME).value, equals('${dataUserVO['firstName']} Cores'));
       // expect(Wire.data(GET__USER_FULL_NAME, value: 'new value'), throwsException);
       // expect(Wire.data(GET__USER_FULL_NAME, value: 'new value'), throwsA(Exception(ERROR__DATA_IS_GETTER)));
       // expect(Wire.data(GET__USER_FULL_NAME, value: 'new value'), throwsA(TypeMatcher<Exception>()));

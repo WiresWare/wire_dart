@@ -15,6 +15,7 @@ part 'data.dart';
 ///
 
 typedef WireListener<T> = Future<void> Function(T? payload, int wireId);
+typedef WireValueFunction<T> = Function(T? prevValue);
 
 abstract class WireMiddleware {
   Future<void> onAdd(Wire<dynamic> wire);
@@ -108,7 +109,7 @@ class Wire<T> {
     // Call a listener in this Wire only in case data type match it's listener type.
     final isFilterByPayloadType =  payload is T || payload == null;
     // print('> Wire -> transfer(${T}): filterByPayloadType = ${filterByPayloadType}');
-    if (isFilterByPayloadType) await _listener!(payload as T, _id!);
+    if (isFilterByPayloadType) await _listener!(payload as T?, _id!);
   }
 
   /// Nullify all relations
@@ -136,7 +137,7 @@ class Wire<T> {
 
   /// Create wire object from params and [attach] it to the communication layer
   /// All middleware will be informed from [WireMiddleware.onAdd] before wire is attached to the layer
-  static Future<Wire<dynamic>> add<T>(
+  static Future<Wire<T>> add<T>(
     Object scope,
     String signal,
     WireListener<T> listener,
@@ -160,7 +161,7 @@ class Wire<T> {
   }
 
   /// Check if signal string or wire instance exists in communication layer
-  static bool has({String? signal, Wire<dynamic>? wire}) {
+  static bool has<T>({String? signal, Wire<T>? wire}) {
     if (signal != null) return _COMMUNICATION_LAYER.hasSignal(signal);
     if (wire != null) return _COMMUNICATION_LAYER.hasWire(wire);
     return false;
@@ -193,7 +194,7 @@ class Wire<T> {
   /// Remove all wires for specific signal, for more precise target to remove add scope and/or listener
   /// All middleware will be informed from [WireMiddleware.onRemove] after signal removed, only if existed
   /// Returns [bool] telling signal existed in communication layer
-  static Future<bool> remove({String? signal, Object? scope, WireListener<dynamic>? listener}) async {
+  static Future<bool> remove<T>({String? signal, Object? scope, WireListener<T>? listener}) async {
     if (signal != null) return _removeAllBySignal(signal);
     if (scope != null) return (await _removeAllByScope(scope)).isNotEmpty;
     return false;
@@ -225,7 +226,7 @@ class Wire<T> {
 
   /// When you need Wires associated with signal or scope or listener
   /// Returns [List<Wire>]
-  static List<Wire<dynamic>> get({
+  static List<Wire<dynamic>> get<T>({
     String? signal,
     Object? scope,
     WireListener<dynamic>? listener,
@@ -260,19 +261,19 @@ class Wire<T> {
   /// void remove()
   /// ```
   /// Returns [WireData]
-  static WireData<T> data<T>(String key, {T? value, WireDataGetter<T>? getter}) {
-    final WireData<T> wireData = _DATA_CONTAINER_LAYER.has(key)
+  static WireData data(String key, {dynamic value, WireDataGetter? getter}) {
+    final WireData wireData = _DATA_CONTAINER_LAYER.has(key)
       ? _DATA_CONTAINER_LAYER.get(key)
       : _DATA_CONTAINER_LAYER.create(key);
-    // print('> Wire -> WireData - data key = ${key}, value = ${value}, getter = ${getter}');
     if (getter != null) {
-      wireData.value = getter;
+      wireData.getter = getter;
       wireData.lock(WireDataLockToken());
     }
+    // print('> Wire -> WireData - data key = ${key}, value = ${value}, getter = ${getter}');
     if (value != null) {
       if (wireData.isGetter) throw Exception(ERROR__VALUE_IS_NOT_ALLOWED_TOGETHER_WITH_GETTER);
-      final prevValue = wireData.value;
-      final nextValue = (value is Function) ? (value as Function(T)).call(prevValue) : value;
+      final prevValue = wireData.isSet ? wireData.value : null;
+      final nextValue = (value is WireValueFunction) ? value(prevValue) : value;
       wireData.value = nextValue;
       Future.forEach(_MIDDLEWARE_LIST, (WireMiddleware m) async =>
         m.onData(key, prevValue, nextValue));
@@ -281,16 +282,17 @@ class Wire<T> {
   }
 
   /// Store an instance of the object by it's type, and lock it, so it can't be overwritten
-  static void put<T>(T instance, {WireDataLockToken? lock}) {
+  static T put<T>(T instance, {WireDataLockToken? lock}) {
     final key = instance.runtimeType.toString();
     if (Wire.data(key).isLocked) throw AssertionError(ERROR__CANT_PUT_ALREADY_EXISTING_INSTANCE);
     Wire.data(key, value: instance).lock(lock ?? WireDataLockToken());
+    return instance;
   }
 
   /// Return an instance of an object by its type, throw an error in case it is not set
-  static T find<T>([T? instanceType]) {
-    final key = (instanceType ?? T).toString();
+  static dynamic find<R>([R? instanceType]) {
+    final key = (instanceType ?? R).toString();
     if (Wire.data(key).isSet == false) throw AssertionError(ERROR__CANT_FIND_INSTANCE_NULL);
-    return Wire.data(key).value as T;
+    return Wire.data(key).value!;
   }
 }

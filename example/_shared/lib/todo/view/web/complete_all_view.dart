@@ -9,7 +9,7 @@ import 'package:wire_example_shared/todo/view/web/base/dom_element_view.dart';
 class CompleteAllView extends DomElement {
   CompleteAllView(CheckboxInputElement dom) : super(dom) {
     Wire.add(this, ViewSignals.COMPLETE_ALL_FORCED, _onWireSignalForced);
-    dom.checked = Wire.data<bool>(DataKeys.COMPLETE_ALL).value;
+    dom.checked = Wire.data(DataKeys.COMPLETE_ALL).value as bool;
     dom.onChange.listen(_onChecked);
   }
 
