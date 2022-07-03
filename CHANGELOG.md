@@ -1,3 +1,8 @@
+## 1.4.8
+- Reset of WireData propagated to middleware layer
+- Refactoring and code improvements (types)
+- Mixins (utilities) MixinWithWireData moved from Wire Flutter
+
 ## 1.4.7
 - API updated with new methods: `addMany` which allow to add (create) wires from Map<String, WireListener>
 - Wire.remove rewritten to allow remove all wires related to scope without specifying each signal with scope
@@ -70,11 +75,11 @@
 ## 0.9.8
 - Todo example with AngularDart using shared code from symlink.
 
-## 0.9.7 
+## 0.9.7
 - README update
 
 ## 0.9.6
-- Wire's property "hash" renamed to "wid" - unique integer number which is just counter of created Wires in runtime. 
+- Wire's property "hash" renamed to "wid" - unique integer number which is just counter of created Wires in runtime.
 - Parameters of WireListener was changed - instance of Wire removed, first parameter now is data from `Wire.send(signal, data)`, second parameter is a "wid" using it associated Wire can be retrieved from communication layer with `Wire.get(wid:wid).single`.
 - Internal renaming to match layers concept
 - README update with Flutter widget example
@@ -103,10 +108,10 @@
 - New API methods: `has` signal or wire and `get` list of wires by signal, scope or listener
 
 ## 0.3.2
-- dartfmt style fixes  
+- dartfmt style fixes
 
 ## 0.3.1
-- WireListener has first parameter Wire that holds signal, scope, listener itself and replies  
+- WireListener has first parameter Wire that holds signal, scope, listener itself and replies
 
 ## 0.3.0
 - In method Wire.add replies parameter is named
@@ -115,7 +120,7 @@
 - Examples correction
 
 ## 0.2.2
-- Introduction of WireListener and WireDataListener to force correct listeners method's params signature 
+- Introduction of WireListener and WireDataListener to force correct listeners method's params signature
 - Implementation of "remove" from Wire by scope or/and by listener
 - WireData has new property "isSet" which help to distinguish between newly created with value null and deleted when null distributed to listeners
 - Todo MVC example completed!
