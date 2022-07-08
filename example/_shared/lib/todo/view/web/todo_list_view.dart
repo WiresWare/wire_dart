@@ -13,13 +13,13 @@ class TodoListView extends DomElement {
     _renderedIds = todoList.toList();
 
     wireDataTodoList.subscribe((list) async {
+      print('> TodoListView -> wireDataTodoList.update: ${list}');
       for (final id in list as List<String>) {
         if (!_renderedIds.contains(id)) {
           append(id);
         }
       }
       _renderedIds = todoList.toList();
-      print('> TodoListView -> wireDataTodoList.subscribe: ${list}');
     });
   }
 

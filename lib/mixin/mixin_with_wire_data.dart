@@ -2,13 +2,13 @@ library wire_flutter;
 
 import 'package:wire/wire.dart';
 
-mixin MixinWithWireData {
+mixin WireMixinWithWireData {
   bool hasNot(String dataKey) => !has(dataKey);
   bool has(String dataKey) => Wire.data(dataKey).isSet;
 
-  Future<dynamic> get(String dataKey) => Future(() {
+  Future<T> get<T>(String dataKey) => Future(() {
     if (has(dataKey)) {
-      return Future.value(Wire.data(dataKey).value);
+      return Future.value(Wire.data(dataKey).value as T);
     } else {
       return Future.error('Error: missing data on key - ${dataKey}');
     }
@@ -32,5 +32,9 @@ mixin MixinWithWireData {
 
   void reset(String dataKey) {
     if (Wire.data(dataKey).isSet) Wire.data(dataKey).reset();
+  }
+
+  Future<void> remove(String dataKey) async {
+    if (Wire.data(dataKey).isSet) await Wire.data(dataKey).remove();
   }
 }

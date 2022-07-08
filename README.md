@@ -1,5 +1,7 @@
 # Wire - communication and data-container layers
-Wire - communication and data layers which consist of string keys thus realization of String API when each component of the system - logical or visual - represented as a set of Strings - what it consumes is Data API and what it produces or reacts to is Signals API.
+Wire - communication and data distribution layers which consist of string keys that bound to various types of data.
+This is realization of String API when each component of the system - logical or visual - represented as a set of
+Strings - what component consumes is Data API and what it produces or reacts to is Signals API.
 
 ### Library aimed to decouple UI from business logic
 ![Schema](assets/wire-schema.jpeg)
@@ -116,7 +118,7 @@ void init() {
 Key to a good software product is understanding of how things work together, what do what, software design, separation of concerns and responsibilities, SOLID principles. Here is a good saying from Robert C. Martin:
  > "Architecture is not about making decisions earlier, but making decisions late. Good architecture is a software structure that allows you to defer critical decisions for as long as possible, defer them to the point where you've got enough information to actually make them, or not make them".
 
-It's always good to protect your business rules from UI changes and make the user interface **a plug-in** to the business rules, same for domain data make it a plug-in to the business rules and UI. 
+It's always good to protect your business rules from UI changes and make the user interface **a plug-in** to the business rules, same for domain data make it a plug-in to the business rules and UI.
 
 ## History
 
@@ -145,11 +147,11 @@ A software system consists in leveraging three main concepts:
 2. Events listening and propagation.
 3. Decision making based on that data (or FSM).
 
-You find these concepts in every program. Basically it's called - Model-View-Controller - meta-pattern or idea of separating program on functional pieces. Understanding MVC is about understanding how programs should work. 
- 
+You find these concepts in every program. Basically it's called - Model-View-Controller - meta-pattern or idea of separating program on functional pieces. Understanding MVC is about understanding how programs should work.
+
 ### Model
-Data structure and the ways how to access data define how an application works and how to apply changes. Therefore data definition is the first step in software development. All starts with data. In MVC, the fact that Model is in the first position emphasize it as well. Models in application play a wider role than just value objects definition, it's also a way of how these objects are stored and retrieved, you can think of it as a data API - create, update, delete and etc. Does it make any decisions on how to modify the data? Probably not, maybe only update related data (e.g. in-memory counter of completed todos). And don't forget that there are two types of models - active and passive, one can notify when changes have occurred (active) and another is a plain storage, file or database (passive) - it has to be monitored by a controller or another agent. 
-Next the example of one of TodoModel's methods: 
+Data structure and the ways how to access data define how an application works and how to apply changes. Therefore data definition is the first step in software development. All starts with data. In MVC, the fact that Model is in the first position emphasize it as well. Models in application play a wider role than just value objects definition, it's also a way of how these objects are stored and retrieved, you can think of it as a data API - create, update, delete and etc. Does it make any decisions on how to modify the data? Probably not, maybe only update related data (e.g. in-memory counter of completed todos). And don't forget that there are two types of models - active and passive, one can notify when changes have occurred (active) and another is a plain storage, file or database (passive) - it has to be monitored by a controller or another agent.
+Next the example of one of TodoModel's methods:
 ```dart
 TodoVO create(String text, String note) {
     final todoVO = TodoVO(uuid(), text, note, false);
@@ -171,7 +173,7 @@ TodoVO create(String text, String note) {
 `Wire.data('key')` plays a role of active model, it holds `WireData` instances associated with string keys, `WireData` is a container with data (accessed from `.value` property) and it can be monitored for updates by subscribing to it - `WireData.subscribe((value) => { ... })`. To update the value and notify listeners just set the value: `Wire.data('key', value)`. That's simple. It's up to you to decide from where the value (`WireData.value`) will be updated either from separate entity, a model by calling its data API (together with physical storing in database or sending to a server), or you can do it from controller afterwards when sub-processes will be ended.
 
 ### View
-UI also could have its own state - visual state, and it might not need to be stored in persistent storage at all, only temporarily. Example - accordion’s opened tab, or button hover state, tooltips, input highlight and etc. These states might depend on domain's data and are generated in run-time based on some conditions. Yes, view could have logic inside, but it has to be simple branching conditions and only depends on data passed in, not from multiple data sources, if it is then this is a sign of needed refactoring (for example extracting condition into pre-calculated object property - UserVO.canRoleBeChanged). With `Wire` view consume data from Data Container Layer - `Wire.data(value)`, then view subscribe to updates and re-render itself when change will happen - `WireData.subscribe((value) => { ... })`. 
+UI also could have its own state - visual state, and it might not need to be stored in persistent storage at all, only temporarily. Example - accordion’s opened tab, or button hover state, tooltips, input highlight and etc. These states might depend on domain's data and are generated in run-time based on some conditions. Yes, view could have logic inside, but it has to be simple branching conditions and only depends on data passed in, not from multiple data sources, if it is then this is a sign of needed refactoring (for example extracting condition into pre-calculated object property - UserVO.canRoleBeChanged). With `Wire` view consume data from Data Container Layer - `Wire.data(value)`, then view subscribe to updates and re-render itself when change will happen - `WireData.subscribe((value) => { ... })`.
 ```dart
 class TodoCountView extends DomElement {
   TodoCountView(SpanElement dom):super(dom) {
@@ -185,17 +187,17 @@ class TodoCountView extends DomElement {
 But not every program has a view, servers might not have UI, and it all depends on the definition of the view. Saying View we mean something that can emit external events about outside world or interaction, and incoming network traffic fit to this definition quite well, and in this case Wire can be a distribution gate for network API calls, just call `Wire.send(signal, dto)` on network events and every part of internal system can react to it. `Wire.send` is a Communication Layer - a way to completely separate parts of the application. View sends signals and waits for data to be updated. Other parts of the view can listen for signals as well and update themselves accordingly. `Signal` is a string type constant and all of them represent Events API of the component or a system.
 
 ### Controller
- Decision making - business logic - the rules, the controller. It's a place where data meet events, their data are mixed with other data, compared and distributed to a model for CRUD operations, then view updates. 
+ Decision making - business logic - the rules, the controller. It's a place where data meet events, their data are mixed with other data, compared and distributed to a model for CRUD operations, then view updates.
  > We believe and promote the idea that's view is 'just' the UI layer, with the real app being the logic and data kept outside the components tree.
 
 <sub align="right">from original article [Thoughts on React Hooks, Redux, and Separation of Concerns](https://blog.isquaredsoftware.com/2019/07/blogged-answers-thoughts-on-hooks/)</sub>
 
-Based on this belief we recommend to keep all your business logic, all these data processing and decision making logic outside of a view - in controllers, this is the only right place to do that. **Signals listeners placed inside controller**. You register a signal by adding it to the Communication Layer with `Wire.add(scope, signal, listener)`. Many signals can be connected to the same listener and vice versa. The listener should follow the specification of WireListener and has two params - data payload it distributes and wire identifier (wid - string constant). 
+Based on this belief we recommend to keep all your business logic, all these data processing and decision making logic outside of a view - in controllers, this is the only right place to do that. **Signals listeners placed inside controller**. You register a signal by adding it to the Communication Layer with `Wire.add(scope, signal, listener)`. Many signals can be connected to the same listener and vice versa. The listener should follow the specification of WireListener and has two params - data payload it distributes and wire identifier (wid - string constant).
 ```dart
 class TodoController {
     TodoModel todoModel;
     TodoController(this.todoModel) {
-    
+
     Wire.add(this, ViewSignals.INPUT, (String data, int wid) {
       var text = data;
       print('> TodoProcessor -> TodoViewOutputSignal.INPUT: ' + text);
@@ -204,7 +206,7 @@ class TodoController {
         Wire.send(ViewSignals.CLEAR_INPUT);
       }
     });
-    
+
     Wire.add(this, ViewSignals.DELETE, (String data, int wid) {
       var todoId = data;
       print('> TodoProcessor -> TodoViewOutputSignal.DELETE: ' + todoId);
@@ -229,7 +231,7 @@ class TodoController {
 In controller you make a decision of how to process input data, do calculation, then data delegated to a model(s), stored or sent to the server, then controller might initiate reaction - send another signal or if data was not updated from model (in Data Container Layer) then controller might update it manually (with `Wire.data(key, value)`). Application can have multiple controllers each responsible to its particular data processing. You might think of them as reducers from Redux world or commands from PureMVC.
 
 ## Few words about FLUX
-[FLUX pattern](https://facebook.github.io/flux/docs/in-depth-overview) is a modification of MVC idea, where **data flow unidirectional** and controllers replaced with so-called "controller-views": 
+[FLUX pattern](https://facebook.github.io/flux/docs/in-depth-overview) is a modification of MVC idea, where **data flow unidirectional** and controllers replaced with so-called "controller-views":
 > "Views often found at the top of the hierarchy that retrieve data from the stores and pass this data down to their children."
 
 ![FLUX Diagram](./assets/wire-flux-concept.svg)

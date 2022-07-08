@@ -1,3 +1,13 @@
+## 1.4.9
+- New abstracts - `WireCommandAbstract` and `WireDatabaseServiceAbstract`
+- New utilities mixins - `WireMixinWithDatabase` and `WireMixinWithWhenReady`
+- New utilities commands - `WireCommandWithRequiredData` and `WireCommandWithWireData`
+- Prefix "Wire" was added to all utilities and mixins related to Wire
+- New method "remove" in `WireMixinWithWireData`, which simplify `Wire.data(dataKey).remove()`
+- Additional example of Todo application with use of commands to process signal without model but with
+  `StorageMiddleware` which store all changes in `WireData` layer to `shared_preferences`
+- Dart version increased to 2.17.5
+
 ## 1.4.8
 - Reset of WireData propagated to middleware layer
 - Refactoring and code improvements (types)

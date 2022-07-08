@@ -73,9 +73,14 @@ class TodoListItemView extends DomElement {
 
   EditDTO getEditData() => EditDTO(dom.id, inpEdit.value!.trim(), '');
 
-  Future<void> _OnDataChanged(todoVO) async {
-    print('> TodoListItemView -> _OnTodoDataChanged = ${todoVO}');
-    todoVO != null ? update(todoVO as TodoVO) : remove();
+  Future<void> _OnDataChanged(input) async {
+    final todoVO = input as TodoVO?;
+    print('> TodoListItemView -> _OnTodoDataChanged = ${todoVO?.id ?? 'empty'}');
+    if (todoVO == null) {
+      remove();
+    } else {
+      update(todoVO);
+    }
   }
 
   void _OnEditBegin() {
