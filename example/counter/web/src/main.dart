@@ -9,9 +9,6 @@ import 'model/middleware/counter_storage_middleware.dart';
 import 'view/components/counter_button.dart';
 import 'view/components/counter_display.dart';
 
-late CounterController processor;
-late ApplicationView application;
-
 void main() {
   /// COUNTER EXAMPLE ======================================
   final counterStorageMiddleware = CounterStorageMiddleware();
@@ -20,17 +17,13 @@ void main() {
   Wire.data(CounterDataKeys.COUNT, value: counterStorageMiddleware.getInitialValue());
   // Register middleware after setting initial value to prevent saving initial value
   Wire.middleware(counterStorageMiddleware);
+  // Instantiate controller that register all signal processing
+  CounterController();
 
   print('Init Ready: initial value = ${Wire.data(CounterDataKeys.COUNT).value}');
 
-  init();
-}
-
-void init() {
   final root = document.querySelector('#root');
-
-  processor = CounterController();
-  application = ApplicationView(root as DivElement?);
+  ApplicationView(root as DivElement?);
 }
 
 class ApplicationView {

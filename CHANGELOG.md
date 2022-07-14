@@ -1,3 +1,6 @@
+## 1.4.10
+- README updated
+
 ## 1.4.9
 - New abstracts - `WireCommandAbstract` and `WireDatabaseServiceAbstract`
 - New utilities mixins - `WireMixinWithDatabase` and `WireMixinWithWhenReady`

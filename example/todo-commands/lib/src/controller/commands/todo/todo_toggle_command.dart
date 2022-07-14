@@ -10,8 +10,9 @@ class TodoToggleCommand extends WireCommandWithWireData<void> {
 
   @override
   Future<void> execute() async {
-    final todoVO = await get<TodoVO>(todoId);
-    final count = await get<int>(DataKeys.COUNT);
+    final todoVO = await get<TodoVO?>(todoId).onError((error, stackTrace) => null);
+    if (todoVO == null) return;
+    final count = await get<int>(DataKeys.COUNT).onError((error, stackTrace) => 0);
     final wasCompleted = todoVO.completed;
 
     todoVO.completed = !todoVO.completed;
