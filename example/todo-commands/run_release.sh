@@ -1,1 +1,1 @@
-webdev serve web:8083
+webdev serve --release
