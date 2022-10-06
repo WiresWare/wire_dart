@@ -1,4 +1,4 @@
-import 'package:wire/utils/util_wire_command_with_wire_data.dart';
+import 'package:wire/utils/wire_command_with_wire_data.dart';
 
 abstract class WireCommandWithRequiredData<T> extends WireCommandWithWireData<T> {
   WireCommandWithRequiredData({List<String> requiredDataKeys = const []}) {

@@ -2,7 +2,6 @@ import 'package:wire/wire.dart';
 import 'package:wire_example_shared/todo/const/data_keys.dart';
 
 class CountCompletedGetter {
-
   final listOfAllTodosWireData = Wire.data(DataKeys.LIST_OF_IDS);
   final notCompletedCountWireData = Wire.data(DataKeys.COUNT);
 
