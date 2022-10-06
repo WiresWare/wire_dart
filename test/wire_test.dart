@@ -10,19 +10,19 @@ class TestWireMiddleware extends WireMiddleware {
   @override
   Future<void> onData(String key, prevValue, nextValue) async {
     print('> TestWireMiddleware -> onData: key = '
-        '${key} | $prevValue | $nextValue');
+      '${key} | $prevValue | $nextValue');
   }
 
   @override
   Future<void> onRemove(String signal, [Object? scope, listener]) async {
     print('> TestWireMiddleware -> onRemove: signal = '
-        '${signal} | $scope | $listener');
+      '${signal} | $scope | $listener');
   }
 
   @override
   Future<void> onSend(String? signal, [data, scope]) async {
     print('> TestWireMiddleware -> onRemove: signal = '
-        '${signal} | $data | $scope');
+      '${signal} | $data | $scope');
   }
 }
 
