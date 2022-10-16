@@ -353,7 +353,7 @@ class StatsCounter extends StatelessWidget {
 ```
 Future<Wire<T>> .add<T>(Object scope, String signal, WireListener<T> listener, [int replies = 0])
 Future<List<Wire<dynamic>>> .addMany(Object scope, Map<String, WireListener<dynamic>> signalToHandlerMap)
-Future<bool> .send<T>(String signal, {T payload, Object scope}) // Payload or DTO stands for Data Transfer Object
+Future<WireSendResults> .send<T>(String signal, {T payload, Object scope}) // Payload or DTO stands for Data Transfer Object
 Future<bool> .remove(String signal, {Object scope, WireListener listener})
 bool .has({String signal, Wire wire})
 void .attach(Wire wire)
@@ -364,6 +364,7 @@ List<Wire> .get({String signal, Object scope, WireListener listener, int wid})
 
 WireData .data<T>(String key, [T value])
 ```
+`Wire.send` executes all handlers added to any scope for the signal, executes asynchronous and return result's object `WireSendResults` with data list of length equal to the number of handlers that return not null results.   
 
 ### WireListener<T>:
 Definition of listener to a signal in `Wire.add(scope, signal, listener)`
