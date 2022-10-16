@@ -1,3 +1,6 @@
+## 1.5.0
+- API update: return `WireSendResults` when `Wire.send` instead of boolean value of numbers of subscribers left for the signal.
+
 ## 1.4.10
 - README updated
 
