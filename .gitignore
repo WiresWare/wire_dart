@@ -1,6 +1,7 @@
 # Created by .ignore support plugin (hsz.mobi)
 .dart_tool/
 **/.idea/
+.fleet
 .packages
 *.lock
 *node_modules/*
