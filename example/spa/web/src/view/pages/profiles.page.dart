@@ -1,4 +1,5 @@
 import 'dart:html';
+
 import '../base/page.dart';
 
 class ProfilesPage extends Page {
@@ -26,6 +27,7 @@ class ProfilesPage extends Page {
   }
 
   void _handleClickEvent(event) {
+    print('> ProfilesPage -> _handleClickEvent');
     // dispatchAction(Action.INDEX_PAGE_BUTTON_LOGIN_CLICKED);
   }
 }

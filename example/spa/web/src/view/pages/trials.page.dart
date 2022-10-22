@@ -3,7 +3,7 @@ import 'dart:html';
 import '../base/page.dart';
 
 class TrialsPage extends Page {
-  TrialsPage() : super('page/trials.html') {
+  TrialsPage() : super('trials') {
     dom.style.backgroundColor = 'antiquewhite';
   }
 
