@@ -30,10 +30,10 @@ mixin WireMixinWithWireData {
   }
 
   void reset(String dataKey) {
-    if (Wire.data(dataKey).isSet) Wire.data(dataKey).reset();
+    if (has(dataKey)) Wire.data(dataKey).reset();
   }
 
   Future<void> remove(String dataKey) async {
-    if (Wire.data(dataKey).isSet) await Wire.data(dataKey).remove();
+    if (has(dataKey)) await Wire.data(dataKey).remove();
   }
 }

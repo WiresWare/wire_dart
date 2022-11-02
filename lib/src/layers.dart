@@ -88,7 +88,9 @@ class WireCommunicateLayer {
   Future<void> clear() async {
     final wiresToRemove = <Wire<dynamic>>[];
     _wireById.forEach((hash, wire) => wiresToRemove.add(wire));
-    await Future.forEach(wiresToRemove, (Wire<dynamic> wire) => _removeWire(wire));
+    if (wiresToRemove.isNotEmpty) {
+      await Future.forEach(wiresToRemove, (Wire<dynamic> wire) => _removeWire(wire));
+    }
 
     _wireById.clear();
     _wireIdsBySignal.clear();
@@ -115,7 +117,7 @@ class WireCommunicateLayer {
   }
 
   ///
-  /// Exclude a Wire based on an signal.
+  /// Exclude a Wire based on a signal.
   ///
   /// @param    The Wire to remove.
   /// @return If there is no ids (no Wires) for that SIGNAL stop future perform
@@ -147,35 +149,35 @@ class WireMiddlewaresLayer {
   void add(WireMiddleware middleware) => _MIDDLEWARE_LIST.add(middleware);
   void clear() => _MIDDLEWARE_LIST.clear();
 
-  void onData(String key, dynamic prevValue, dynamic nextValue) {
-    _process((WireMiddleware m) => m.onData(key, prevValue, nextValue));
+  Future<void> onData(String key, dynamic prevValue, dynamic nextValue) async {
+    return _process((WireMiddleware m) => m.onData(key, prevValue, nextValue));
   }
 
-  void onReset(String key, dynamic prevValue) {
-    _process((WireMiddleware m) => m.onData(key, prevValue, null));
+  Future<void> onReset(String key, dynamic prevValue) async {
+    return _process((WireMiddleware m) => m.onData(key, prevValue, null));
   }
 
-  void onRemove(String signal, {Object? scope, WireListener<dynamic>? listener}) {
-    _process((WireMiddleware mw) => mw.onRemove(signal, scope, listener));
+  Future<void> onRemove(String signal, {Object? scope, WireListener<dynamic>? listener}) async {
+    return _process((WireMiddleware mw) => mw.onRemove(signal, scope, listener));
   }
 
-  void onSend(String signal, dynamic payload) {
-    _process((WireMiddleware mw) => mw.onSend(signal, payload));
+  Future<void> onSend(String signal, dynamic payload) async {
+    return _process((WireMiddleware mw) => mw.onSend(signal, payload));
   }
 
-  void onAdd(Wire<dynamic> wire) {
-    _process((WireMiddleware mw) => mw.onAdd(wire));
+  Future<void> onAdd(Wire<dynamic> wire) async {
+    return _process((WireMiddleware mw) => mw.onAdd(wire));
   }
 
-  void _process(Function(WireMiddleware mw) p) {
+  Future<void> _process(Function(WireMiddleware mw) p) async {
     if (_MIDDLEWARE_LIST.isNotEmpty) {
-      Future.forEach(_MIDDLEWARE_LIST, p);
+      await Future.forEach(_MIDDLEWARE_LIST, p);
     }
   }
 }
 
 class WireDataContainerLayer {
-  final Map<String, WireData> _dataMap = <String, WireData>{};
+  final _dataMap = <String, WireData>{};
 
   bool has(String key) => _dataMap.containsKey(key);
   WireData get(String key) => _dataMap[key]!;

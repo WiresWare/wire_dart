@@ -220,8 +220,8 @@ void main() {
 
       await Wire.purge(withMiddleware: true);
 
-      Wire.add(SCOPE, SIGNAL_G2, listener);
-      Wire.add(SCOPE, SIGNAL_G2_2, listener);
+      await Wire.add(SCOPE, SIGNAL_G2, listener);
+      await Wire.add(SCOPE, SIGNAL_G2_2, listener);
       Wire.attach(testWire);
       Wire.middleware(testMiddleware);
     });
@@ -232,9 +232,9 @@ void main() {
       print('> ===========================================================================');
       print('> $TEST_CASE_2_1 ');
       print('> ===========================================================================');
-      print('> 2.1.1 -> Wire.has(wire: testWire) == isTrue');
+      print('> 2.1.1 -> Wire.has(wire: ${testWire}) == isTrue');
       expect(Wire.has(wire: testWire), isTrue);
-      print('> 2.1.2 -> Wire.has(signal: SIGNAL) == isTrue');
+      print('> 2.1.2 -> Wire.has(signal: $SIGNAL_G2) == isTrue');
       expect(Wire.has(signal: SIGNAL_G2), isTrue);
 
       print('> ======================= PURGE =======================');

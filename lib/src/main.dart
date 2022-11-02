@@ -136,7 +136,7 @@ class Wire<T> {
   /// All middleware will be informed from [WireMiddleware.onAdd] before wire is attached to the layer
   static Future<Wire<T>> add<T>(Object scope, String signal, WireListener<T> listener, {int replies = 0}) async {
     final wire = Wire<T>(scope, signal, listener, replies);
-    _MIDDLEWARE_LAYER.onAdd(wire);
+    await _MIDDLEWARE_LAYER.onAdd(wire);
     attach(wire);
     return wire;
   }
@@ -158,9 +158,9 @@ class Wire<T> {
   /// If use scope then only wire with this scope value will receive the payload
   /// All middleware will be informed from [WireMiddleware.onSend] before signal sent on wires
   ///
-  /// Returns true when no wire for the signal has found
+  /// Returns WireSendResults which contains data from all listeners that react on the signal
   static Future<WireSendResults> send<T>(String signal, {T? payload, Object? scope}) async {
-    _MIDDLEWARE_LAYER.onSend(signal, payload);
+    await _MIDDLEWARE_LAYER.onSend(signal, payload);
     return _COMMUNICATION_LAYER.send(signal, payload, scope);
   }
 

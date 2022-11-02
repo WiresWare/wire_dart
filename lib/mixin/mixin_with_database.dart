@@ -16,5 +16,5 @@ mixin WireMixinWithDatabase {
     } catch (e) {}
   }
 
-  void delete(String key) => {if (databaseService.exist(key)) databaseService.delete(key)};
+  void delete(String key) => {if (exist(key)) databaseService.delete(key)};
 }

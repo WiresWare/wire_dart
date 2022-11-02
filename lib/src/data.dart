@@ -17,21 +17,30 @@ class WireData {
   WireData(this._key, this._onRemove, this._onReset);
 
   final String _key;
-  final Function(String) _onRemove;
-  final WireDataOnReset _onReset;
+  dynamic _value; // initial value is null
+
+  Function(String)? _onRemove;
+  WireDataOnReset? _onReset;
+  WireDataGetter? _getter;
+  WireDataLockToken? _lockToken;
 
   final _listeners = <WireDataListener>{};
-
-  bool get isGetter => _getter != null;
 
   /// This property needed to distinguish between newly created and not set WireData which has value of null at the beginning
   /// And with WireData at time when it's removed, because when removing the value also set to null
   bool get isSet => _value != null;
-
-  String get key => _key;
-
-  WireDataLockToken? _lockToken;
   bool get isLocked => _lockToken != null;
+  bool get isGetter => _getter != null;
+  String get key => _key;
+  dynamic get value => isGetter ? _getter!(this) : _value;
+
+  set getter(WireDataGetter value) => _getter = value;
+  set value(dynamic input) {
+    // print('> WireDate -> set value: ${input}');
+    _guardian();
+    _value = input;
+    refresh();
+  }
 
   /// Prevent any value modifications inside specific of [WireData] instance.
   /// [WireDataLockToken] token should be stored in some controller or responsible
@@ -51,30 +60,19 @@ class WireData {
     return opened; // throw ERROR__DATA_CANNOT_OPEN
   }
 
-  WireDataGetter? _getter;
-  set getter(WireDataGetter value) => _getter = value;
-
-  dynamic _value; // initial value is null
-  dynamic get value => isGetter ? _getter!(this) : _value;
-  set value(dynamic input) {
-    // print('> WireDate -> set value: ${input}');
-    _guardian();
-    _value = input;
-    refresh();
-  }
-
-  Future<void> refresh([dynamic value]) async {
+  Future<void> refresh([dynamic optional]) async {
     if (_listeners.isEmpty) return;
     for (final listener in _listeners) {
-      await listener(this.value);
+      await listener(optional ?? value);
     }
   }
 
+  // In the call of this function isSet will return false
   Future<void> reset() async {
     _guardian();
     final previousValue = _value;
     _value = null;
-    _onReset(_key, previousValue);
+    _onReset!(_key, previousValue);
     await refresh();
   }
 
@@ -82,7 +80,9 @@ class WireData {
     if (!clean) _guardian();
     _value = null;
     _lockToken = null;
-    _onRemove(_key);
+    _onRemove!(_key);
+    _onRemove = null;
+    _onReset = null;
     await refresh();
     _listeners.clear();
   }
