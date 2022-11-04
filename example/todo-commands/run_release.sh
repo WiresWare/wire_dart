@@ -1,1 +1,1 @@
-webdev serve --release
+webdev build --output web:build
