@@ -6,12 +6,9 @@ class CountCompletedGetter {
   final notCompletedCountWireData = Wire.data(DataKeys.COUNT);
 
   int getter(WireData that) {
-    if (!that.hasListener(that.refresh)) {
-      listOfAllTodosWireData.subscribe(that.refresh);
-      notCompletedCountWireData.subscribe(that.refresh);
-    }
-
     final int notCompletedCount = notCompletedCountWireData.value as int;
-    return (listOfAllTodosWireData.value as List).length - notCompletedCount;
+    final result = (listOfAllTodosWireData.value as List).length - notCompletedCount;
+    print('> CountCompletedGetter - getter: result = ${result}');
+    return result;
   }
 }
