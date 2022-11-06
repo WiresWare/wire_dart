@@ -33,6 +33,7 @@ class WireData {
   bool get isGetter => _getter != null;
   String get key => _key;
   dynamic get value => isGetter ? _getter!(this) : _value;
+  int get numberOfListeners => _listeners.length;
 
   set getter(WireDataGetter value) => _getter = value;
   set value(dynamic input) {
@@ -91,6 +92,7 @@ class WireData {
     if (isLocked) throw Exception(isGetter ? ERROR__DATA_IS_GETTER : ERROR__DATA_IS_LOCKED);
   }
 
+  // Subscribe to updates of value but not getter because its value locked
   WireData subscribe(WireDataListener listener) {
     if (!hasListener(listener)) {
       _listeners.add(listener);
