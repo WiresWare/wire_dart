@@ -6,6 +6,7 @@
 *.lock
 *node_modules/*
 pubspec.lock
+/example/todo-commands/build/
 /example/todo/build/
 /example/todo/.dart_tool/
 /example/todo/debug.log
