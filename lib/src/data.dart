@@ -63,8 +63,9 @@ class WireData {
 
   Future<void> refresh([dynamic optional]) async {
     if (_listeners.isEmpty) return;
+    final valueForListener = optional ?? value;
     for (final listener in _listeners) {
-      await listener(optional ?? value);
+      await listener(valueForListener);
     }
   }
 
