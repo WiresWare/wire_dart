@@ -95,6 +95,7 @@ class WireData {
 
   // Subscribe to updates of value but not getter because its value locked
   WireData subscribe(WireDataListener listener) {
+    if (isGetter) throw Exception(ERROR__SUBSCRIBE_TO_DATA_GETTER);
     if (!hasListener(listener)) {
       _listeners.add(listener);
     }
