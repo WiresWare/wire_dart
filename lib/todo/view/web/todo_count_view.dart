@@ -11,7 +11,7 @@ class TodoCountView extends DomElement {
     final wireDataCount = Wire.data(DataKeys.COUNT);
     final wireDataGetterCountCompleted = Wire.data(DataKeys.GET_COUNT_COMPLETED);
 
-    wireDataGetterCountCompleted.subscribe((value) => updateCount(wireDataCount.value, value));
+    wireDataCount.subscribe((value) => updateCount(value, wireDataGetterCountCompleted.value));
     updateCount(wireDataCount.value, wireDataGetterCountCompleted.value);
   }
 
