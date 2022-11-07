@@ -348,13 +348,12 @@ void main() {
         wireData.subscribe(that.refresh);
         return nameFormatter(userVO);
       };
-      Wire.data(GET__USER_FULL_NAME, getter: wireDataGetter).subscribe((value) async {
-        print('> $GET__USER_FULL_NAME -> updated: $value');
-      });
+      Wire.data(GET__USER_FULL_NAME, getter: wireDataGetter);
     });
 
     test('5.1 Getter', () {
       print('>\t Wire.data(GET__USER_FULL_NAME).isLocked');
+      expect(() => Wire.data(GET__USER_FULL_NAME).subscribe((value) async {}), throwsA(isA<Exception>()));
       expect(Wire.data(GET__USER_FULL_NAME).isLocked, isTrue);
       expect(Wire.data(GET__USER_FULL_NAME).isGetter, isTrue);
       expect(Wire.data(GET__USER_FULL_NAME).value, equals(nameFormatter(dataUserVO)));
