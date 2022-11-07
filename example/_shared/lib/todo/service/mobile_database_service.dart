@@ -1,13 +1,12 @@
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
-
 import 'package:wire_example_shared/todo/data/vo/todo_vo.dart';
 import 'package:wire_example_shared/todo/service/abstract_database_service.dart';
 
 class MobileDatabaseService extends IDatabaseService {
   MobileDatabaseService();
 
-  late final Box<List<Map<String, dynamic>>> store;
+  late final Box<List<dynamic>> store;
 
   @override
   Future<bool> init([String? key]) async {
@@ -40,6 +39,7 @@ class MobileDatabaseService extends IDatabaseService {
 
   @override
   void save(String key, dynamic data) {
-    store.put(key, data as List<Map<String, dynamic>>);
+    print('> MobileDatabaseService -> save: key = $key');
+    if (data is List) store.put(key, data);
   }
 }
