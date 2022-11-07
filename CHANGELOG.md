@@ -1,3 +1,9 @@
+## 1.5.1
+- New error `ERROR__SUBSCRIBE_TO_DATA_GETTER` thrown on `WireData` subscribe method called when its a getter - `isGetter == true`, thus its not possible to listen for getter updates!
+- In `WireData.refresh()` method the value stored to local variable before traverse the array of listeners passing getting value for each (because value could be getter).
+- `WireData` with new property `numberOfListeners`
+- Minor improvements and code reorganizations, `Wire.add` async.
+
 ## 1.5.0
 - API update: return `WireSendResults` when `Wire.send` instead of boolean value of numbers of subscribers left for the signal.
 
