@@ -1,7 +1,7 @@
 import 'package:wire/wire.dart';
 
 import '../constants/data.dart';
-import '../states/user.states.dart';
+import '../states/user_states.dart';
 
 class UserController {
   UserController();

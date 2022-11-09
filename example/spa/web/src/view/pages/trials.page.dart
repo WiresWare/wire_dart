@@ -1,5 +1,9 @@
 import 'dart:html';
 
+import 'package:wire/wire.dart';
+
+import '../../constants/action.dart';
+import '../../constants/signals.dart';
 import '../base/page.dart';
 
 class TrialsPage extends Page {
@@ -33,9 +37,10 @@ class TrialsPage extends Page {
   }
 
   void _handleClickEvent(Event event) {
+    print('> TrialsPage -> _handleClickEvent');
     final ct = event.currentTarget;
     if (ct == _btnIndex) {
-      // dispatchAction(Action.GALLERY_PAGE_BUTTON_INDEX_CLICKED);
+      Wire.send(Signals.STATES_ACTION__NAVIGATE, payload: Action.NAVIGATE_TO_MAIN);
     } else if (ct == _btnExit) {
       // dispatchAction(Action.GALLERY_PAGE_BUTTON_EXIT_CLICKED);
     }

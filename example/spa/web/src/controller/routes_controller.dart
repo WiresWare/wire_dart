@@ -6,7 +6,7 @@ import 'package:wire/wire.dart';
 import '../constants/action.dart';
 import '../constants/data.dart';
 import '../constants/signals.dart';
-import '../states/router.states.dart';
+import '../states/router_states.dart';
 import '../view/base/page.dart';
 import '../view/pages/login.page.dart';
 import '../view/pages/main.page.dart';
@@ -55,11 +55,18 @@ class RoutesController {
         to: RouterStates.PAGE_TRIALS,
         on: Action.NAVIGATE_TO_TRIALS,
         handler: (StatesTransition transition) => {navigateFromTo(TrialsPage())});
+    routerStates.when(
+        at: RouterStates.PAGE_TRIALS,
+        to: RouterStates.PAGE_MAIN,
+        on: Action.NAVIGATE_TO_MAIN,
+        handler: (StatesTransition transition) => {navigateFromTo(MainPage())});
   }
 
   Future<void> navigateFromTo(Page toPage) async {
     final hasCurrentPage = _currentPage != null;
     if (hasCurrentPage) await _currentPage?.beforeLeave();
+
+    print('> RoutesController -> navigateFromTo: ${_currentPage} - ${toPage.path}');
 
     final template = await HttpRequest.getString('${_templatePath}${toPage.path}.html');
     // ignore: unsafe_html

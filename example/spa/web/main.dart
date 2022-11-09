@@ -2,8 +2,8 @@ import 'dart:html';
 
 import 'src/constants/dom.dart';
 import 'src/constants/pages.dart';
-import 'src/controller/auth.controller.dart';
-import 'src/controller/routes.controller.dart';
+import 'src/controller/auth_controller.dart';
+import 'src/controller/routes_controller.dart';
 import 'src/view/application.dart';
 
 void main() async {
