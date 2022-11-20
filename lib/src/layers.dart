@@ -179,10 +179,15 @@ class WireMiddlewaresLayer {
 class WireDataContainerLayer {
   final _dataMap = <String, WireData>{};
 
+  bool _remove(String key) => _dataMap.remove(key) != null;
+
   bool has(String key) => _dataMap.containsKey(key);
   WireData get(String key) => _dataMap[key]!;
-  WireData create(String key, WireDataOnReset onReset) => _dataMap[key] = WireData(key, remove, onReset);
-  bool remove(String key) => _dataMap.remove(key) != null;
+  WireData create(String key, WireDataOnReset onReset) {
+    final result = WireData(key, _remove, onReset);
+    _dataMap[key] = result;
+    return result;
+  }
 
   Future<void> clear() async {
     final wireDataToRemove = <WireData>[];
