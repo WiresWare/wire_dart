@@ -1,3 +1,9 @@
+## 1.5.2
+- Method remove in WireDataContainerLayer became private.
+- Wire listener became private and can be compared through method listenerEqual, which is used in remove and getByListener.
+- In order to call middleware on WireData.remove call the method reset called instead of nulling value.
+- Examples and tests updated
+ 
 ## 1.5.1
 - New error `ERROR__SUBSCRIBE_TO_DATA_GETTER` thrown on `WireData` subscribe method called when its a getter - `isGetter == true`, thus its not possible to listen for getter updates!
 - In `WireData.refresh()` method the value stored to local variable before traverse the array of listeners passing getting value for each (because value could be getter).
