@@ -65,7 +65,7 @@ class WireCommunicateLayer {
     return WireSendResults(results, noMoreSubscribers);
   }
 
-  Future<bool> remove<T>(String signal, [Object? scope, WireListener<T>? listener]) async {
+  Future<bool> remove(String signal, [Object? scope, WireListener<dynamic>? listener]) async {
     final exists = hasSignal(signal);
     if (exists) {
       final withScope = scope != null;
@@ -75,7 +75,7 @@ class WireCommunicateLayer {
         if (_wireById.containsKey(wireId)) {
           final wire = _wireById[wireId]!;
           final isWrongScope = withScope && scope != wire.scope;
-          final isWrongListener = withListener && listener != wire.listener;
+          final isWrongListener = withListener && !wire.listenerEqual(listener);
           if (isWrongScope || isWrongListener) return;
           toRemoveList.add(wire);
         }
@@ -108,7 +108,13 @@ class WireCommunicateLayer {
 
   List<Wire<dynamic>> getByListener(WireListener<dynamic> listener) {
     final result = <Wire<dynamic>>[];
-    _wireById.forEach((_, wire) => {if (wire.listener == listener) result.add(wire)});
+    // print('> Wire -> WireCommunicateLayer: getByListener, listener = ${listener}');
+    _wireById.forEach((_, wire) {
+      final compareListener = wire.listenerEqual(listener);
+      // print('\t compareListener = ${compareListener}');
+      if (compareListener) result.add(wire);
+    });
+    // print('> \t result = ${result}');
     return result;
   }
 

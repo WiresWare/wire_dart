@@ -68,7 +68,9 @@ class Wire<T> {
   ///
   /// @private
   WireListener<T>? _listener;
-  WireListener<T> get listener => _listener!;
+  bool listenerEqual(WireListener<dynamic> listener) {
+    return _listener == listener;
+  }
 
   ///
   /// [read-only] [internal use]
@@ -129,7 +131,7 @@ class Wire<T> {
   /// Remove wire object from communication layer, then inform all middlewares with
   /// Returns existence of another wires with that signal.
   static Future<bool> detach(Wire<dynamic> wire) {
-    return remove(signal: wire.signal, scope: wire.scope, listener: wire.listener);
+    return remove(signal: wire.signal, scope: wire.scope);
   }
 
   /// Create wire object from params and [attach] it to the communication layer
@@ -177,9 +179,10 @@ class Wire<T> {
   /// Remove all wires for specific signal, for more precise target to remove add scope and/or listener
   /// All middleware will be informed from [WireMiddleware.onRemove] after signal removed, only if existed
   /// Returns [bool] telling signal existed in communication layer
-  static Future<bool> remove<T>({String? signal, Object? scope, WireListener<T>? listener}) async {
-    if (signal != null) return _removeAllBySignal(signal);
-    if (scope != null) return (await _removeAllByScope(scope)).isNotEmpty;
+  static Future<bool> remove({String? signal, Object? scope, WireListener<dynamic>? listener}) async {
+    if (signal != null) return _removeAllBySignal(signal, listener: listener);
+    if (scope != null) return (await _removeAllByScope(scope, listener: listener)).isNotEmpty;
+    if (listener != null) return (await _removeAllByListener(listener)).isNotEmpty;
     return false;
   }
 
@@ -189,10 +192,16 @@ class Wire<T> {
     return existed;
   }
 
-  static Future<List<bool>> _removeAllByScope<T>(Object scope) async {
+  static Future<List<bool>> _removeAllByScope<T>(Object scope, {WireListener<dynamic>? listener}) async {
     final List<Wire<dynamic>> listOfWiresForScope = List.from(_COMMUNICATION_LAYER.getByScope(scope));
-    return Future.wait(
-        listOfWiresForScope.map((Wire<dynamic> wire) async => _removeAllBySignal(wire.signal, scope: scope)));
+    return Future.wait(listOfWiresForScope
+        .map((Wire<dynamic> wire) async => _removeAllBySignal(wire.signal, scope: scope, listener: listener)));
+  }
+
+  static Future<List<bool>> _removeAllByListener(WireListener<dynamic> listener) async {
+    final List<Wire<dynamic>> listOfWiresWithListener = List.from(_COMMUNICATION_LAYER.getByListener(listener));
+    return Future.wait(listOfWiresWithListener
+        .map((Wire<dynamic> wire) async => _removeAllBySignal(wire.signal, scope: wire.scope, listener: listener)));
   }
 
   /// Class extending [WireMiddleware] can listen to all processes in side Wire
