@@ -3,6 +3,10 @@ import 'package:wire/utils/wire_command_with_wire_data.dart';
 import 'package:wire/wire.dart';
 
 class TestWireMiddleware extends WireMiddleware {
+  TestWireMiddleware(this.simpleDataStorage);
+
+  Map<String, dynamic> simpleDataStorage;
+
   @override
   Future<void> onAdd(Wire wire) async {
     print('> TestWireMiddleware -> onAdd: Wire.signal = ${wire.signal}');
@@ -12,6 +16,10 @@ class TestWireMiddleware extends WireMiddleware {
   Future<void> onData(String key, prevValue, nextValue) async {
     print('> TestWireMiddleware -> onData: key = '
         '${key} | $prevValue | $nextValue');
+    if (nextValue != null)
+      simpleDataStorage[key] = nextValue;
+    else
+      simpleDataStorage.remove(key);
   }
 
   @override
@@ -47,6 +55,7 @@ void main() {
     final TEST_CASE_1_4 = '1.4. Counter Signal with 2 replies';
     final TEST_CASE_1_5 = '1.5. Test put/find';
     final TEST_CASE_1_6 = '1.6. Add many and remove by scope';
+    final TEST_CASE_1_7 = '1.7. Remove all by listener';
 
     const SCOPE = Object();
 
@@ -72,11 +81,11 @@ void main() {
       await Wire.purge(withMiddleware: true);
       print('> 1: Setup -> Add signal $SIGNAL_G1 with dynamic WireListener');
       print('> \t\t Dynamic listener (with specified data type) will react on any signal');
-      Wire.add(SCOPE, SIGNAL_G1, listener_dynamic);
+      Wire.add<dynamic>(SCOPE, SIGNAL_G1, listener_dynamic);
       print('> 1: Setup -> Add signal $SIGNAL_G1 with string WireListener');
-      Wire.add(SCOPE, SIGNAL_G1, listener_string);
+      Wire.add<String>(SCOPE, SIGNAL_G1, listener_string);
       print('> 1: Setup -> Add signal $SIGNAL_G1 with boolean WireListener');
-      Wire.add(SCOPE, SIGNAL_G1, listener_boolean);
+      Wire.add<bool>(SCOPE, SIGNAL_G1, listener_boolean);
       print('> 1: Setup -> Attach pre-created signal ${wireToAttach.signal} with string WireListener');
       Wire.attach(wireToAttach);
     });
@@ -172,12 +181,15 @@ void main() {
       await Wire.addMany(scope, {
         SIGNAL_G1: (_, __) async {
           print('> $TEST_CASE_1_6 -> Hello from $SIGNAL_G1');
+          return false;
         },
         SIGNAL_NEW: (_, __) async {
           print('> $TEST_CASE_1_6 -> Hello from $SIGNAL_NEW');
+          return SIGNAL_NEW;
         },
         SIGNAL_COUNTER: (_, __) async {
           print('> $TEST_CASE_1_6 -> Hello from $SIGNAL_COUNTER');
+          return 1;
         },
       });
 
@@ -187,15 +199,28 @@ void main() {
       expect(Wire.get(signal: SIGNAL_COUNTER).isNotEmpty, isTrue);
 
       print('> 1.6.2 -> Send signal to verify their work');
-      await Wire.send(SIGNAL_G1);
-      await Wire.send(SIGNAL_NEW);
-      await Wire.send(SIGNAL_COUNTER);
+      expect((await Wire.send(SIGNAL_G1)).dataList.first, false);
+      expect((await Wire.send(SIGNAL_NEW)).dataList.first, SIGNAL_NEW);
+      expect((await Wire.send(SIGNAL_COUNTER)).dataList.first, 1);
 
-      print('> 1.6.3 -> Call Wire.removeAllByScope(scope)');
-      await Wire.remove(scope: scope);
+      print('> 1.6.3 -> Call Wire.removeAllByScope(scope) -> existed == true');
+      expect(await Wire.remove(scope: scope), isTrue);
+      expect(await Wire.remove(scope: scope), isFalse);
 
-      print('> 1.6.4 -> Check no signals after removal');
-      expect(Wire.get(scope: scope).isEmpty, isTrue);
+      print('> 1.6.4 -> Check no signals after removal - returned list is empty');
+      expect(await Wire.get(scope: scope).isEmpty, isTrue);
+    });
+
+    test(TEST_CASE_1_7, () async {
+      print('> ===========================================================================');
+      print('> $TEST_CASE_1_7 ');
+      print('> ===========================================================================');
+      print('> TEST Remove all signals by listener');
+      Wire wire = await Wire.add(PutFindTestObject(), 'some_random_signal', listener_dynamic);
+      expect(Wire.has(wire: wire), isTrue);
+      expect(Wire.get(listener: listener_dynamic).length, 2);
+      expect(await Wire.remove(listener: listener_dynamic), isTrue);
+      expect(await Wire.get(listener: listener_dynamic).isEmpty, isTrue);
     });
   });
 
@@ -211,7 +236,7 @@ void main() {
 
     var testWire = Wire(SCOPE, 'wire_signal_2', listener);
 
-    var testMiddleware = TestWireMiddleware();
+    var testMiddleware = TestWireMiddleware({});
 
     setUp(() async {
       print('> ===========================================================================');
@@ -278,7 +303,41 @@ void main() {
     });
   });
 
-  group(GROUP_3_TITLE, () {});
+  group(GROUP_3_TITLE, () {
+    var simpleDataStorage = <String, dynamic>{};
+    var testMiddleware = TestWireMiddleware(simpleDataStorage);
+
+    final KEY_STRING = 'key';
+    final DATA_STRING = 'value';
+
+    setUp(() async {
+      print('> ===========================================================================');
+      print('> $GROUP_3_TITLE ');
+      print('> ===========================================================================');
+      await Wire.purge(withMiddleware: true);
+      print('>\t -> add middleware with empty map - <String, dynamic>{}');
+      Wire.middleware(testMiddleware);
+    });
+
+    test('3.1 Check data present in data container layer after being set', () async {
+      print('>\t -> Set value and check WireData return type');
+      expect(Wire.data(KEY_STRING).isSet, isFalse);
+      expect(Wire.data(KEY_STRING, value: DATA_STRING), isInstanceOf<WireData>());
+      expect(Wire.data(KEY_STRING), isInstanceOf<WireData>());
+      expect(Wire.data(KEY_STRING).isSet, isTrue);
+      expect(Wire.data(KEY_STRING).isLocked, isFalse);
+      expect(Wire.data(KEY_STRING).value, DATA_STRING);
+      print('>\t -> Set value and check WireData return type');
+      expect(simpleDataStorage.containsKey(KEY_STRING), isTrue);
+      expect(simpleDataStorage[KEY_STRING], DATA_STRING);
+
+      print('>\t -> Remove WireData $KEY_STRING');
+      await Wire.data(KEY_STRING).remove();
+      expect(Wire.data(KEY_STRING).isSet, isFalse);
+      expect(Wire.data(KEY_STRING).value, isNull);
+      expect(simpleDataStorage.containsKey(KEY_STRING), isFalse);
+    });
+  });
 
   group(GROUP_4_TITLE, () {
     final DATA_KEY = 'DATA_KEY';
@@ -295,7 +354,7 @@ void main() {
       Wire.data(DATA_KEY).subscribe((value) async {
         print('> $DATA_KEY -> updated: $value');
       });
-
+      print('>\t set initial value and lock');
       Wire.data(DATA_KEY, value: 'initial value');
       Wire.data(DATA_KEY).lock(data_lockToken_one);
     });
@@ -309,11 +368,7 @@ void main() {
       print('>\t Wire.data(DATA_KEY).lock(data_lockToken_one)');
       expect(Wire.data(DATA_KEY).lock(data_lockToken_one), isTrue);
       print('>\t Wire.data(DATA_KEY, value: cant be changed)');
-      // expect(Wire.data(DATA_KEY, value: 'cant be changed'), throwsA(Exception(ERROR__DATA_IS_LOCKED)));
-      // expect(Wire.data(DATA_KEY, value: 'cant be changed'), throwsA(TypeMatcher<Exception>()));
-      // expect(Wire.data(DATA_KEY, value: 'cant be changed'), throwsA(isA<Exception>()));
-      // expect(Wire.data(DATA_KEY, value: 'cant be changed'), throwsException);
-      // expect(Wire.data(DATA_KEY, value: 'cant be changed'), throwsA(equals(ERROR__DATA_IS_LOCKED)));
+      expect(() => Wire.data(DATA_KEY, value: 'cant be changed'), throwsA(isA<Exception>()));
 
       expect(Wire.data(DATA_KEY).lock(data_lockToken_one), isTrue);
       expect(Wire.data(DATA_KEY).lock(data_lockToken_one), isTrue);
