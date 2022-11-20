@@ -80,12 +80,11 @@ class WireData {
 
   Future<void> remove({bool clean = false}) async {
     if (!clean) _guardian();
-    _value = null;
     _lockToken = null;
+    await reset();
     _onRemove!(_key);
     _onRemove = null;
     _onReset = null;
-    await refresh();
     _listeners.clear();
   }
 
