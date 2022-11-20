@@ -26,28 +26,28 @@ class AuthController {
         to: AuthStates.USER_LOGIN_VALIDATE,
         on: Action.USER_LOGIN_VALIDATE,
         handler: (StatesTransition t) {
-          print('> AuthController -> authStates: USER_LOGIN_VALIDATE - ${t.toString()}');
+          print('> AuthController -> authStates: USER_LOGIN_VALIDATE - ${t}');
         });
     authStates.when(
         at: AuthStates.USER_LOGIN_VALIDATE,
         to: AuthStates.USER_LOGGED_IN,
         on: Action.USER_LOGIN_COMPLETE,
         handler: (StatesTransition t) {
-          print('> AuthController -> authStates: USER_LOGIN_COMPLETE - ${t.toString()}');
+          print('> AuthController -> authStates: USER_LOGIN_COMPLETE - ${t}');
         });
     authStates.when(
         at: AuthStates.USER_LOGIN_VALIDATE,
         to: AuthStates.USER_LOGIN_ERROR,
         on: Action.USER_LOGIN_ERROR,
         handler: (StatesTransition t) {
-          print('> AuthController -> authStates: USER_LOGIN_ERROR - ${t.toString()}');
+          print('> AuthController -> authStates: USER_LOGIN_ERROR - ${t}');
         });
     authStates.when(
         at: AuthStates.USER_LOGIN_ERROR,
         to: AuthStates.USER_LOGGED_OUT,
         on: Action.USER_LOGOUT,
         handler: (StatesTransition t) {
-          print('> AuthController -> authStates: USER_LOGIN_ERROR - ${t.toString()}');
+          print('> AuthController -> authStates: USER_LOGIN_ERROR - ${t}');
         });
     authStates.when(
         at: AuthStates.USER_LOGGED_IN,
