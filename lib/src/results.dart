@@ -6,14 +6,26 @@ part of wire;
 /// License: APACHE LICENSE, VERSION 2.0
 ///
 class WireSendResults {
-  WireSendResults(List<dynamic> dataList, [bool noSubscribers = false]) {
-    _dataList = dataList;
+  WireSendResults(List<dynamic> list, [bool noSubscribers = false]) {
+    _list = list;
     _noSubscribers = noSubscribers;
   }
 
-  late final List<dynamic> _dataList;
+  late final List<dynamic> _list;
   late final bool _noSubscribers;
 
-  List<dynamic> get dataList => _dataList;
+  bool get hasError => _list.any((element) => element is WireSendError);
+  List<dynamic> get list => _list;
   bool get signalHasNoSubscribers => _noSubscribers;
+}
+
+class WireSendError {
+  WireSendError(String message, Exception error) {
+    _error = error;
+    _message = message;
+  }
+  late final Exception _error;
+  late final String _message;
+  String get message => _message;
+  Exception get error => _error;
 }
