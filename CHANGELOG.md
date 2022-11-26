@@ -1,3 +1,8 @@
+## 1.5.3
+- Parameter of `WireSendResults.dataList` was renamed to `WireSendResults.list`
+- Errors thrown while `Wire.send` transfer signal will captured and placed in results `WireSendResults` as `WireSendError`, and the results now has method to check for errors `hasError` 
+- Docs updated, tests extended to cover more cases and new methods
+
 ## 1.5.2
 - Method remove in WireDataContainerLayer became private.
 - Wire listener became private and can be compared through method listenerEqual, which is used in remove and getByListener.

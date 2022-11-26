@@ -4,7 +4,7 @@
 ; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
 ;
 [subrepo]
-	remote = git@github.com:wire-toolkit/wire_dart.git
+	remote = git@github.com:WiresWare/wire_dart.git
 	branch = subrepo/example/_shared
 	commit = 1ffd8b546cf37ac8acb1faacfe1f50f75b076b41
 	method = merge

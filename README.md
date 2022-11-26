@@ -1,19 +1,20 @@
 # Wire is communication and data-container layers
-These layers consist of string keys that bound to handler's methods and various types of data. This is realization of idea of "Strings API" when each component of the system - logical or visual - represented as a set of strings - whats component consumes is "Data API" and whats it produces or reacts to is "Signals API".
+These layers consist of string keys that bound to handler's methods and data observers. This is realization of idea of "Strings API" when each component of the system - logical or visual - represented as a set of strings - whats component consumes is "Data API" and "Signals API" is what component producing or reacts on.
 
 ## Library aimed to decouple UI from business logic
 ![Schema](assets/wire-schema.jpeg)
 
 It has two layers:
- - **Communication Layer** - consists of "signals" with associated listeners bound to specific scope - instances of `Wire` object. This layer has main API: `Wire.add` and `Wire.send`.
- - **Data Container Layer** - it is a key-value in-memory map, where value is an instance of `WireData` object that holds dynamic value and can be subscribed for updates, main API: `Wire.data`.
+- **Communication Layer** - consists of "signals" (string keys) with associated handlers bound to specific scope - instances of `Wire` object. This layer has main methods: `Wire.add` and `Wire.send`.
+- **Data Container Layer** - it is a key-value in-memory map, where each value is an instance of `WireData` - observer that holds dynamic value and can be subscribed for updates, its main method: `Wire.data`.
 
-`WireData` has special implementation for Flutter - [**WireDataBuilder** Widget](https://pub.dev/packages/wire_flutter). This widget makes it possible to reuse business logic in web and in mobile project with Flutter. Take a look at the "example" folder in both repositories (current and [wire_flutter](https://github.com/wire-toolkit/wire_flutter/tree/master/example)) where `_shared` folder contains reusable code imported in both projects as a dart package (with custom path to package), the folder shared as a separate git branch with [git-subrepo](https://github.com/ingydotnet/git-subrepo)
+`WireData` has special implementation for Flutter - [**WireDataBuilder** Widget](https://pub.dev/packages/wire_flutter). This widget makes it possible to reuse business logic in web and in mobile project with Flutter. Take a look at the "example" folder in both repositories (current and [wire_flutter](https://github.com/WiresWare/wire_flutter/tree/master/example)) where `_shared` folder contains reusable code imported in both projects as a dart package (with custom path to package), the folder shared as a separate git branch with [git-subrepo](https://github.com/ingydotnet/git-subrepo)
 
 [![Shared code in Flutter mobile/web and custom HTML dart-web](https://img.youtube.com/vi/6e3OUaigjcw/0.jpg)](https://www.youtube.com/watch?v=6e3OUaigjcw)
 
-Wire library also ported to (work in progress, and currently outdated):
-- [Wire Haxe](https://github.com/wire-toolkit/wire_haxe) that can help to compile or better say transpile reusable code in one of the following language: __JavaScript, Java, C#, C++, HL, Lua, PHP__.
+Wire library also ported to:
+- [Wire Haxe](https://github.com/WiresWare/wire_haxe) that can help to compile, or better say transpile, reusable code in one of the following language: __JavaScript, Java, C#, C++, HL, Lua, PHP__.
+- [Wire TS](https://github.com/WiresWare/wire_ts) with example of todo-commands
 
 ## Usage:
 
@@ -325,7 +326,7 @@ But in general it's all MVC, **Wire** incorporate these ideas of Flux, but also 
 3. Listeners react to signals and process incoming data, these listeners are controllers and update data in stores, which then will trigger reactions (also they can send new signals, but its just an options).
 
 ## Wire in Flutter / [WireDataBuilder<T>](https://pub.dev/packages/wire_flutter)
-Having business logic separated from presentation, events distributed in Communication Layer and data accessible from shared layer (Wire.data) it's now possible to consume the data and send signal from UI easily. In Flutter this means that we can leave visual hierarchy, UI rendering and transitions between screens/pages to the Flutter framework, and consume data in places where it's needed, we can do this with special widget - `WireDataBuilder<T>({Key key, String dataKey, Builder builder})` which subscribe with a string `dataKey` to WireData value and its changes, it rebuilds underlying widget you return from `builder` function when WireData value updated. However if you need only data in place you still can get it directly with `Wire.data('key').value`. Here is an example from [Todo](https://github.com/wire-toolkit/wire_flutter/tree/master/example/wire_flutter_todo) application:
+Having business logic separated from presentation, events distributed in Communication Layer and data accessible from shared layer (Wire.data) it's now possible to consume the data and send signal from UI easily. In Flutter this means that we can leave visual hierarchy, UI rendering and transitions between screens/pages to the Flutter framework, and consume data in places where it's needed, we can do this with special widget - `WireDataBuilder<T>({Key key, String dataKey, Builder builder})` which subscribe with a string `dataKey` to WireData value and its changes, it rebuilds underlying widget you return from `builder` function when WireData value updated. However if you need only data in place you still can get it directly with `Wire.data('key').value`. Here is an example from [Todo](https://github.com/WiresWare/wire_flutter/tree/master/example/wire_flutter_todo) application:
 Here is Wire in Flutter
 ```dart
 class StatsCounter extends StatelessWidget {
@@ -364,7 +365,14 @@ List<Wire> .get({String signal, Object scope, WireListener listener, int wid})
 
 WireData .data<T>(String key, [T value])
 ```
-`Wire.send` executes all handlers added to any scope for the signal, executes asynchronous and return result's object `WireSendResults` with data list of length equal to the number of handlers that return not null results.   
+`Wire.send` executes all handlers added to any scope for the signal, executes asynchronous and return result's object `WireSendResults` with data list of length equal to the number of handlers that return not null results, in case of error, the "chain" of consequent transfers to listeners won't be stopped but special `WireSendError` will be added to the `WireSendResults` list (the results object has method - `hasError`). The signal also propagated to all registered middlewares in `onSend(signal: string, payload?: any | null, scope?: object | null): void`;  
+
+### WireSendResults:
+```
+bool get hasError
+List<dynamic> get list
+bool get signalHasNoSubscribers
+```
 
 ### WireListener<T>:
 Definition of listener to a signal in `Wire.add(scope, signal, listener)`
@@ -381,10 +389,10 @@ WireData subscribe(WireDataListener<T> listener)
 WireData unsubscribe(WireDataListener<T> listener)
 void refresh()
 void remove()
-T get value
-bool WireData.lock(WireDataLockToken token)
-bool WireData.unlock(WireDataLockToken token)
-bool get WireData.isLocked
+dynamic get value
+bool lock(WireDataLockToken token)
+bool unlock(WireDataLockToken token)
+bool get isLocked
 ```
 
 ### WireDataListener<T>:
@@ -425,8 +433,8 @@ Generate UML with `dcdg` (PlantUML): `pub global run dcdg -o ./uml/configuration
 
 **2.2 Todo MVC and Flutter**:
 
-![Todo Flutter with Wire](https://github.com/wire-toolkit/wire_flutter/blob/master/assets/wire_flutter_example_todo.gif)
-[repo](https://github.com/wire-toolkit/wire_flutter/tree/master/example/wire_flutter_todo)
+![Todo Flutter with Wire](https://github.com/WiresWare/wire_flutter/blob/master/assets/wire_flutter_example_todo.gif)
+[repo](https://github.com/WiresWare/wire_flutter/tree/master/example/wire_flutter_todo)
 
 ### 2.1 Todo Angular
 ![Todo Example with AngularDart using shared code](/assets/wire_example_todo_angular.gif)
