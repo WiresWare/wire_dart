@@ -49,11 +49,11 @@ class WireCommunicateLayer {
         await Future.forEach<int>(_wireIdsBySignal[signal]!, (wireId) async {
           final wire = _wireById[wireId]!;
           if (isLookingInScope && wire.scope != scope) return;
-          noMoreSubscribers = wire.withReplies && --wire.replies == 0;
-          // print('> \t\t wireId = ${wireId} | noMoreSubscribers = ${noMoreSubscribers}');
-          if (noMoreSubscribers) wiresToRemove.add(wire);
-          final resultData = await wire.transfer(payload);
+          final resultData = await wire.transfer(payload).catchError(_processSendError);
           if (resultData != null) results.add(resultData);
+          noMoreSubscribers = wire.withReplies && --wire.replies == 0;
+          if (noMoreSubscribers) wiresToRemove.add(wire);
+          // print('> \t\t wireId = ${wireId} | noMoreSubscribers = ${noMoreSubscribers}');
         });
         if (wiresToRemove.isNotEmpty) {
           await Future.forEach(wiresToRemove, (Wire<dynamic> wire) async {
@@ -64,6 +64,8 @@ class WireCommunicateLayer {
     }
     return WireSendResults(results, noMoreSubscribers);
   }
+
+  WireSendError _processSendError(err) => WireSendError(ERROR__ERROR_DURING_PROCESSING_SEND, err as Exception);
 
   Future<bool> remove(String signal, [Object? scope, WireListener<dynamic>? listener]) async {
     final exists = hasSignal(signal);

@@ -46,9 +46,10 @@ void main() {
   group(GROUP_1_TITLE, () {
     const SIGNAL_G1 = 'SIGNAL';
     const SIGNAL_COUNTER = 'SIGNAL_COUNTER';
+    const SIGNAL_WITH_ERROR = 'SIGNAL_WITH_ERROR';
     const SIGNAL_NOT_REGISTERED = 'SIGNAL_NOT_REGISTERED';
 
-    final TEST_CASE_1_0 = '1.0. Registered Signal';
+    final TEST_CASE_1_0 = '1.0. Send Signal';
     final TEST_CASE_1_1 = '1.1. Has Signal';
     final TEST_CASE_1_2 = '1.2. Unregistered Signal';
     final TEST_CASE_1_3 = '1.3. Detach Signal';
@@ -81,13 +82,19 @@ void main() {
       await Wire.purge(withMiddleware: true);
       print('> 1: Setup -> Add signal $SIGNAL_G1 with dynamic WireListener');
       print('> \t\t Dynamic listener (with specified data type) will react on any signal');
-      Wire.add<dynamic>(SCOPE, SIGNAL_G1, listener_dynamic);
+      await Wire.add<dynamic>(SCOPE, SIGNAL_G1, listener_dynamic);
       print('> 1: Setup -> Add signal $SIGNAL_G1 with string WireListener');
-      Wire.add<String>(SCOPE, SIGNAL_G1, listener_string);
+      await Wire.add<String>(SCOPE, SIGNAL_G1, listener_string);
       print('> 1: Setup -> Add signal $SIGNAL_G1 with boolean WireListener');
-      Wire.add<bool>(SCOPE, SIGNAL_G1, listener_boolean);
+      await Wire.add<bool>(SCOPE, SIGNAL_G1, listener_boolean);
       print('> 1: Setup -> Attach pre-created signal ${wireToAttach.signal} with string WireListener');
       Wire.attach(wireToAttach);
+      await Wire.add(SCOPE, SIGNAL_WITH_ERROR, (_, __) async {
+        return 1;
+      });
+      await Wire.add(SCOPE, SIGNAL_WITH_ERROR, (_, __) async {
+        throw Exception('Error processing signal');
+      });
     });
 
     test(TEST_CASE_1_0, () async {
@@ -103,6 +110,14 @@ void main() {
       expect((await Wire.send(SIGNAL_G1, payload: false)).signalHasNoSubscribers, isFalse);
       print('> 1.0.3 -> Send attached ${wireToAttach.signal} signal without data (=null)');
       expect((await Wire.send(wireToAttach.signal)).signalHasNoSubscribers, isFalse);
+      print(
+        '> 1.0.4 -> When one of the listener of the signal throw an error it will be catch and returned in the WireTransferError.results array. Wires that have replies wont be removed.',
+      );
+      expect(
+          () => Wire.send(SIGNAL_WITH_ERROR).then((WireSendResults results) {
+                if (results.hasError) throw results.list.firstWhere((item) => item is WireSendError);
+              }),
+          throwsA(isA<WireSendError>()));
     });
 
     test(TEST_CASE_1_1, () async {
@@ -199,9 +214,9 @@ void main() {
       expect(Wire.get(signal: SIGNAL_COUNTER).isNotEmpty, isTrue);
 
       print('> 1.6.2 -> Send signal to verify their work');
-      expect((await Wire.send(SIGNAL_G1)).dataList.first, false);
-      expect((await Wire.send(SIGNAL_NEW)).dataList.first, SIGNAL_NEW);
-      expect((await Wire.send(SIGNAL_COUNTER)).dataList.first, 1);
+      expect((await Wire.send(SIGNAL_G1)).list.first, false);
+      expect((await Wire.send(SIGNAL_NEW)).list.first, SIGNAL_NEW);
+      expect((await Wire.send(SIGNAL_COUNTER)).list.first, 1);
 
       print('> 1.6.3 -> Call Wire.removeAllByScope(scope) -> existed == true');
       expect(await Wire.remove(scope: scope), isTrue);
@@ -450,8 +465,8 @@ void main() {
       expect(Wire.get(signal: SIGNAL_CHAIN_EXECUTION).length, 2);
       print('>\t WireSendResults.signalHasNoSubscribers = ${results.signalHasNoSubscribers}');
       expect(results.signalHasNoSubscribers, isFalse);
-      print('>\t WireSendResults.dataList.length = ${results.dataList.length}');
-      expect(results.dataList.length, 1);
+      print('>\t WireSendResults.list.length = ${results.list.length}');
+      expect(results.list.length, 1);
     });
   });
 }
