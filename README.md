@@ -429,7 +429,7 @@ Generate UML with `dcdg` (PlantUML): `pub global run dcdg -o ./uml/configuration
 ![Todo web with Wire](/assets/wire_example_todo_web.gif)
 - Open IDEA
 - Select build target - Dart Web, point to example/todo/index.html
-- Run Debug
+- Run Debug or `sh run_debug.sh`
 
 **2.2 Todo MVC and Flutter**:
 
