@@ -1,5 +1,5 @@
 # Wire is communication and data-container layers
-These two layers consist of string keys that bound to handlers (communication) and data observers (data-container). This is realization of idea of ["Strings API"](https://slides.com/coresvladimir/strings-api-and-wire) when each component of the system - logical or visual - represented as a set of strings: one set is whats component consumes as data ("Data API") and another set of string is what component producing or reacts on ("Signals API").
+These two layers consist of string keys that bound to handlers (communication) and data observers (data-container). This is realization of idea of ["Strings API"](https://medium.com/@vladimir.cores/introduction-of-strings-api-741f080ec63d) when each component of the system - logical or visual - represented as a set of strings: one set is whats component consumes as data ("Data API") and another set of string is what component producing or reacts on ("Signals API").
 
 ## Library aimed to decouple UI from business logic
 ![Schema](assets/wire-schema.jpeg)
