@@ -1,11 +1,11 @@
 # Wire is communication and data-container layers
-These layers consist of string keys that bound to handler's methods and data observers. This is realization of idea of "Strings API" when each component of the system - logical or visual - represented as a set of strings - whats component consumes is "Data API" and "Signals API" is what component producing or reacts on.
+These two layers consist of string keys that bound to handlers (communication) and data observers (data-container). This is realization of idea of ["Strings API"](https://slides.com/coresvladimir/strings-api-and-wire) when each component of the system - logical or visual - represented as a set of strings: one set is whats component consumes as data ("Data API") and another set of string is what component producing or reacts on ("Signals API").
 
 ## Library aimed to decouple UI from business logic
 ![Schema](assets/wire-schema.jpeg)
 
 It has two layers:
-- **Communication Layer** - consists of "signals" (string keys) with associated handlers bound to specific scope - instances of `Wire` object. This layer has main methods: `Wire.add` and `Wire.send`.
+- **Communication Layer** - consists of "signals" (string keys) with associated handlers bound to specific scope (instances of `Wire` object enclose them). This layer has main methods: `Wire.add` and `Wire.send`.
 - **Data Container Layer** - it is a key-value in-memory map, where each value is an instance of `WireData` - observer that holds dynamic value and can be subscribed for updates, its main method: `Wire.data`.
 
 `WireData` has special implementation for Flutter - [**WireDataBuilder** Widget](https://pub.dev/packages/wire_flutter). This widget makes it possible to reuse business logic in web and in mobile project with Flutter. Take a look at the "example" folder in both repositories (current and [wire_flutter](https://github.com/WiresWare/wire_flutter/tree/master/example)) where `_shared` folder contains reusable code imported in both projects as a dart package (with custom path to package), the folder shared as a separate git branch with [git-subrepo](https://github.com/ingydotnet/git-subrepo)
