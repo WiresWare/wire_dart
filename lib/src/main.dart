@@ -204,7 +204,7 @@ class Wire<T> {
         .map((Wire<dynamic> wire) async => _removeAllBySignal(wire.signal, scope: wire.scope, listener: listener)));
   }
 
-  /// Class extending [WireMiddleware] can listen to all processes in side Wire
+  /// Class extending [WireMiddleware] can listen to all processes inside Wire
   static void middleware(WireMiddleware value) {
     if (!_MIDDLEWARE_LAYER.has(value))
       _MIDDLEWARE_LAYER.add(value);
