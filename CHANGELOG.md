@@ -1,3 +1,6 @@
+## 1.5.4
+- Wire.data listeners copied to Set before traverse them on value change/update
+
 ## 1.5.3
 - Parameter of `WireSendResults.dataList` was renamed to `WireSendResults.list`
 - Errors thrown while `Wire.send` transfer signal will captured and placed in results `WireSendResults` as `WireSendError`, and the results now has method to check for errors `hasError` 
