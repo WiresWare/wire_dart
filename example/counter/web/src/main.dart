@@ -10,13 +10,11 @@ import 'view/components/counter_display.dart';
 
 void main() {
   /// COUNTER EXAMPLE ======================================
-  // final counterStorageMiddleware = CounterStorageMiddleware();
-  // final initialValue = counterStorageMiddleware.getInitialValue();
-  /// Set initial value from local storage
-  // Wire.data(CounterDataKeys.COUNT, value: initialValue);
-  /// Register middleware after setting initial value to prevent saving initial value
-  // Wire.middleware(counterStorageMiddleware);
-  /// Instantiate controller that register all signal processing
+
+  /// Create model that defines data sources and initial values
+  // CounterModel();
+
+  /// Create controller that register all signal processing
   CounterController();
 
   final rootDom = document.querySelector('#root');
