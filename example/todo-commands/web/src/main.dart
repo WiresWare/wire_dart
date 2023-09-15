@@ -10,17 +10,20 @@ import 'package:wire_example_todo_commands/src/controller/todo_controller.dart';
 
 void main() async {
   Wire.put(WebDatabaseService());
+  try {
+    final storageMiddleware = StorageMiddleware();
+    await storageMiddleware.whenReady;
 
-  final storageMiddleware = StorageMiddleware();
-  await storageMiddleware.whenReady;
+    Wire.middleware(storageMiddleware);
+    Wire.middleware(TodoMiddleware());
 
-  Wire.middleware(storageMiddleware);
-  Wire.middleware(TodoMiddleware());
+    TodoController();
+    RouteController();
 
-  TodoController();
-  RouteController();
-
-  TodoView();
-
-  document.querySelector('#loading')?.remove();
+    TodoView();
+  } catch (e) {
+    /// Show error message
+  } finally {
+    document.querySelector('#loading')?.remove();
+  }
 }
