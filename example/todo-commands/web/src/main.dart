@@ -11,10 +11,10 @@ import 'package:wire_example_todo_commands/src/controller/todo_controller.dart';
 void main() async {
   Wire.put(WebDatabaseService());
 
-  final storage = StorageMiddleware();
-  await storage.whenReady;
+  final storageMiddleware = StorageMiddleware();
+  await storageMiddleware.whenReady;
 
-  Wire.middleware(storage);
+  Wire.middleware(storageMiddleware);
   Wire.middleware(TodoMiddleware());
 
   TodoController();

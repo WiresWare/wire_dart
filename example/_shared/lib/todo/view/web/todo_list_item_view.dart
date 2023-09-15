@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:html';
+
 import 'package:wire/wire.dart';
 import 'package:wire_example_shared/todo/const/view_signals.dart';
 import 'package:wire_example_shared/todo/data/dto/edit_dto.dart';
@@ -22,11 +23,8 @@ class TodoListItemView extends DomElement {
       inpEdit.onBlur.listen((_) => _OnEditCancel())
     ]);
 
-    final todoWireData = Wire.data(id);
-    todoWireData.subscribe(_OnDataChanged);
-    if (todoWireData.isSet) {
-      _OnDataChanged(todoWireData.value);
-    }
+    final wdTodo = Wire.data(id);
+    wdTodo.subscribe(_OnDataChanged);
 
     container.append(inpToggle);
     container.append(lblContent);
@@ -34,6 +32,8 @@ class TodoListItemView extends DomElement {
 
     dom.append(inpEdit);
     dom.append(container);
+
+    if (wdTodo.isSet) _OnDataChanged(wdTodo.value);
   }
 
   final inpToggle = InputElement()
@@ -47,11 +47,14 @@ class TodoListItemView extends DomElement {
   final listeners = <StreamSubscription<dynamic>>[];
 
   void remove() {
-    final todoWireData = Wire.data(dom.id);
-    final hasListener = todoWireData.hasListener(_OnDataChanged);
-    print('> TodoListItemView -> remove: hasListener = ${hasListener}');
-    if (hasListener) todoWireData.unsubscribe(_OnDataChanged);
-    listeners.removeWhere((element) { element.cancel(); return true; });
+    final wdTodo = Wire.data(dom.id);
+    final hasListener = wdTodo.hasListener(_OnDataChanged);
+    if (hasListener) wdTodo.unsubscribe(_OnDataChanged);
+    // print('> TodoListItemView -> remove: hasListener = ${hasListener}');
+    listeners.removeWhere((element) {
+      element.cancel();
+      return true;
+    });
     container.remove();
     inpEdit.remove();
     dom.remove();
