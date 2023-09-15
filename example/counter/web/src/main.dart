@@ -5,35 +5,41 @@ import 'package:wire/wire.dart';
 import 'const/counter_data_keys.dart';
 import 'const/counter_signals_keys.dart';
 import 'controller/counter_controller.dart';
-import 'model/middleware/counter_storage_middleware.dart';
 import 'view/components/counter_button.dart';
 import 'view/components/counter_display.dart';
 
 void main() {
   /// COUNTER EXAMPLE ======================================
-  final counterStorageMiddleware = CounterStorageMiddleware();
-
-  // Set initial value from local storage
-  Wire.data(CounterDataKeys.COUNT, value: counterStorageMiddleware.getInitialValue());
-  // Register middleware after setting initial value to prevent saving initial value
-  Wire.middleware(counterStorageMiddleware);
-  // Instantiate controller that register all signal processing
+  // final counterStorageMiddleware = CounterStorageMiddleware();
+  // final initialValue = counterStorageMiddleware.getInitialValue();
+  /// Set initial value from local storage
+  // Wire.data(CounterDataKeys.COUNT, value: initialValue);
+  /// Register middleware after setting initial value to prevent saving initial value
+  // Wire.middleware(counterStorageMiddleware);
+  /// Instantiate controller that register all signal processing
   CounterController();
 
-  print('Init Ready: initial value = ${Wire.data(CounterDataKeys.COUNT).value}');
+  final rootDom = document.querySelector('#root');
+  ApplicationView(rootDom as DivElement?);
 
-  final root = document.querySelector('#root');
-  ApplicationView(root as DivElement?);
+  print('Init Ready: initial value = '
+      '${Wire.data(CounterDataKeys.COUNT).value}');
 }
 
 class ApplicationView {
   ApplicationView(this.root) {
     try {
       final group = DivElement()..className = 'spectrum-ButtonGroup';
-      group.append(CounterButton('Increase', CounterSignalsKeys.INCREASE).dom);
-      group.append(CounterButton('Decrease', CounterSignalsKeys.DECREASE).dom);
 
-      root!.append(CounterDisplay().dom);
+      final btnIncrease = CounterButton('Increase', CounterSignalsKeys.INCREASE);
+      final btnDecrease = CounterButton('Decrease', CounterSignalsKeys.DECREASE);
+
+      final counterDisplay = CounterDisplay();
+
+      group.append(btnIncrease.dom);
+      group.append(btnDecrease.dom);
+
+      root!.append(counterDisplay.dom);
       root!.append(group);
     } catch (e) {
       print(e);
