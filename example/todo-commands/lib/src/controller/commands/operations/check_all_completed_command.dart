@@ -8,12 +8,13 @@ class CheckAllCompletedCommand extends WireCommandWithWireData<void> {
 
   @override
   Future<void> execute() async {
-    final completeAllWireData = Wire.data(DataKeys.COMPLETE_ALL);
-    final bool completeAll = completeAllWireData.isSet && (completeAllWireData.value as bool);
+    final count = (await get<List>(DataKeys.LIST_OF_IDS)).length;
+    final countCompleted = Wire.data(DataKeys.GET_COUNT_COMPLETED).value;
+    final completeAll = count == countCompleted;
+    print('> CheckAllCompletedCommand: wdCount = ${count}');
+    print('> CheckAllCompletedCommand: wdCountCompleted = ${countCompleted}');
     print('> CheckAllCompletedCommand: completeAll = ${completeAll}');
     update(DataKeys.COMPLETE_ALL, data: completeAll);
-    if (completeAll) {
-      Wire.send(ViewSignals.COMPLETE_ALL_FORCED, payload: false);
-    }
+    Wire.send(ViewSignals.COMPLETE_ALL_FORCED, payload: completeAll);
   }
 }
