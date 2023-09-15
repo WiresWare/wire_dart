@@ -6,14 +6,16 @@ import 'package:wire_example_shared/todo/view/web/base/dom_element_view.dart';
 
 class TodoCountView extends DomElement {
   TodoCountView(Element dom) : super(dom) {
-    final wireDataCount = Wire.data(DataKeys.COUNT);
-    final wireDataGetterCountCompleted = Wire.data(DataKeys.GET_COUNT_COMPLETED);
+    final wdCount = Wire.data(DataKeys.COUNT);
+    final wdCompletedCount = Wire.data(DataKeys.GET_COUNT_COMPLETED);
 
-    wireDataCount.subscribe((value) => updateCount(value, wireDataGetterCountCompleted.value));
-    updateCount(wireDataCount.value, wireDataGetterCountCompleted.value);
+    wdCount.subscribe((value) async {
+      await _updateCount(value, wdCompletedCount.value);
+    });
+    _updateCount(wdCount.value, wdCompletedCount.value);
   }
 
-  Future<void> updateCount<int>(int count, int completedCount) async {
+  Future<void> _updateCount<int>(int count, int completedCount) async {
     dom.text = '${count} | ${completedCount}';
   }
 }
