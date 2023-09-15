@@ -1,8 +1,7 @@
 import 'dart:html';
 
 import 'package:wire/wire.dart';
-
-import '../base/dom_element.dart';
+import 'package:wire_example_counter/mvc/view/base/dom_element.dart';
 
 class CounterButton extends DomElement {
   CounterButton(String title, String signal) : super(ButtonElement()) {

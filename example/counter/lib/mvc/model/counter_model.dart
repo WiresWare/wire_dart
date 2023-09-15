@@ -1,7 +1,6 @@
 import 'package:wire/wire.dart';
-
-import '../const/counter_data_keys.dart';
-import 'middleware/counter_storage_middleware.dart';
+import 'package:wire_example_counter/const/counter_data_keys.dart';
+import 'package:wire_example_counter/mvc/model/middleware/counter_storage_middleware.dart';
 
 class CounterModel {
   CounterModel() {

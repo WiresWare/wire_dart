@@ -1,12 +1,11 @@
 import 'dart:html';
 
 import 'package:wire/wire.dart';
-
-import 'const/counter_data_keys.dart';
-import 'const/counter_signals_keys.dart';
-import 'controller/counter_controller.dart';
-import 'view/components/counter_button.dart';
-import 'view/components/counter_display.dart';
+import 'package:wire_example_counter/const/counter_data_keys.dart';
+import 'package:wire_example_counter/const/counter_signals_keys.dart';
+import 'package:wire_example_counter/mvc/controller/counter_controller.dart';
+import 'package:wire_example_counter/mvc/view/components/counter_button.dart';
+import 'package:wire_example_counter/mvc/view/components/counter_display.dart';
 
 void main() {
   /// COUNTER EXAMPLE ======================================

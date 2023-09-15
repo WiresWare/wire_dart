@@ -1,9 +1,8 @@
 import 'dart:html';
 
 import 'package:wire/wire.dart';
-
-import '../../const/counter_data_keys.dart';
-import '../base/dom_element.dart';
+import 'package:wire_example_counter/const/counter_data_keys.dart';
+import 'package:wire_example_counter/mvc/view/base/dom_element.dart';
 
 class CounterDisplay extends DomElement {
   CounterDisplay() : super(DivElement()) {

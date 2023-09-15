@@ -1,7 +1,7 @@
 import 'package:wire/wire.dart';
 
-import '../const/counter_data_keys.dart';
-import '../const/counter_signals_keys.dart';
+import 'package:wire_example_counter/const/counter_data_keys.dart';
+import 'package:wire_example_counter/const/counter_signals_keys.dart';
 
 class CounterController {
   CounterController() {

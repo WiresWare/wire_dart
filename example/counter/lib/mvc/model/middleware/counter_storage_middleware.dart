@@ -1,8 +1,7 @@
 import 'dart:html';
 
-import 'package:wire/src/main.dart';
-
-import '../../const/counter_data_keys.dart';
+import 'package:wire/wire.dart';
+import 'package:wire_example_counter/const/counter_data_keys.dart';
 
 class CounterStorageMiddleware extends WireMiddleware {
   final storage = window.localStorage;
@@ -37,8 +36,6 @@ class CounterStorageMiddleware extends WireMiddleware {
   }
 
   int getInitialValue() {
-    return storage.containsKey(CounterDataKeys.COUNT)
-      ? int.parse(storage[CounterDataKeys.COUNT]!)
-      : 0;
+    return storage.containsKey(CounterDataKeys.COUNT) ? int.parse(storage[CounterDataKeys.COUNT]!) : 0;
   }
 }
