@@ -193,7 +193,7 @@ void main() {
       print('> 1.5.1 -> Put object of type ${putFindTestObject.runtimeType} to Wire');
       Wire.put<PutFindTestObject>(putFindTestObject);
       print('> 1.5.2 -> Find object of type ${putFindTestObject.runtimeType}');
-      expect(Wire.find<PutFindTestObject>() == putFindTestObject, isTrue);
+      expect(Wire.find(PutFindTestObject) == putFindTestObject, isTrue);
     });
 
     test(TEST_CASE_1_6, () async {
