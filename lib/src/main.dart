@@ -23,6 +23,8 @@ abstract class WireMiddleware {
   Future<void> onSend(String signal, [Object? payload, Object? scope]);
   Future<void> onRemove(String signal, [Object? scope, WireListener<dynamic>? listener]);
   Future<void> onData(String key, dynamic prevValue, dynamic nextValue);
+  Future<void> onDataError(dynamic error, String key, dynamic value);
+  Future<void> onReset(String key, dynamic value);
 }
 
 class Wire<T> {
@@ -244,10 +246,17 @@ class Wire<T> {
   /// void remove()
   /// ```
   /// Returns [WireData]
-  static WireData data(String key, {dynamic value, WireDataGetter? getter}) {
-    final WireData wireData = _DATA_CONTAINER_LAYER.has(key)
-        ? _DATA_CONTAINER_LAYER.get(key)
-        : _DATA_CONTAINER_LAYER.create(key, _MIDDLEWARE_LAYER.onReset);
+  static WireData<T> data<T>(String key, {T? value, WireDataGetter<T>? getter}) {
+    if (_DATA_CONTAINER_LAYER.has(key)) {
+      final wireData = _DATA_CONTAINER_LAYER.get(key);
+      if (wireData is! WireData<T>) {
+        throw Exception('WireData<$T> type mismatch');
+      }
+      return wireData;
+    }
+
+    final wireData = _DATA_CONTAINER_LAYER.create<T>(key, _MIDDLEWARE_LAYER.onReset, _MIDDLEWARE_LAYER.onDataError);
+
     if (getter != null) {
       wireData.getter = getter;
       wireData.lock(WireDataLockToken());

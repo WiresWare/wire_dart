@@ -161,8 +161,12 @@ class WireMiddlewaresLayer {
     return _process((WireMiddleware m) => m.onData(key, prevValue, nextValue));
   }
 
+  Future<void> onDataError(dynamic error, String key, dynamic value) async {
+    return _process((WireMiddleware m) => m.onDataError(error, key, value));
+  }
+
   Future<void> onReset(String key, dynamic prevValue) async {
-    return _process((WireMiddleware m) => m.onData(key, prevValue, null));
+    return _process((WireMiddleware m) => m.onReset(key, prevValue));
   }
 
   Future<void> onRemove(String signal, {Object? scope, WireListener<dynamic>? listener}) async {
@@ -191,8 +195,8 @@ class WireDataContainerLayer {
 
   bool has(String key) => _dataMap.containsKey(key);
   WireData get(String key) => _dataMap[key]!;
-  WireData create(String key, WireDataOnReset onReset) {
-    final result = WireData(key, _remove, onReset);
+  WireData<T> create<T>(String key, WireDataOnReset<T?> onReset, WireDataOnError<T?> onError) {
+    final result = WireData<T>(key, _remove, onReset, onError);
     _dataMap[key] = result;
     return result;
   }
