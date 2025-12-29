@@ -195,19 +195,15 @@ class Wire<T> {
   }
 
   static Future<List<bool>> _removeAllByScope<T>(Object scope, {WireListener<dynamic>? listener}) async {
-    final results = <bool>[];
-    for (final wire in _COMMUNICATION_LAYER.getByScope(scope)!) {
-      results.add(await _removeAllBySignal(wire.signal, scope: scope, listener: listener));
-    }
-    return results;
+    final listOfWiresForScope = List.from(_COMMUNICATION_LAYER.getByScope(scope));
+    return Future.wait(listOfWiresForScope
+        .map((Wire<dynamic> wire) async => _removeAllBySignal(wire.signal, scope: scope, listener: listener)));
   }
 
   static Future<List<bool>> _removeAllByListener(WireListener<dynamic> listener) async {
-    final results = <bool>[];
-    for (final wire in _COMMUNICATION_LAYER.getByListener(listener)!) {
-      results.add(await _removeAllBySignal(wire.signal, scope: wire.scope, listener: listener));
-    }
-    return results;
+    final listOfWiresWithListener = List.from(_COMMUNICATION_LAYER.getByListener(listener));
+    return Future.wait(listOfWiresWithListener
+        .map((Wire<dynamic> wire) async => _removeAllBySignal(wire.signal, scope: wire.scope, listener: listener)));
   }
 
   /// Class extending [WireMiddleware] can listen to all processes inside Wire
@@ -220,19 +216,16 @@ class Wire<T> {
 
   /// When you need Wires associated with signal or scope or listener
   /// Returns [List<Wire>]
-  static List<Wire<dynamic>?> get<T>({String? signal, Object? scope, WireListener<dynamic>? listener, int? wireId}) {
-    var result = <Wire<dynamic>?>[];
+  static List<Wire<dynamic>> get<T>({String? signal, Object? scope, WireListener<dynamic>? listener, int? wireId}) {
+    final result = <Wire<dynamic>>[];
     if (signal != null) {
-      final instances = _COMMUNICATION_LAYER.getBySignal(signal);
-      if (instances.isNotEmpty) result = [...result, ...instances];
+      result.addAll(_COMMUNICATION_LAYER.getBySignal(signal));
     }
     if (scope != null) {
-      final instances = _COMMUNICATION_LAYER.getByScope(scope);
-      if (instances.isNotEmpty) result = [...result, ...instances];
+      result.addAll(_COMMUNICATION_LAYER.getByScope(scope));
     }
     if (listener != null) {
-      final instances = _COMMUNICATION_LAYER.getByListener(listener);
-      if (instances.isNotEmpty) result = [...result, ...instances];
+      result.addAll(_COMMUNICATION_LAYER.getByListener(listener));
     }
     if (wireId != null) {
       final instance = _COMMUNICATION_LAYER.getByWireId(wireId);
@@ -295,9 +288,9 @@ class Wire<T> {
   }
 
   /// Return an instance of an object by its type, throw an error in case it is not set
-  static dynamic find(Type instanceType) {
-    final key = instanceType.toString();
+  static T find<T>() {
+    final key = T.toString();
     if (Wire.data(key).isSet == false) throw AssertionError(ERROR__CANT_FIND_INSTANCE_NULL);
-    return Wire.data(key).value!;
+    return Wire.data(key).value! as T;
   }
 }

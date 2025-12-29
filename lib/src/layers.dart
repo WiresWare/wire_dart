@@ -43,12 +43,16 @@ class WireCommunicateLayer {
       final hasWires = _wireIdsBySignal.containsKey(signal);
       if (hasWires) {
         final isLookingInScope = scope != null;
-        final wireIdsList = _wireIdsBySignal[signal]!;
+        final wireIdsList = List.of(_wireIdsBySignal[signal]!);
         for (final wireId in wireIdsList) {
           final wire = _wireById[wireId]!;
           if (isLookingInScope && wire.scope != scope) continue;
           final result = await wire.transfer(payload).catchError(_processSendError);
-          noMoreSubscribers = wire.withReplies && --wire.replies == 0 && (await _removeWire(wire));
+          if (wire.withReplies && --wire.replies == 0) {
+            noMoreSubscribers = await _removeWire(wire);
+          } else {
+            noMoreSubscribers = false;
+          }
           if (result != null) {
             results.add(result);
           }
@@ -99,11 +103,11 @@ class WireCommunicateLayer {
     _wireIdsBySignal.clear();
   }
 
-  List<Wire<dynamic>?> getBySignal(String signal) {
+  List<Wire<dynamic>> getBySignal(String signal) {
     if (hasSignal(signal)) {
       return _wireIdsBySignal[signal]!.map((wireId) {
         return _wireById[wireId];
-      }).toList();
+      }).whereType<Wire<dynamic>>().toList();
     }
     return [];
   }
@@ -161,35 +165,33 @@ class WireMiddlewaresLayer {
   void add(WireMiddleware middleware) => _MIDDLEWARE_LIST.add(middleware);
   void clear() => _MIDDLEWARE_LIST.clear();
 
-  void onData(String key, dynamic prevValue, dynamic nextValue) {
+  Future<void> onData(String key, dynamic prevValue, dynamic nextValue) async {
     return _process((WireMiddleware m) => m.onData(key, prevValue, nextValue));
   }
 
-  void onDataError(dynamic error, String key, dynamic value) {
+  Future<void> onDataError(dynamic error, String key, dynamic value) async {
     return _process((WireMiddleware m) => m.onDataError(error, key, value));
   }
 
-  void onReset(String key, dynamic prevValue) {
+  Future<void> onReset(String key, dynamic prevValue) async {
     return _process((WireMiddleware m) => m.onReset(key, prevValue));
   }
 
-  void onRemove(String signal, {Object? scope, WireListener<dynamic>? listener}) {
+  Future<void> onRemove(String signal, {Object? scope, WireListener<dynamic>? listener}) async {
     return _process((WireMiddleware mw) => mw.onRemove(signal, scope, listener));
   }
 
-  void onSend(String signal, dynamic payload) {
+  Future<void> onSend(String signal, dynamic payload) async {
     return _process((WireMiddleware mw) => mw.onSend(signal, payload));
   }
 
-  void onAdd(Wire<dynamic> wire) {
+  Future<void> onAdd(Wire<dynamic> wire) async {
     return _process((WireMiddleware mw) => mw.onAdd(wire));
   }
 
-  void _process(Function(WireMiddleware mw) p) {
+  Future<void> _process(Function(WireMiddleware mw) p) async {
     if (_MIDDLEWARE_LIST.isNotEmpty) {
-      for (final mw in _MIDDLEWARE_LIST) {
-        p(mw);
-      }
+      await Future.forEach(_MIDDLEWARE_LIST, p);
     }
   }
 }

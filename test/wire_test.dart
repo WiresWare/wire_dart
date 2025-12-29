@@ -6,6 +6,7 @@ class TestWireMiddleware extends WireMiddleware {
   TestWireMiddleware(this.simpleDataStorage);
 
   Map<String, dynamic> simpleDataStorage;
+  Function(dynamic, String, dynamic)? onDataErrorCallback;
 
   @override
   Future<void> onAdd(Wire wire) async {
@@ -38,6 +39,7 @@ class TestWireMiddleware extends WireMiddleware {
   Future<void> onDataError(error, String key, value) async {
     print('> TestWireMiddleware -> onDataError: key = '
         '${key} | $error | $value');
+    onDataErrorCallback?.call(error, key, value);
   }
 
   @override
@@ -193,7 +195,7 @@ void main() {
       print('> 1.5.1 -> Put object of type ${putFindTestObject.runtimeType} to Wire');
       Wire.put<PutFindTestObject>(putFindTestObject);
       print('> 1.5.2 -> Find object of type ${putFindTestObject.runtimeType}');
-      expect(Wire.find(PutFindTestObject) == putFindTestObject, isTrue);
+      expect(Wire.find<PutFindTestObject>() == putFindTestObject, isTrue);
     });
 
     test(TEST_CASE_1_6, () async {
@@ -375,7 +377,7 @@ void main() {
       final key = 'error_key';
       var errorCaught = false;
       final middleware = TestWireMiddleware({});
-      middleware.onDataError = (error, key, value) async {
+      middleware.onDataErrorCallback = (error, key, value) {
         errorCaught = true;
       };
       Wire.middleware(middleware);
