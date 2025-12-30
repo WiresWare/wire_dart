@@ -271,8 +271,7 @@ class Wire<T> {
     if (value != null) {
       if (wireData.isGetter) throw Exception(ERROR__VALUE_IS_NOT_ALLOWED_TOGETHER_WITH_GETTER);
       final prevValue = wireData.isSet ? wireData.value : null;
-      final isValueFunction = value is WireValueFunction;
-      final nextValue = isValueFunction ? value(prevValue) : value;
+      final nextValue = (value is WireValueFunction) ? value(prevValue) : value;
       _MIDDLEWARE_LAYER.onData(key, prevValue, nextValue);
       wireData.value = nextValue;
     }
