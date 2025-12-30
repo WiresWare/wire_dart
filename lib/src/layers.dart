@@ -195,12 +195,12 @@ class WireMiddlewaresLayer {
 class WireDataContainerLayer {
   final _dataMap = <String, WireData>{};
 
-  bool remove(String key) => _dataMap.remove(key) != null;
+  bool _remove(String key) => _dataMap.remove(key) != null;
 
   bool has(String key) => _dataMap.containsKey(key);
   WireData get(String key) => _dataMap[key]!;
   WireData<T> create<T>(String key, WireDataOnReset<T?> onReset, WireDataOnError<T?> onError) {
-    final result = WireData<T>(key, remove, onReset, onError);
+    final result = WireData<T>(key, _remove, onReset, onError);
     _dataMap[key] = result;
     return result;
   }
