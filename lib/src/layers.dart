@@ -117,6 +117,7 @@ class WireCommunicateLayer {
 
   List<Wire<dynamic>> getByListener(WireListener<dynamic> listener) {
     final result = <Wire<dynamic>>[];
+    // print('> Wire -> WireCommunicateLayer: getByListener, listener = ${listener}');
     _wireById.forEach((_, wire) {
       if (wire.listenerEqual(listener)) result.add(wire);
     });
