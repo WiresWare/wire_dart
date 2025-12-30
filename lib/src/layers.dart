@@ -37,29 +37,24 @@ class WireCommunicateLayer {
   }
 
   Future<WireSendResults> send(String signal, [payload, scope]) async {
-    var noMoreSubscribers = true;
     final results = [];
     if (hasSignal(signal)) {
-      final hasWires = _wireIdsBySignal.containsKey(signal);
-      if (hasWires) {
-        final isLookingInScope = scope != null;
-        final wireIdsList = List.of(_wireIdsBySignal[signal]!);
-        for (final wireId in wireIdsList) {
-          final wire = _wireById[wireId]!;
-          if (isLookingInScope && wire.scope != scope) continue;
-          final result = await wire.transfer(payload).catchError(_processSendError);
-          if (wire.withReplies && --wire.replies == 0) {
-            noMoreSubscribers = await _removeWire(wire);
-          } else {
-            noMoreSubscribers = false;
-          }
-          if (result != null) {
-            results.add(result);
-          }
+      final wireIdsList = List.of(_wireIdsBySignal[signal]!);
+      final isLookingInScope = scope != null;
+      for (final wireId in wireIdsList) {
+        if (!_wireById.containsKey(wireId)) continue;
+        final wire = _wireById[wireId]!;
+        if (isLookingInScope && wire.scope != scope) continue;
+        final result = await wire.transfer(payload).catchError(_processSendError);
+        if (wire.withReplies && --wire.replies == 0) {
+          await _removeWire(wire);
+        }
+        if (result != null) {
+          results.add(result);
         }
       }
     }
-    return WireSendResults(results, noMoreSubscribers);
+    return WireSendResults(results, !hasSignal(signal));
   }
 
   WireSendError _processSendError(err) => WireSendError(ERROR__ERROR_DURING_PROCESSING_SEND, err as Exception);
