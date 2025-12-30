@@ -76,25 +76,33 @@ class WireData<T> {
     final valueForListener = optionalValue ?? value;
     final listeners = Set<WireDataListener<T?>>.from(_listeners);
     if (listenersExecutionMode == WireDataListenersExecutionMode.PARALLEL) {
-      final futures = <Future<void>>[];
-      for (final listener in listeners) {
-        futures.add(Future.microtask(() async {
-          try {
-            await listener(valueForListener);
-          } catch (error) {
-            _onError?.call(error, key, valueForListener);
-          }
-        }));
-      }
-      await Future.wait(futures);
+      await _refreshInParallel(listeners, valueForListener);
     } else {
-      for (final listener in listeners) {
-        if (hasListener(listener)) {
-          try {
-            await listener(valueForListener);
-          } catch (error) {
-            _onError?.call(error, key, valueForListener);
-          }
+      await _refreshSequentially(listeners, valueForListener);
+    }
+  }
+
+  Future<void> _refreshInParallel(Set<WireDataListener<T?>> listeners, T? valueForListener) async {
+    final futures = <Future<void>>[];
+    for (final listener in listeners) {
+      futures.add(Future.microtask(() async {
+        try {
+          await listener(valueForListener);
+        } catch (error) {
+          _onError?.call(error, key, valueForListener);
+        }
+      }));
+    }
+    await Future.wait(futures);
+  }
+
+  Future<void> _refreshSequentially(Set<WireDataListener<T?>> listeners, T? valueForListener) async {
+    for (final listener in listeners) {
+      if (hasListener(listener)) {
+        try {
+          await listener(valueForListener);
+        } catch (error) {
+          _onError?.call(error, key, valueForListener);
         }
       }
     }
