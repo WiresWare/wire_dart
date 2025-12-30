@@ -17,3 +17,4 @@ const String ERROR__ERROR_DURING_PROCESSING_SEND = 'WR:3006 - One of the listene
 
 const String ERROR__CANT_PUT_ALREADY_EXISTING_INSTANCE = 'WR:4001 - Cant put already existing instance (unlock first)';
 const String ERROR__CANT_FIND_INSTANCE_NULL = 'WR:4002 - Cant find instance its not set';
+const String ERROR__DATA_TYPE_MISMATCH = 'WR:5001 - WireData type mismatch';

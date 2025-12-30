@@ -256,7 +256,7 @@ class Wire<T> {
     if (_DATA_CONTAINER_LAYER.has(key)) {
       final wireData = _DATA_CONTAINER_LAYER.get(key);
       if (wireData is! WireData<T>) {
-        throw Exception('WireData<$T> type mismatch');
+        throw Exception(ERROR__DATA_TYPE_MISMATCH);
       }
       return wireData;
     }
