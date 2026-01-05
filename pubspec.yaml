@@ -4,11 +4,9 @@ version: 1.5.4
 homepage: https://github.com/WiresWare/wire_dart
 
 environment:
-  sdk: '>=3.10.1 <4.0.0'
+  sdk: '>=3.10.3 <4.0.0'
 
 dev_dependencies:
-  test: ^1.16.5
-  build_web_compilers:
+  test:
   build_runner:
-  dart_style:
-  lints: ^2.0.0
+  lints:
