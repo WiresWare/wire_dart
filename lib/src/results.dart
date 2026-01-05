@@ -1,3 +1,5 @@
+part of wire;
+
 ///
 /// Created by Vladimir (Cores) Minkin on 12/10/22.
 /// Github: https://github.com/vladimircores

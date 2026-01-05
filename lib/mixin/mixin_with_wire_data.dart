@@ -1,4 +1,4 @@
-library;
+library wire;
 
 import 'package:wire/wire.dart';
 

@@ -1,4 +1,4 @@
-library;
+library wire;
 
 import 'dart:convert';
 
@@ -13,9 +13,7 @@ mixin WireMixinWithDatabase {
   void persist(String key, dynamic value) {
     try {
       databaseService.save(key, jsonEncode(value));
-    } catch (e) {
-      // empty
-    }
+    } catch (e) {}
   }
 
   void delete(String key) => {if (exist(key)) databaseService.delete(key)};
