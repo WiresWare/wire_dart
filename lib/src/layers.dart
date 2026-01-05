@@ -37,32 +37,35 @@ class WireCommunicateLayer {
   }
 
   Future<WireSendResults> send(String signal, [payload, scope]) async {
-    bool noMoreSubscribers = true;
-    // print('> Wire -> WireCommunicateLayer: send - hasSignal($signal) = ${hasSignal(signal)}');
     final results = [];
     if (hasSignal(signal)) {
-      final hasWires = _wireIdsBySignal.containsKey(signal);
-      // print('> Wire -> WireCommunicateLayer: send - hasWires = ${hasWires}');
-      if (hasWires) {
-        final wiresToRemove = <Wire<dynamic>>[];
-        final isLookingInScope = scope != null;
-        await Future.forEach<int>(_wireIdsBySignal[signal]!, (wireId) async {
-          final wire = _wireById[wireId]!;
-          if (isLookingInScope && wire.scope != scope) return;
-          final resultData = await wire.transfer(payload).catchError(_processSendError);
-          if (resultData != null) results.add(resultData);
-          noMoreSubscribers = wire.withReplies && --wire.replies == 0;
-          if (noMoreSubscribers) wiresToRemove.add(wire);
-          // print('> \t\t wireId = ${wireId} | noMoreSubscribers = ${noMoreSubscribers}');
-        });
-        if (wiresToRemove.isNotEmpty) {
-          await Future.forEach(wiresToRemove, (Wire<dynamic> wire) async {
-            noMoreSubscribers = await _removeWire(wire);
-          });
+      final wireIdsList = List.of(_wireIdsBySignal[signal]!);
+      for (final wireId in wireIdsList) {
+        if (!_wireById.containsKey(wireId)) continue;
+        final result = await _transferOnWire(wireId, payload, scope);
+        if (result != null) {
+          results.add(result);
         }
       }
     }
-    return WireSendResults(results, noMoreSubscribers);
+    return WireSendResults(results, !hasSignal(signal));
+  }
+
+  Future<dynamic> _transferOnWire(int wireId, [payload, scope]) async {
+    if (!_wireById.containsKey(wireId)) return null;
+    final wire = _wireById[wireId]!;
+    final isLookingInScope = scope != null;
+    if (isLookingInScope && wire.scope != scope) return null;
+
+    if (wire.withReplies) {
+      if (wire.replies == 1) {
+        await _removeWire(wire);
+      } else {
+        wire.replies--;
+      }
+    }
+
+    return await wire.transfer(payload).catchError(_processSendError);
   }
 
   WireSendError _processSendError(err) => WireSendError(ERROR__ERROR_DURING_PROCESSING_SEND, err as Exception);
@@ -116,6 +119,7 @@ class WireCommunicateLayer {
       // print('\t compareListener = ${compareListener}');
       if (compareListener) result.add(wire);
     });
+    // print('> \t result = ${result}');
     return result;
   }
 
@@ -186,12 +190,12 @@ class WireMiddlewaresLayer {
 class WireDataContainerLayer {
   final _dataMap = <String, WireData>{};
 
-  bool remove(String key) => _dataMap.remove(key) != null;
+  bool _remove(String key) => _dataMap.remove(key) != null;
 
   bool has(String key) => _dataMap.containsKey(key);
   WireData get(String key) => _dataMap[key]!;
-  WireData create(String key, WireDataOnReset onReset) {
-    final result = WireData(key, remove, onReset);
+  WireData<T> create<T>(String key, WireDataOnReset<T?> onReset, WireDataOnError<T?> onError) {
+    final result = WireData<T>(key, _remove, onReset, onError);
     _dataMap[key] = result;
     return result;
   }

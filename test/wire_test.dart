@@ -6,6 +6,7 @@ class TestWireMiddleware extends WireMiddleware {
   TestWireMiddleware(this.simpleDataStorage);
 
   Map<String, dynamic> simpleDataStorage;
+  Function(dynamic, String, dynamic)? onDataErrorCallback;
 
   @override
   Future<void> onAdd(Wire wire) async {
@@ -30,8 +31,21 @@ class TestWireMiddleware extends WireMiddleware {
 
   @override
   Future<void> onSend(String? signal, [data, scope]) async {
-    print('> TestWireMiddleware -> onRemove: signal = '
+    print('> TestWireMiddleware -> onSend: signal = '
         '${signal} | $data | $scope');
+  }
+
+  @override
+  Future<void> onDataError(error, String key, value) async {
+    print('> TestWireMiddleware -> onDataError: key = '
+        '${key} | $error | $value');
+    onDataErrorCallback?.call(error, key, value);
+  }
+
+  @override
+  Future<void> onReset(String key, value) async {
+    print('> TestWireMiddleware -> onReset: key = '
+        '${key} | $value');
   }
 }
 
@@ -352,6 +366,76 @@ void main() {
       expect(Wire.data(KEY_STRING).value, isNull);
       expect(simpleDataStorage.containsKey(KEY_STRING), isFalse);
     });
+
+    test('3.2 Check generics', () async {
+      final key = 'generic_key';
+      Wire.data<int>(key, value: 10);
+      expect(Wire.data<int>(key).value, 10);
+      expect(() => Wire.data<String>(key), throwsA(isA<Exception>()));
+    });
+
+    test('3.3 onError callback', () async {
+      final key = 'error_key';
+      var errorCaught = false;
+      final middleware = TestWireMiddleware({});
+      middleware.onDataErrorCallback = (error, key, value) {
+        errorCaught = true;
+      };
+      Wire.middleware(middleware);
+      Wire.data(key).subscribe((value) async {
+        throw Exception('Test Error');
+      });
+      await Wire.data(key).refresh();
+      expect(errorCaught, isTrue);
+    });
+
+    test('3.4 listener execution modes', () async {
+      final key = 'execution_mode_key';
+      final wireData = Wire.data(key);
+      var parallelCount = 0;
+
+      wireData.listenersExecutionMode = WireDataListenersExecutionMode.PARALLEL;
+      wireData.subscribe((value) async {
+        await Future.delayed(Duration(milliseconds: 10));
+        parallelCount++;
+      });
+      wireData.subscribe((value) async {
+        parallelCount++;
+      });
+
+      await wireData.refresh();
+      expect(parallelCount, 2);
+    });
+
+    test('3.5 async unsubscribe', () async {
+      final key = 'unsubscribe_key';
+      final wireData = Wire.data<int>(key);
+      var listener1CallCount = 0;
+      var listener2CallCount = 0;
+
+      WireDataListener<int?> listener1 = (value) async {
+        listener1CallCount++;
+      };
+      WireDataListener<int?> listener2 = (value) async {
+        listener2CallCount++;
+      };
+
+      wireData.subscribe(listener1);
+      wireData.subscribe(listener2);
+
+      // First refresh, both should be called
+      await wireData.refresh(1);
+      expect(listener1CallCount, 1);
+      expect(listener2CallCount, 1);
+
+      // Unsubscribe listener1
+      await wireData.unsubscribe(listener: listener1);
+
+      // Second refresh, only listener2 should be called again
+      await wireData.refresh(2);
+      expect(listener1CallCount, 1, reason: 'Unsubscribed listener should not be called again');
+      expect(listener2CallCount, 2, reason: 'Subscribed listener should still be called');
+    });
   });
 
   group(GROUP_4_TITLE, () {
@@ -467,6 +551,22 @@ void main() {
       expect(results.signalHasNoSubscribers, isFalse);
       print('>\t WireSendResults.list.length = ${results.list.length}');
       expect(results.list.length, 1);
+    });
+
+    test('6.2 Race condition with replies', () async {
+      const signal = 'race_condition_signal';
+      var callCount = 0;
+      await Wire.add(
+        Object(),
+        signal,
+        (_, __) async {
+          callCount++;
+          await Wire.send(signal);
+        },
+        replies: 1,
+      );
+      await Wire.send(signal);
+      expect(callCount, 1);
     });
   });
 }
