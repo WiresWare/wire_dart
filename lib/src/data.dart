@@ -1,4 +1,4 @@
-part of wire;
+import 'package:wire/src/const.dart';
 
 ///
 /// Created by Vladimir Cores (Minkin) on 12/06/20.
@@ -40,9 +40,11 @@ class WireData<T> {
   String get key => _key;
   T? get value => isGetter ? _getter!(this) : _value;
   int get numberOfListeners => _listeners.length;
-  WireDataListenersExecutionMode get listenersExecutionMode => _listenersExecutionMode ?? WireDataListenersExecutionMode.SEQUENTIAL;
+  WireDataListenersExecutionMode get listenersExecutionMode =>
+      _listenersExecutionMode ?? WireDataListenersExecutionMode.SEQUENTIAL;
 
-  set listenersExecutionMode(WireDataListenersExecutionMode mode) => _listenersExecutionMode = mode;
+  set listenersExecutionMode(WireDataListenersExecutionMode mode) =>
+      _listenersExecutionMode = mode;
   set getter(WireDataGetter<T> value) => _getter = value;
   set value(T? input) {
     // print('> WireDate -> set value: ${input}');
@@ -82,21 +84,29 @@ class WireData<T> {
     }
   }
 
-  Future<void> _refreshInParallel(Set<WireDataListener<T?>> listeners, T? valueForListener) async {
+  Future<void> _refreshInParallel(
+    Set<WireDataListener<T?>> listeners,
+    T? valueForListener,
+  ) async {
     final futures = <Future<void>>[];
     for (final listener in listeners) {
-      futures.add(Future.microtask(() async {
-        try {
-          await listener(valueForListener);
-        } catch (error) {
-          _onError?.call(error, key, valueForListener);
-        }
-      }));
+      futures.add(
+        Future.microtask(() async {
+          try {
+            await listener(valueForListener);
+          } catch (error) {
+            _onError?.call(error, key, valueForListener);
+          }
+        }),
+      );
     }
     await Future.wait(futures);
   }
 
-  Future<void> _refreshSequentially(Set<WireDataListener<T?>> listeners, T? valueForListener) async {
+  Future<void> _refreshSequentially(
+    Set<WireDataListener<T?>> listeners,
+    T? valueForListener,
+  ) async {
     for (final listener in listeners) {
       if (hasListener(listener)) {
         try {
@@ -130,7 +140,9 @@ class WireData<T> {
   }
 
   void _guardian() {
-    if (isLocked) throw Exception(isGetter ? ERROR__DATA_IS_GETTER : ERROR__DATA_IS_LOCKED);
+    if (isLocked) {
+      throw Exception(isGetter ? ERROR__DATA_IS_GETTER : ERROR__DATA_IS_LOCKED);
+    }
   }
 
   // Subscribe to updates of value but not getter because its value locked
@@ -142,7 +154,10 @@ class WireData<T> {
     return this;
   }
 
-  Future<WireData<T>> unsubscribe({WireDataListener<T?>? listener, bool immediate = false}) async {
+  Future<WireData<T>> unsubscribe({
+    WireDataListener<T?>? listener,
+    bool immediate = false,
+  }) async {
     if (isGetter) throw Exception(ERROR__SUBSCRIBE_TO_DATA_GETTER);
     if (listener != null) {
       if (hasListener(listener)) {

@@ -1,4 +1,4 @@
-library wire;
+library;
 
 mixin WireMixinWithWhenReady {
   late Future<bool> whenReady;

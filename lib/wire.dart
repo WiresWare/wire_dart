@@ -1,3 +1,3 @@
-library wire;
+library;
 
 export 'src/main.dart';
