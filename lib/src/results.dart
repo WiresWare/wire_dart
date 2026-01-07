@@ -1,5 +1,3 @@
-part of wire;
-
 ///
 /// Created by Vladimir (Cores) Minkin on 12/10/22.
 /// Github: https://github.com/vladimircores
@@ -15,17 +13,20 @@ class WireSendResults {
   late final bool _noSubscribers;
 
   bool get hasError => _list.any((element) => element is WireSendError);
+  List<WireSendError> get errors => _list.whereType<WireSendError>().toList();
+  String get errorsString => errors.map((error) => '${error.message} (${error.error})').join('\n');
   List<dynamic> get list => _list;
   bool get signalHasNoSubscribers => _noSubscribers;
 }
 
 class WireSendError {
-  WireSendError(String message, Exception error) {
-    _error = error;
+  WireSendError(String message, StateError error) {
+    print('WireSendError -> constructor -> message: $message | error: $error');
     _message = message;
+    _error = error;
   }
-  late final Exception _error;
+  late final StateError _error;
   late final String _message;
   String get message => _message;
-  Exception get error => _error;
+  StateError get error => _error;
 }

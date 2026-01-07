@@ -11,6 +11,7 @@ class ApplyFilterToTodosCommand extends WireCommandWithWireData<void> {
   @override
   Future<void> execute() async {
     final todoIdsList = await get<List<String>>(DataKeys.LIST_OF_IDS);
+    print('> ApplyFilterToTodosCommand -> execute: $filter');
     await Future.forEach(todoIdsList, (String todoId) async {
       final todoVO = await get<TodoVO>(todoId);
       bool todoVisible = todoVO.visible;
@@ -27,11 +28,10 @@ class ApplyFilterToTodosCommand extends WireCommandWithWireData<void> {
       }
       if (todoVO.visible != todoVisible) {
         todoVO.visible = todoVisible;
-        update(todoId, data: todoVO);
+        update<TodoVO>(todoId, data: todoVO);
       }
     });
 
-    update(DataKeys.FILTER, data: filter);
-    print('> TodoModel -> filtered: $filter');
+    update<FilterValues>(DataKeys.FILTER, data: filter);
   }
 }

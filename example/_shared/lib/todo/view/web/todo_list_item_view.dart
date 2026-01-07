@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:wire/wire.dart';
 import 'package:wire_example_shared/todo/const/view_signals.dart';
@@ -9,18 +9,19 @@ import 'package:wire_example_shared/todo/data/vo/todo_vo.dart';
 import 'package:wire_example_shared/todo/view/web/base/dom_element_view.dart';
 
 class TodoListItemView extends DomElement {
-  TodoListItemView(String id) : super(LIElement()) {
+  TodoListItemView(String id) : super(HTMLLIElement()) {
     dom.id = id;
     listeners.addAll([
-      inpToggle.onClick.listen((e) => Wire.send(ViewSignals.TOGGLE, payload: id)),
-      btnDelete.onClick.listen((e) => Wire.send(ViewSignals.DELETE, payload: id)),
-      inpEdit.onKeyDown.listen((e) {
+      inpToggle.onClick.listen((MouseEvent e) => Wire.send(ViewSignals.TOGGLE, payload: id)),
+      btnDelete.onClick.listen((MouseEvent e) => Wire.send(ViewSignals.DELETE, payload: id)),
+      inpEdit.onKeyDown.listen((KeyboardEvent e) {
         if (e.keyCode == KeyCode.ENTER) {
           Wire.send(ViewSignals.EDIT, payload: getEditData());
-        } else if (e.keyCode == KeyCode.ESC) _OnEditCancel();
+        } else if (e.keyCode == KeyCode.ESC)
+          _OnEditCancel();
       }),
       lblContent.onDoubleClick.listen((_) => _OnEditBegin()),
-      inpEdit.onBlur.listen((_) => _OnEditCancel())
+      inpEdit.onBlur.listen((_) => _OnEditCancel()),
     ]);
 
     final wdTodo = Wire.data(id);
@@ -36,20 +37,20 @@ class TodoListItemView extends DomElement {
     if (wdTodo.isSet) _OnDataChanged(wdTodo.value);
   }
 
-  final inpToggle = InputElement()
+  final inpToggle = HTMLInputElement()
     ..className = 'toggle'
     ..type = 'checkbox';
 
-  final lblContent = LabelElement()..className = 'todo-content';
-  final btnDelete = ButtonElement()..className = 'destroy';
-  final inpEdit = InputElement()..className = 'edit';
-  final container = DivElement()..className = 'view';
+  final lblContent = HTMLLabelElement()..className = 'todo-content';
+  final btnDelete = HTMLButtonElement()..className = 'destroy';
+  final inpEdit = HTMLInputElement()..className = 'edit';
+  final container = HTMLDivElement()..className = 'view';
   final listeners = <StreamSubscription<dynamic>>[];
 
   void remove() {
     final wdTodo = Wire.data(dom.id);
     final hasListener = wdTodo.hasListener(_OnDataChanged);
-    if (hasListener) wdTodo.unsubscribe(_OnDataChanged);
+    if (hasListener) wdTodo.unsubscribe(listener: _OnDataChanged, immediate: true);
     // print('> TodoListItemView -> remove: hasListener = ${hasListener}');
     listeners.removeWhere((element) {
       element.cancel();
@@ -68,15 +69,15 @@ class TodoListItemView extends DomElement {
       final text = htmlEscape.convert(todoVO.text);
       dom.className = todoVO.completed ? 'completed' : '';
       inpToggle.checked = todoVO.completed;
-      lblContent.text = text;
+      lblContent.textContent = text;
       inpEdit.value = text;
       inpEdit.selectionStart = text.length;
     }
   }
 
-  EditDTO getEditData() => EditDTO(dom.id, inpEdit.value!.trim(), '');
+  EditDTO getEditData() => EditDTO(dom.id, inpEdit.value.trim(), '');
 
-  Future<void> _OnDataChanged(input) async {
+  Future<void> _OnDataChanged(dynamic input) async {
     final todoVO = input as TodoVO?;
     print('> TodoListItemView -> _OnTodoDataChanged = ${todoVO?.id ?? 'empty'}');
     if (todoVO == null) {
@@ -87,12 +88,12 @@ class TodoListItemView extends DomElement {
   }
 
   void _OnEditBegin() {
-    dom.classes.add('editing');
+    dom.classList.add('editing');
     inpEdit.focus();
   }
 
   void _OnEditCancel() {
-    inpEdit.text = lblContent.text;
-    dom.classes.remove('editing');
+    inpEdit.textContent = lblContent.textContent;
+    dom.classList.remove('editing');
   }
 }

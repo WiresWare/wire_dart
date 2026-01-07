@@ -11,7 +11,7 @@ class TodoInputCommand extends WireCommandWithWireData<void> {
   final InputDTO inputDTO;
 
   @override
-  Future<void> execute() async {
+  Future<TodoVO?> execute() async {
     final text = inputDTO.text;
 
     if (text.isNotEmpty) {
@@ -28,15 +28,17 @@ class TodoInputCommand extends WireCommandWithWireData<void> {
       todoIdsList.add(newTodoId);
 
       // Add object to data layer by id
-      update(newTodoVO.id, data: newTodoVO);
+      update<TodoVO>(newTodoVO.id, data: newTodoVO);
       // Update TodoList in data layer
-      update(DataKeys.LIST_OF_IDS, data: todoIdsList);
+      update<List<String>>(DataKeys.LIST_OF_IDS, data: todoIdsList);
       // Update counter
-      update(DataKeys.COUNT, data: notCompletedCount);
+      update<int>(DataKeys.COUNT, data: notCompletedCount);
       // Send signal to clean input
       Wire.send(ViewSignals.CLEAR_INPUT);
+      return newTodoVO;
     } else {
       // Signalise about error or wrong input
+      return null;
     }
   }
 }

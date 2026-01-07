@@ -17,14 +17,14 @@ import 'package:wire_example_todo_commands/src/controller/getters/getter_count_c
 class TodoController {
   TodoController() {
     Wire.addMany(this, {
-      ViewSignals.INPUT:    (_, __) => TodoInputCommand(_! as InputDTO).execute(),
-      ViewSignals.EDIT:     (_, __) => TodoEditCommand(_! as EditDTO).execute(),
-      ViewSignals.DELETE:   (_, __) => TodoDeleteCommand(_! as String).execute(),
-      ViewSignals.TOGGLE:   (_, __) => TodoToggleCommand(_! as String).execute(),
+      ViewSignals.INPUT: (input, __) => TodoInputCommand(input as InputDTO).execute(),
+      ViewSignals.EDIT: (input, __) => TodoEditCommand(input as EditDTO).execute(),
+      ViewSignals.DELETE: (input, __) => TodoDeleteCommand(input as String).execute(),
+      ViewSignals.TOGGLE: (input, __) => TodoToggleCommand(input as String).execute(),
 
-      ViewSignals.FILTER:          (_, __) => ApplyFilterToTodosCommand(_! as FilterValues).execute(),
-      ViewSignals.CLEAR_COMPLETED: (_, __) => ClearCompletedTodosCommand().execute(),
-      ViewSignals.COMPLETE_ALL:    (_, __) => CompleteAllTodosCommand(_! as bool).execute()
+      ViewSignals.FILTER: (input, __) => ApplyFilterToTodosCommand(input as FilterValues).execute(),
+      ViewSignals.CLEAR_COMPLETED: (input, __) => ClearCompletedTodosCommand().execute(),
+      ViewSignals.COMPLETE_ALL: (input, __) => CompleteAllTodosCommand(input as bool).execute(),
     });
 
     Wire.data(DataKeys.GET_COUNT_COMPLETED, getter: CountCompletedGetter().getter);

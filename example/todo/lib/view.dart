@@ -1,4 +1,6 @@
-import 'dart:html';
+import 'dart:js_interop';
+
+import 'package:web/web.dart';
 
 import 'package:wire_example_shared/todo/view/web/clear_completed_view.dart';
 import 'package:wire_example_shared/todo/view/web/complete_all_view.dart';
@@ -16,19 +18,21 @@ class TodoView {
     final domToggleAll = document.querySelector('.toggle-all')!;
     final domClearCompleted = document.querySelector('.clear-completed')!;
 
-    TodoInputView(domNewTodoInput as InputElement);
-    TodoListView(domTodoList as UListElement);
-    TodoCountView(domTodoCount as Element);
-    TodoFilterView(domFiltersList as UListElement);
-    CompleteAllView(domToggleAll as CheckboxInputElement);
-    ClearCompletedView(domClearCompleted as ButtonElement);
+    TodoInputView(domNewTodoInput as HTMLInputElement);
+    TodoListView(domTodoList as HTMLUListElement);
+    TodoCountView(domTodoCount as HTMLElement);
+    TodoFilterView(domFiltersList as HTMLUListElement);
+    CompleteAllView(domToggleAll as HTMLInputElement);
+    ClearCompletedView(domClearCompleted as HTMLButtonElement);
   }
 }
 
 class ErrorView {
   ErrorView() {
-    document.querySelector('#todoapp')
-      ?..innerHtml = '<h2>Error during model initialization</h2>'
+    final app = document.querySelector('#todoapp') as HTMLElement?;
+    if (app == null) return;
+    app
+      ..innerHTML = '<h2>Error during model initialization</h2>'.toJS
       ..style.textAlign = 'center'
       ..style.padding = '2rem 0';
   }

@@ -29,6 +29,8 @@ analyzer:
     # Turned off until null-safe rollout is complete.
     unnecessary_null_comparison: ignore
   exclude:
+    - "test/**"
+    - "build/**"
     - "lib/**.g.dart"
     - "example/**"
 

@@ -1,30 +1,36 @@
-part of wire;
+import 'package:wire/src/const.dart';
 
 ///
 /// Created by Vladimir Cores (Minkin) on 12/06/20.
 /// Github: https://github.com/vladimircores
 /// License: APACHE LICENSE, VERSION 2.0
 ///
-typedef WireDataListener = Future<void> Function(dynamic value);
-typedef WireDataGetter = dynamic Function(WireData that);
-typedef WireDataOnReset = void Function(String, dynamic);
+enum WireDataListenersExecutionMode { SEQUENTIAL, PARALLEL }
+
+typedef WireDataListener<T> = Future<void> Function(T value);
+typedef WireDataGetter<T> = T Function(WireData<T> that);
+typedef WireDataOnReset<T> = void Function(String, T);
+typedef WireDataOnError<T> = void Function(dynamic error, String key, T value);
 
 class WireDataLockToken {
   bool equal(WireDataLockToken token) => this == token;
 }
 
-class WireData {
-  WireData(this._key, this._onRemove, this._onReset);
+class WireData<T> {
+  WireData(this._key, this._onRemove, this._onReset, this._onError);
 
   final String _key;
-  dynamic _value; // initial value is null
+  T? _value; // initial value is null
 
   Function(String)? _onRemove;
-  WireDataOnReset? _onReset;
-  WireDataGetter? _getter;
+  WireDataOnReset<T?>? _onReset;
+  WireDataOnError<T?>? _onError;
+  WireDataGetter<T>? _getter;
   WireDataLockToken? _lockToken;
+  WireDataListenersExecutionMode? _listenersExecutionMode;
 
-  final _listeners = <WireDataListener>{};
+  final _listeners = <WireDataListener<T?>>{};
+  final _refreshQueue = <Future<void>>[];
 
   /// This property needed to distinguish between newly created and not set WireData which has value of null at the beginning
   /// And with WireData at time when it's removed, because when removing the value also set to null
@@ -32,15 +38,19 @@ class WireData {
   bool get isLocked => _lockToken != null;
   bool get isGetter => _getter != null;
   String get key => _key;
-  dynamic get value => isGetter ? _getter!(this) : _value;
+  T? get value => isGetter ? _getter!(this) : _value;
   int get numberOfListeners => _listeners.length;
+  WireDataListenersExecutionMode get listenersExecutionMode => _listenersExecutionMode ?? WireDataListenersExecutionMode.SEQUENTIAL;
 
-  set getter(WireDataGetter value) => _getter = value;
-  set value(dynamic input) {
+  set listenersExecutionMode(WireDataListenersExecutionMode mode) => _listenersExecutionMode = mode;
+  set getter(WireDataGetter<T> value) => _getter = value;
+  set value(T? input) {
     // print('> WireDate -> set value: ${input}');
     _guardian();
     _value = input;
-    refresh();
+    final future = refresh(input);
+    future.whenComplete(() => _refreshQueue.remove(future));
+    _refreshQueue.add(future);
   }
 
   /// Prevent any value modifications inside specific of [WireData] instance.
@@ -61,12 +71,43 @@ class WireData {
     return opened; // throw ERROR__DATA_CANNOT_OPEN
   }
 
-  Future<void> refresh([dynamic optional]) async {
+  Future<void> refresh([T? optionalValue]) async {
     if (_listeners.isEmpty) return;
-    final valueForListener = optional ?? value;
-    final listeners = Set<WireDataListener>.from(_listeners);
+    final valueForListener = optionalValue ?? value;
+    final listeners = Set<WireDataListener<T?>>.from(_listeners);
+    if (listenersExecutionMode == WireDataListenersExecutionMode.PARALLEL) {
+      return _refreshInParallel(listeners, valueForListener);
+    } else {
+      return _refreshSequentially(listeners, valueForListener);
+    }
+  }
+
+  Future<void> _refreshInParallel(Set<WireDataListener<T?>> listeners, T? valueForListener) async {
+    final futures = <Future<void>>[];
     for (final listener in listeners) {
-      await listener(valueForListener);
+      futures.add(
+        Future.microtask(() async {
+          try {
+            await listener(valueForListener);
+          } catch (error) {
+            return _onError?.call(error, key, valueForListener);
+          }
+        }),
+      );
+    }
+    await Future.wait(futures);
+  }
+
+  Future<void> _refreshSequentially(Set<WireDataListener<T?>> listeners, T? valueForListener) async {
+    for (final listener in listeners) {
+      if (hasListener(listener)) {
+        try {
+          await listener(valueForListener);
+        } catch (error) {
+          print('> WireData -> _refreshSequentially: error = ${error}');
+          return _onError?.call(error, key, valueForListener);
+        }
+      }
     }
   }
 
@@ -75,7 +116,7 @@ class WireData {
     _guardian();
     final previousValue = _value;
     _value = null;
-    _onReset!(_key, previousValue);
+    _onReset?.call(_key, previousValue);
     await refresh();
   }
 
@@ -83,9 +124,11 @@ class WireData {
     if (!clean) _guardian();
     _lockToken = null;
     await reset();
-    _onRemove!(_key);
+    _refreshQueue.clear();
+    _onRemove?.call(_key);
     _onRemove = null;
     _onReset = null;
+    _onError = null;
     _listeners.clear();
   }
 
@@ -94,7 +137,7 @@ class WireData {
   }
 
   // Subscribe to updates of value but not getter because its value locked
-  WireData subscribe(WireDataListener listener) {
+  WireData<T> subscribe(WireDataListener<T?> listener) {
     if (isGetter) throw Exception(ERROR__SUBSCRIBE_TO_DATA_GETTER);
     if (!hasListener(listener)) {
       _listeners.add(listener);
@@ -102,16 +145,30 @@ class WireData {
     return this;
   }
 
-  WireData unsubscribe([WireDataListener? listener]) {
+  Future<WireData<T>> unsubscribe({WireDataListener<T?>? listener, bool immediate = false}) async {
+    if (isGetter) throw Exception(ERROR__SUBSCRIBE_TO_DATA_GETTER);
     if (listener != null) {
-      if (hasListener(listener)) _listeners.remove(listener);
+      if (hasListener(listener)) {
+        Future<void> remove() async {
+          _listeners.remove(listener);
+        }
+
+        final isRefreshing = _refreshQueue.isNotEmpty;
+        final shouldWaitForRefresh = isRefreshing && !immediate;
+
+        if (shouldWaitForRefresh) {
+          await Future.wait(_refreshQueue).whenComplete(remove);
+        } else {
+          await remove();
+        }
+      }
     } else {
       _listeners.clear();
     }
     return this;
   }
 
-  bool hasListener(WireDataListener listener) {
+  bool hasListener(WireDataListener<T?> listener) {
     return _listeners.contains(listener);
   }
 }

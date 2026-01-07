@@ -22,4 +22,14 @@ class WireViewerMiddleware extends WireMiddleware {
   Future<void> onSend(String signal, [payload, scope]) async {
     print('> WireViewerMiddleware -> onSend: signal = ${signal} | data = ${payload} | scope = ${scope}');
   }
+
+  @override
+  Future<void> onDataError(error, String key, value) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> onReset(String key, value) {
+    throw UnimplementedError();
+  }
 }

@@ -1,4 +1,7 @@
-part of wire;
+import 'package:wire/src/const.dart';
+import 'package:wire/src/data.dart';
+import 'package:wire/src/main.dart';
+import 'package:wire/src/results.dart';
 
 ///
 /// Created by Vladimir Cores (Minkin) on 07/10/19.
@@ -37,35 +40,40 @@ class WireCommunicateLayer {
   }
 
   Future<WireSendResults> send(String signal, [payload, scope]) async {
-    bool noMoreSubscribers = true;
-    // print('> Wire -> WireCommunicateLayer: send - hasSignal($signal) = ${hasSignal(signal)}');
     final results = [];
     if (hasSignal(signal)) {
-      final hasWires = _wireIdsBySignal.containsKey(signal);
-      // print('> Wire -> WireCommunicateLayer: send - hasWires = ${hasWires}');
-      if (hasWires) {
-        final wiresToRemove = <Wire<dynamic>>[];
-        final isLookingInScope = scope != null;
-        await Future.forEach<int>(_wireIdsBySignal[signal]!, (wireId) async {
-          final wire = _wireById[wireId]!;
-          if (isLookingInScope && wire.scope != scope) return;
-          final resultData = await wire.transfer(payload).catchError(_processSendError);
-          if (resultData != null) results.add(resultData);
-          noMoreSubscribers = wire.withReplies && --wire.replies == 0;
-          if (noMoreSubscribers) wiresToRemove.add(wire);
-          // print('> \t\t wireId = ${wireId} | noMoreSubscribers = ${noMoreSubscribers}');
-        });
-        if (wiresToRemove.isNotEmpty) {
-          await Future.forEach(wiresToRemove, (Wire<dynamic> wire) async {
-            noMoreSubscribers = await _removeWire(wire);
-          });
+      final wireIdsList = List.of(_wireIdsBySignal[signal]!);
+      for (final wireId in wireIdsList) {
+        if (!_wireById.containsKey(wireId)) continue;
+        final result = await _transferOnWire(wireId, payload, scope);
+        print('> WireLayers -> send(_transferOnWire) - signal | result: $signal | ${result} | ${payload}');
+        if (result != null) {
+          results.add(result);
         }
       }
     }
-    return WireSendResults(results, noMoreSubscribers);
+    return WireSendResults(results, !hasSignal(signal));
   }
 
-  WireSendError _processSendError(err) => WireSendError(ERROR__ERROR_DURING_PROCESSING_SEND, err as Exception);
+  Future<dynamic> _transferOnWire(int wireId, [payload, scope]) async {
+    final wire = _wireById[wireId]!;
+    final isLookingInScope = scope != null;
+    if (isLookingInScope && wire.scope != scope) return null;
+    print('> WireLayers -> _transferOnWire: ${payload}');
+    try {
+      final result = await wire.transfer(payload).catchError(_processSendError);
+      if (wire.withReplies && wire.replies-- == 1) {
+        await _removeWire(wire);
+      }
+      return result;
+    } catch (e) {
+      print('> WireLayers -> _transferOnWire -> failed to transfer data: ${payload} | ${e}');
+      final error = StateError(e.toString());
+      return WireSendError(ERROR__ERROR_DURING_PROCESSING_SEND, error);
+    }
+  }
+
+  WireSendError _processSendError(dynamic err) => WireSendError(ERROR__ERROR_DURING_PROCESSING_SEND, StateError(err.toString()));
 
   Future<bool> remove(String signal, [Object? scope, WireListener<dynamic>? listener]) async {
     final exists = hasSignal(signal);
@@ -73,38 +81,56 @@ class WireCommunicateLayer {
       final withScope = scope != null;
       final withListener = listener != null;
       final toRemoveList = <Wire<dynamic>>[];
-      await Future.forEach(_wireIdsBySignal[signal]!, (wireId) {
-        if (_wireById.containsKey(wireId)) {
-          final wire = _wireById[wireId]!;
-          final isWrongScope = withScope && scope != wire.scope;
-          final isWrongListener = withListener && !wire.listenerEqual(listener);
-          if (isWrongScope || isWrongListener) return;
-          toRemoveList.add(wire);
+      final hasWires = _wireIdsBySignal.containsKey(signal);
+      if (hasWires) {
+        for (final wireId in _wireIdsBySignal[signal]!) {
+          if (_wireById.containsKey(wireId)) {
+            final wire = _wireById[wireId]!;
+            final isWrongScope = withScope && scope != wire.scope;
+            final isWrongListener = withListener && !wire.listenerEqual(listener);
+            if (isWrongScope || isWrongListener) continue;
+            toRemoveList.add(wire);
+          }
         }
-      });
-      await Future.forEach(toRemoveList, (Wire<dynamic> wireToRemove) => _removeWire(wireToRemove));
+      }
+      if (toRemoveList.isNotEmpty) {
+        for (final wire in toRemoveList) {
+          await _removeWire(wire);
+        }
+      }
     }
     return exists;
   }
 
   Future<void> clear() async {
-    final wiresToRemove = <Wire<dynamic>>[];
-    _wireById.forEach((hash, wire) => wiresToRemove.add(wire));
-    if (wiresToRemove.isNotEmpty) {
-      await Future.forEach(wiresToRemove, (Wire<dynamic> wire) => _removeWire(wire));
+    final wireToRemove = <Wire<dynamic>>[];
+    _wireById.forEach((_, wire) => wireToRemove.add(wire));
+    if (wireToRemove.isNotEmpty) {
+      for (final wire in wireToRemove) {
+        await _removeWire(wire);
+      }
     }
-
     _wireById.clear();
     _wireIdsBySignal.clear();
   }
 
   List<Wire<dynamic>> getBySignal(String signal) {
-    return hasSignal(signal) ? _wireIdsBySignal[signal]!.map((wid) => _wireById[wid]!).toList() : <Wire<dynamic>>[];
+    if (hasSignal(signal)) {
+      return _wireIdsBySignal[signal]!
+          .map((wireId) {
+            return _wireById[wireId];
+          })
+          .whereType<Wire<dynamic>>()
+          .toList();
+    }
+    return [];
   }
 
   List<Wire<dynamic>> getByScope(Object scope) {
     final result = <Wire<dynamic>>[];
-    _wireById.forEach((_, wire) => {if (wire.scope == scope) result.add(wire)});
+    _wireById.forEach((_, wire) {
+      if (wire.scope == scope) result.add(wire);
+    });
     return result;
   }
 
@@ -112,11 +138,8 @@ class WireCommunicateLayer {
     final result = <Wire<dynamic>>[];
     // print('> Wire -> WireCommunicateLayer: getByListener, listener = ${listener}');
     _wireById.forEach((_, wire) {
-      final compareListener = wire.listenerEqual(listener);
-      // print('\t compareListener = ${compareListener}');
-      if (compareListener) result.add(wire);
+      if (wire.listenerEqual(listener)) result.add(wire);
     });
-    // print('> \t result = ${result}');
     return result;
   }
 
@@ -144,7 +167,7 @@ class WireCommunicateLayer {
     final noMoreSignals = wireIdsForSignal.isEmpty;
     if (noMoreSignals) _wireIdsBySignal.remove(signal);
 
-    await wire.clear();
+    wire.clear();
 
     return noMoreSignals;
   }
@@ -161,8 +184,12 @@ class WireMiddlewaresLayer {
     return _process((WireMiddleware m) => m.onData(key, prevValue, nextValue));
   }
 
+  Future<void> onDataError(dynamic error, String key, dynamic value) async {
+    return _process((WireMiddleware m) => m.onDataError(error, key, value));
+  }
+
   Future<void> onReset(String key, dynamic prevValue) async {
-    return _process((WireMiddleware m) => m.onData(key, prevValue, null));
+    return _process((WireMiddleware m) => m.onReset(key, prevValue));
   }
 
   Future<void> onRemove(String signal, {Object? scope, WireListener<dynamic>? listener}) async {
@@ -179,29 +206,32 @@ class WireMiddlewaresLayer {
 
   Future<void> _process(Function(WireMiddleware mw) p) async {
     if (_MIDDLEWARE_LIST.isNotEmpty) {
-      await Future.forEach(_MIDDLEWARE_LIST, p);
+      return Future.forEach(_MIDDLEWARE_LIST, p);
     }
   }
 }
 
 class WireDataContainerLayer {
-  final _dataMap = <String, WireData>{};
+  final _dataMap = <String, WireData<dynamic>>{};
 
   bool _remove(String key) => _dataMap.remove(key) != null;
 
   bool has(String key) => _dataMap.containsKey(key);
-  WireData get(String key) => _dataMap[key]!;
-  WireData create(String key, WireDataOnReset onReset) {
-    final result = WireData(key, _remove, onReset);
+  WireData<T> get<T>(String key) => _dataMap[key]! as WireData<T>;
+  WireData<T> create<T>(String key, WireDataOnReset<T?> onReset, WireDataOnError<T?> onError) {
+    final result = WireData<T>(key, _remove, onReset, onError);
     _dataMap[key] = result;
     return result;
   }
 
   Future<void> clear() async {
-    final wireDataToRemove = <WireData>[];
+    final wireDataToRemove = <WireData<dynamic>>[];
     _dataMap.forEach((key, wireData) => wireDataToRemove.add(wireData));
-    await Future.forEach(wireDataToRemove, (WireData wireData) async => wireData.remove(clean: true));
-
+    if (wireDataToRemove.isNotEmpty) {
+      for (final wireData in wireDataToRemove) {
+        await wireData.remove(clean: true);
+      }
+    }
     _dataMap.clear();
   }
 }

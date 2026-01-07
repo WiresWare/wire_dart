@@ -1,14 +1,16 @@
 targets:
   $default:
-#    sources:
-#      - "web/**"
     builders:
       build_web_compilers:entrypoint:
-        # These are globs for the entry points you want to compile.
+        # These are globs for the entrypoints you want to compile.
         generate_for:
           - web/**.dart
+        dev_options:
+          dart2js_args:
+            - -O0
+        release_options:
+          dart2js_args:
+            - -O4
+            - --no-source-maps
         options:
           compiler: dart2js
-          # List any dart2js specific args here, or omit it.
-          dart2js_args:
-            - -O2

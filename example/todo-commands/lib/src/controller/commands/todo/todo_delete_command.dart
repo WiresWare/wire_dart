@@ -18,9 +18,9 @@ class TodoDeleteCommand extends WireCommandWithWireData<void> {
     await remove(todoId);
 
     if (todoVO.completed == false) {
-      update(DataKeys.COUNT, data: count - 1);
+      update<int>(DataKeys.COUNT, data: count - 1);
     }
 
-    update(DataKeys.LIST_OF_IDS, data: todoIdsList);
+    update<List<String>>(DataKeys.LIST_OF_IDS, data: todoIdsList);
   }
 }

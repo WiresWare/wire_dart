@@ -4,7 +4,7 @@ description: A web app that uses only native HTML components
 # homepage: https://www.example.com
 
 environment:
-  sdk: '>=2.17.5 <3.0.0'
+  sdk: "^3.10.4"
 
 dependencies:
   wire: ^1.5.4
@@ -14,6 +14,7 @@ dependencies:
     path: ../todo
 
   shared_preferences:
+  web: ^1.1.1
 
 dependency_overrides:
   wire:
@@ -23,3 +24,4 @@ dev_dependencies:
   build_web_compilers: ^4.0.5
   build_runner: ^2.4.6
   build_test:
+  lints:

@@ -8,7 +8,7 @@ class CounterModel {
     final initialValue = counterStorageMiddleware.getInitialValue();
 
     /// Set initial value from local storage
-    Wire.data(CounterDataKeys.COUNT, value: initialValue);
+    Wire.data<int>(CounterDataKeys.COUNT, value: initialValue);
 
     /// Register middleware after setting initial value to prevent saving initial value
     Wire.middleware(counterStorageMiddleware);

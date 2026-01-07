@@ -12,7 +12,7 @@ class LogoutPage extends Page {
 
   @override
   void render() {
-    dom.text = 'Go to Index in ${_counter}';
+    dom.textContent = 'Go to Index in ${_counter}';
   }
 
   @override
@@ -22,8 +22,10 @@ class LogoutPage extends Page {
   }
 
   void _handleTimerTick(Timer timer) {
-    if (--_counter == 0) print('');
-      // dispatchAction(Action.LOGOUT_PAGE_TIMER_EXPIRED);
-    else render();
+    if (--_counter == 0)
+      print('');
+    // dispatchAction(Action.LOGOUT_PAGE_TIMER_EXPIRED);
+    else
+      render();
   }
 }
