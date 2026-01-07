@@ -1,4 +1,4 @@
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:wire/wire.dart';
 import 'package:wire_example_shared/todo/const/data_keys.dart';
@@ -6,7 +6,7 @@ import 'package:wire_example_shared/todo/const/view_signals.dart';
 import 'package:wire_example_shared/todo/view/web/base/dom_element_view.dart';
 
 class ClearCompletedView extends DomElement {
-  ClearCompletedView(ButtonElement dom) : super(dom) {
+  ClearCompletedView(HTMLButtonElement dom) : super(dom) {
     final wdTodoList = Wire.data(DataKeys.LIST_OF_IDS);
     final wdCount = Wire.data(DataKeys.COUNT);
 
