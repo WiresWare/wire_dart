@@ -1,11 +1,11 @@
-import 'dart:html';
+import 'package:web/web.dart';
 
 abstract class Component {
   Component(String className) {
     dom.className = '${className} ';
   }
 
-  DivElement dom = DivElement();
+  HTMLDivElement dom = HTMLDivElement();
 
   bool shouldRender() {
     return true;

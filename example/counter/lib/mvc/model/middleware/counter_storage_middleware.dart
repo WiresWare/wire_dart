@@ -1,4 +1,6 @@
-import 'dart:html';
+import 'dart:js_interop_unsafe';
+
+import 'package:web/web.dart';
 
 import 'package:wire/wire.dart';
 import 'package:wire_example_counter/const/counter_data_keys.dart';
@@ -16,10 +18,10 @@ class CounterStorageMiddleware extends WireMiddleware {
     print('> CounterMiddleware -> onData - key: ${key} = ${nextValue} (${prevValue})');
     if (key == CounterDataKeys.COUNT) {
       if (nextValue != null)
-        storage[CounterDataKeys.COUNT] = nextValue.toString();
+        storage.setItem(CounterDataKeys.COUNT, nextValue.toString());
       else {
-        if (storage.containsValue(CounterDataKeys.COUNT)) {
-          storage.remove(CounterDataKeys.COUNT);
+        if (storage.has(CounterDataKeys.COUNT)) {
+          storage.removeItem(CounterDataKeys.COUNT);
         }
       }
     }
@@ -36,6 +38,16 @@ class CounterStorageMiddleware extends WireMiddleware {
   }
 
   int getInitialValue() {
-    return storage.containsKey(CounterDataKeys.COUNT) ? int.parse(storage[CounterDataKeys.COUNT]!) : 0;
+    return storage.has(CounterDataKeys.COUNT) ? int.parse(storage.getItem(CounterDataKeys.COUNT)!) : 0;
+  }
+
+  @override
+  Future<void> onDataError(error, String key, value) async {
+    print('> CounterMiddleware -> onDataError: key = ${key} | value = ${value}');
+  }
+
+  @override
+  Future<void> onReset(String key, value) async {
+    print('> CounterMiddleware -> onReset: key = ${key} | value = ${value}');
   }
 }

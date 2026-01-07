@@ -23,8 +23,8 @@ class ClearCompletedTodosCommand extends WireCommandWithWireData<void> {
       todoIdsList.remove(todoId);
       await remove(todoId);
     });
-    update(DataKeys.LIST_OF_IDS, data: todoIdsList);
-    update(DataKeys.COUNT, data: todoIdsList.length);
+    update<List<String>>(DataKeys.LIST_OF_IDS, data: todoIdsList);
+    update<int>(DataKeys.COUNT, data: todoIdsList.length);
     await CheckAllCompletedCommand().execute();
     print('> ClearCompletedTodosCommand -> executed: length = ${todoIdsList.length}');
   }

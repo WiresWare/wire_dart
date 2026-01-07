@@ -1,4 +1,4 @@
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:wire/wire.dart';
 import 'package:wire_example_counter/const/counter_data_keys.dart';
@@ -17,16 +17,18 @@ void main() {
   CounterController();
 
   final rootDom = document.querySelector('#root');
-  ApplicationView(rootDom as DivElement?);
+  ApplicationView(rootDom as HTMLDivElement?);
 
-  print('Init Ready: initial value = '
-      '${Wire.data(CounterDataKeys.COUNT).value}');
+  print(
+    'Init Ready: initial value = '
+    '${Wire.data<int>(CounterDataKeys.COUNT).value}',
+  );
 }
 
 class ApplicationView {
   ApplicationView(this.root) {
     try {
-      final group = DivElement()..className = 'spectrum-ButtonGroup';
+      final group = HTMLDivElement()..className = 'spectrum-ButtonGroup';
 
       final btnIncrease = CounterButton('Increase', CounterSignalsKeys.INCREASE);
       final btnDecrease = CounterButton('Decrease', CounterSignalsKeys.DECREASE);
@@ -43,5 +45,5 @@ class ApplicationView {
     }
   }
 
-  final DivElement? root;
+  final HTMLDivElement? root;
 }

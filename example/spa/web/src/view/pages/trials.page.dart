@@ -1,4 +1,6 @@
-import 'dart:html';
+import 'dart:js_interop';
+
+import 'package:web/web.dart';
 
 import 'package:wire/wire.dart';
 
@@ -11,16 +13,16 @@ class TrialsPage extends Page {
     dom.style.backgroundColor = 'antiquewhite';
   }
 
-  final _btnIndex = ButtonElement();
-  final _btnExit = ButtonElement();
+  final _btnIndex = HTMLButtonElement();
+  final _btnExit = HTMLButtonElement();
 
   @override
   void render() {
-    _btnIndex.addEventListener('click', _handleClickEvent);
-    _btnIndex.text = 'INDEX';
+    _btnIndex.addEventListener('click', _handleClickEvent.toJS);
+    _btnIndex.textContent = 'INDEX';
 
-    _btnExit.addEventListener('click', _handleClickEvent);
-    _btnExit.text = 'EXIT';
+    _btnExit.addEventListener('click', _handleClickEvent.toJS);
+    _btnExit.textContent = 'EXIT';
 
     dom.append(_btnIndex);
     dom.append(_btnExit);
@@ -28,9 +30,9 @@ class TrialsPage extends Page {
 
   @override
   void destroy() {
-    _btnIndex.removeEventListener('click', _handleClickEvent);
+    _btnIndex.removeEventListener('click', _handleClickEvent.toJS);
     _btnIndex.remove();
-    _btnExit.removeEventListener('click', _handleClickEvent);
+    _btnExit.removeEventListener('click', _handleClickEvent.toJS);
     _btnExit.remove();
 
     super.destroy();

@@ -1,33 +1,33 @@
 import 'dart:convert';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:wire/abstract/abstract_wire_database_service.dart';
 
 class WebDatabaseService extends WireDatabaseServiceAbstract {
   @override
   bool exist(String key) {
-    final result = !!window.localStorage.containsKey(key);
-    // log('> WebDatabaseService -> exist: $key = $result');
+    final result = window.localStorage.getItem(key) != null;
+    print('> WebDatabaseService -> exist: $key = $result');
     return result;
   }
 
   @override
   Future<dynamic> retrieve(String key) {
-    final value = window.localStorage[key];
+    final value = window.localStorage.getItem(key);
     print('> WebDatabaseService -> retrieve: $key');
-    return Future.value(value != null ? jsonDecode(value) : null);
+    return Future.value(value);
   }
 
   @override
   void save(String key, dynamic data) {
-    // log('> WebDatabaseService -> save: $key = $data');
-    window.localStorage[key] = jsonEncode(data);
+    print('> WebDatabaseService -> save: $key = $data');
+    window.localStorage.setItem(key, data as String);
   }
 
   @override
   void delete(String key) {
-    // log('> StaticDatabaseService -> delete: $key');
-    window.localStorage.remove(key);
+    print('> StaticDatabaseService -> delete: $key');
+    window.localStorage.removeItem(key);
   }
 
   @override

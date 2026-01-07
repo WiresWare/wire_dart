@@ -26,7 +26,7 @@ class TodoEditCommand extends WireCommandWithWireData<void> {
     final todoVO = await get<TodoVO>(id);
     todoVO.text = text;
     todoVO.note = note;
-    update(id, data: todoVO);
+    update<TodoVO>(id, data: todoVO);
   }
 
   Future<void> _removeTodo(String id) async {

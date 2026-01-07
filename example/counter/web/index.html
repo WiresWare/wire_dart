@@ -1,38 +1,71 @@
 <!doctype html>
 <html class="spectrum spectrum--large spectrum--light">
-<head>
+  <head>
     <title>Wire Counter Example</title>
-  <!-- Include global variables first -->
-  <link rel="stylesheet" href="assets/styles/@spectrum-css/vars/dist/spectrum-global.css">
-  
-  <!-- Include only the scales your application needs -->
-  <link rel="stylesheet" href="assets/styles/@spectrum-css/vars/dist/spectrum-medium.css">
-  <link rel="stylesheet" href="assets/styles/@spectrum-css/vars/dist/spectrum-large.css">
-  
-  <!-- Include only the colorstops your application needs -->
-  <link rel="stylesheet" href="assets/styles/@spectrum-css/vars/dist/spectrum-light.css">
-  
-  <!-- Include index-vars.css for all components you need -->
-  <link rel="stylesheet" href="assets/styles/@spectrum-css/page/dist/index-vars.css">
-  <link rel="stylesheet" href="assets/styles/@spectrum-css/typography/dist/index-vars.css">
-  <link rel="stylesheet" href="assets/styles/@spectrum-css/icon/dist/index-vars.css">
-  <link rel="stylesheet" href="assets/styles/@spectrum-css/button/dist/index-vars.css">
-  <style>
-    .container {
+    <!-- Include global variables first -->
+    <link
+      rel="stylesheet"
+      href="assets/styles/@spectrum-css/vars/dist/spectrum-global.css"
+    />
+
+    <!-- Include only the scales your application needs -->
+    <link
+      rel="stylesheet"
+      href="assets/styles/@spectrum-css/vars/dist/spectrum-medium.css"
+    />
+    <link
+      rel="stylesheet"
+      href="assets/styles/@spectrum-css/vars/dist/spectrum-large.css"
+    />
+
+    <!-- Include only the colorstops your application needs -->
+    <link
+      rel="stylesheet"
+      href="assets/styles/@spectrum-css/vars/dist/spectrum-light.css"
+    />
+
+    <!-- Include index-vars.css for all components you need -->
+    <link
+      rel="stylesheet"
+      href="assets/styles/@spectrum-css/page/dist/index-vars.css"
+    />
+    <link
+      rel="stylesheet"
+      href="assets/styles/@spectrum-css/typography/dist/index-vars.css"
+    />
+    <link
+      rel="stylesheet"
+      href="assets/styles/@spectrum-css/icon/dist/index-vars.css"
+    />
+    <link
+      rel="stylesheet"
+      href="assets/styles/@spectrum-css/button/dist/index-vars.css"
+    />
+
+    <style>
+      .container {
         margin-top: 1rem;
         text-align: center;
-    }
-    .spectrum-ButtonGroup {
+      }
+      .spectrum-ButtonGroup {
         margin-top: 1rem;
-    }
-    .spectrum-ButtonGroup button:not(:first-child) {
+      }
+      .spectrum-ButtonGroup button:not(:first-child) {
         margin-left: 0.5rem;
-    }
-</style>
-</head>
-<body>
+      }
+      dialog:open::backdrop {
+        background-color: black;
+        opacity: 0.5;
+      }
+    </style>
+  </head>
+  <body>
     <h1 class="spectrum-Heading spectrum-Heading--XXS">Wire Counter Example</h1>
     <div class="container" id="root"></div>
-</body>
-<script src="src/main.dart.js"></script>
+  </body>
+  <dialog id="dialog">
+    <div class="content">...</div>
+    <button class="close">Close</button>
+  </dialog>
+  <script src="src/main.dart.js"></script>
 </html>

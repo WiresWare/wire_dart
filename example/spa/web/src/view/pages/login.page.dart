@@ -1,4 +1,6 @@
-import 'dart:html';
+import 'dart:js_interop';
+
+import 'package:web/web.dart';
 
 import 'package:wire/wire.dart';
 
@@ -13,17 +15,17 @@ class LoginPage extends Page {
 
   @override
   void initialize() {
-    (dom.querySelector('#btnConfirm')! as HtmlElement)
-      .addEventListener('click', (event) {
+    (dom.querySelector('#btnConfirm')! as HTMLElement).addEventListener(
+      'click',
+      (MouseEvent _) {
         print('Confirm');
         Wire.send(Signals.STATES_ACTION__NAVIGATE, payload: Action.NAVIGATE_TO_MAIN);
-      });
+      }.toJS,
+    );
   }
 
   @override
-  void render() {
-
-  }
+  void render() {}
 
   // @override
   // void destroy() {

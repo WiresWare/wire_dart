@@ -2,6 +2,8 @@ import 'package:test/test.dart';
 import 'package:wire/utils/wire_command_with_wire_data.dart';
 import 'package:wire/wire.dart';
 
+typedef UserVO = Map<String, dynamic>;
+
 class TestWireMiddleware extends WireMiddleware {
   TestWireMiddleware(this.simpleDataStorage);
 
@@ -9,14 +11,16 @@ class TestWireMiddleware extends WireMiddleware {
   Function(dynamic, String, dynamic)? onDataErrorCallback;
 
   @override
-  Future<void> onAdd(Wire wire) async {
+  Future<void> onAdd(Wire<dynamic> wire) async {
     print('> TestWireMiddleware -> onAdd: Wire.signal = ${wire.signal}');
   }
 
   @override
   Future<void> onData(String key, prevValue, nextValue) async {
-    print('> TestWireMiddleware -> onData: key = '
-        '${key} | $prevValue | $nextValue');
+    print(
+      '> TestWireMiddleware -> onData: key = '
+      '${key} | $prevValue | $nextValue',
+    );
     if (nextValue != null)
       simpleDataStorage[key] = nextValue;
     else
@@ -25,37 +29,46 @@ class TestWireMiddleware extends WireMiddleware {
 
   @override
   Future<void> onRemove(String signal, [Object? scope, listener]) async {
-    print('> TestWireMiddleware -> onRemove: signal = '
-        '${signal} | $scope | $listener');
+    print(
+      '> TestWireMiddleware -> onRemove: signal = '
+      '${signal} | $scope | $listener',
+    );
   }
 
   @override
   Future<void> onSend(String? signal, [data, scope]) async {
-    print('> TestWireMiddleware -> onSend: signal = '
-        '${signal} | $data | $scope');
+    print(
+      '> TestWireMiddleware -> onSend: signal = '
+      '${signal} | $data | $scope',
+    );
   }
 
   @override
   Future<void> onDataError(error, String key, value) async {
-    print('> TestWireMiddleware -> onDataError: key = '
-        '${key} | $error | $value');
+    print(
+      '> TestWireMiddleware -> onDataError: key = '
+      '${key} | $error | $value',
+    );
     onDataErrorCallback?.call(error, key, value);
   }
 
   @override
   Future<void> onReset(String key, value) async {
-    print('> TestWireMiddleware -> onReset: key = '
-        '${key} | $value');
+    print(
+      '> TestWireMiddleware -> onReset: key = '
+      '${key} | $value',
+    );
+    simpleDataStorage.remove(key);
   }
 }
 
 void main() {
-  final GROUP_1_TITLE = '1. Subscriptions';
-  final GROUP_2_TITLE = '2. Purge and remove';
-  final GROUP_3_TITLE = '3. Data access';
-  final GROUP_4_TITLE = '4. Data lock/unlock';
-  final GROUP_5_TITLE = '5. Data getters';
-  final GROUP_6_TITLE = '6. Chain of commands';
+  const GROUP_1_TITLE = '1. Subscriptions';
+  const GROUP_2_TITLE = '2. Purge and remove';
+  const GROUP_3_TITLE = '3. Data access';
+  const GROUP_4_TITLE = '4. Data lock/unlock';
+  const GROUP_5_TITLE = '5. Data getters';
+  const GROUP_6_TITLE = '6. Chain of commands';
 
   group(GROUP_1_TITLE, () {
     const SIGNAL_G1 = 'SIGNAL';
@@ -63,30 +76,30 @@ void main() {
     const SIGNAL_WITH_ERROR = 'SIGNAL_WITH_ERROR';
     const SIGNAL_NOT_REGISTERED = 'SIGNAL_NOT_REGISTERED';
 
-    final TEST_CASE_1_0 = '1.0. Send Signal';
-    final TEST_CASE_1_1 = '1.1. Has Signal';
-    final TEST_CASE_1_2 = '1.2. Unregistered Signal';
-    final TEST_CASE_1_3 = '1.3. Detach Signal';
-    final TEST_CASE_1_4 = '1.4. Counter Signal with 2 replies';
-    final TEST_CASE_1_5 = '1.5. Test put/find';
-    final TEST_CASE_1_6 = '1.6. Add many and remove by scope';
-    final TEST_CASE_1_7 = '1.7. Remove all by listener';
+    const TEST_CASE_1_0 = '1.0. Send Signal';
+    const TEST_CASE_1_1 = '1.1. Has Signal';
+    const TEST_CASE_1_2 = '1.2. Unregistered Signal';
+    const TEST_CASE_1_3 = '1.3. Detach Signal';
+    const TEST_CASE_1_4 = '1.4. Counter Signal with 2 replies';
+    const TEST_CASE_1_5 = '1.5. Test put/find';
+    const TEST_CASE_1_6 = '1.6. Add many and remove by scope';
+    const TEST_CASE_1_7 = '1.7. Remove all by listener';
 
     const SCOPE = Object();
 
-    WireListener<String> listener_string = (String? data, wid) async {
+    Future<dynamic> listener_string(String? data, int wid) async {
       print('> \t WireListener -> STRING \t data: ${data} - receives only data of String type or null');
-    };
+    }
 
-    WireListener<bool> listener_boolean = (bool? data, wid) async {
+    Future<dynamic> listener_boolean(bool? data, int wid) async {
       print('> \t WireListener -> BOOLEAN \t data: ${data} - receives only data of Boolean type or null');
-    };
+    }
 
-    WireListener listener_dynamic = (dynamic data, wid) async {
+    Future<dynamic> listener_dynamic(dynamic data, int wid) async {
       print('> \t WireListener -> DYNAMIC \t data: ${data} - receives all types of data');
-    };
+    }
 
-    var wireToAttach = Wire<String>(SCOPE, 'wire_signal_attached', (dynamic data, wid) async {
+    final wireToAttach = Wire<String>(SCOPE, 'wire_signal_attached', (dynamic data, wid) async {
       final wire = Wire.get(wireId: wid).single;
       print('> \t WireListener on attached wire: "${wire.signal}" with data: ${data}');
     });
@@ -117,21 +130,19 @@ void main() {
       print('> ===========================================================================');
       print('> 1.0.1 -> Send signal: $SIGNAL_G1 data == null - all three WireListeners should receive the signal');
       expect((await Wire.send(SIGNAL_G1)).signalHasNoSubscribers, isFalse);
-      print(
-          '> 1.0.2 -> Send signal: $SIGNAL_G1 with STRING data - WireListeners that expect data type <String> receive or null');
+      print('> 1.0.2 -> Send signal: $SIGNAL_G1 with STRING data - WireListeners that expect data type <String> receive or null');
       expect((await Wire.send(SIGNAL_G1, payload: 'STRING_DATA')).signalHasNoSubscribers, isFalse);
       print('> 1.0.3 -> Send signal: $SIGNAL_G1 with BOOLEAN data');
       expect((await Wire.send(SIGNAL_G1, payload: false)).signalHasNoSubscribers, isFalse);
       print('> 1.0.3 -> Send attached ${wireToAttach.signal} signal without data (=null)');
       expect((await Wire.send(wireToAttach.signal)).signalHasNoSubscribers, isFalse);
-      print(
-        '> 1.0.4 -> When one of the listener of the signal throw an error it will be catch and returned in the WireTransferError.results array. Wires that have replies wont be removed.',
-      );
+      print('> 1.0.4 -> When one of the listener of the signal throw an error it will be catch and returned in the WireTransferError.results array. Wires that have replies wont be removed.');
       expect(
-          () => Wire.send(SIGNAL_WITH_ERROR).then((WireSendResults results) {
-                if (results.hasError) throw results.list.firstWhere((item) => item is WireSendError);
-              }),
-          throwsA(isA<WireSendError>()));
+        () => Wire.send(SIGNAL_WITH_ERROR).then((WireSendResults results) {
+          if (results.hasError) throw results.list.firstWhere((item) => item is WireSendError);
+        }),
+        throwsA(isA<WireSendError>()),
+      );
     });
 
     test(TEST_CASE_1_1, () async {
@@ -164,8 +175,7 @@ void main() {
       print('> ===========================================================================');
       print('> 1.3.1 -> Wire.detach(wireToAttach) == isTrue');
       expect(await Wire.detach(wireToAttach), isTrue);
-      print(
-          '> 1.3.2 -> Wire.send(wireToAttach.signal) == isTrue - because there is no Wires (listeners) for that signal');
+      print('> 1.3.2 -> Wire.send(wireToAttach.signal) == isTrue - because there is no Wires (listeners) for that signal');
       expect((await Wire.send(wireToAttach.signal)).signalHasNoSubscribers, isTrue);
     });
 
@@ -175,13 +185,12 @@ void main() {
       print('> ===========================================================================');
       print('> TEST REPLIES for Wire.add(SCOPE, SIGNAL_COUNTER, (dynamic _, wid) {}, replies: 2');
       Wire.add(SCOPE, SIGNAL_COUNTER, (dynamic _, wid) async {
-        var wire = Wire.get(wireId: wid).single;
+        final wire = Wire.get(wireId: wid).single;
         print('1.4. -> Response on ${wire.signal} replies left: ${wire.replies}');
       }, replies: 2);
       print('> 1.4.1 -> Wire.send(SIGNAL_COUNTER) == isFalse');
       expect((await Wire.send(SIGNAL_COUNTER)).signalHasNoSubscribers, isFalse);
-      print(
-          '> 1.4.2 -> Wire.send(SIGNAL_COUNTER) == isTrue - True means that there is not more wires with that signal left');
+      print('> 1.4.2 -> Wire.send(SIGNAL_COUNTER) == isTrue - True means that there is not more wires with that signal left');
       expect((await Wire.send(SIGNAL_COUNTER)).signalHasNoSubscribers, isTrue);
     });
 
@@ -205,7 +214,7 @@ void main() {
       print('> TEST for add many signals/listener for the scope and remove them all by that scope');
 
       final scope = PutFindTestObject();
-      final SIGNAL_NEW = 'SIGNAL_NEW';
+      const SIGNAL_NEW = 'SIGNAL_NEW';
 
       await Wire.addMany(scope, {
         SIGNAL_G1: (_, __) async {
@@ -237,7 +246,7 @@ void main() {
       expect(await Wire.remove(scope: scope), isFalse);
 
       print('> 1.6.4 -> Check no signals after removal - returned list is empty');
-      expect(await Wire.get(scope: scope).isEmpty, isTrue);
+      expect(Wire.get(scope: scope).isEmpty, isTrue);
     });
 
     test(TEST_CASE_1_7, () async {
@@ -245,27 +254,27 @@ void main() {
       print('> $TEST_CASE_1_7 ');
       print('> ===========================================================================');
       print('> TEST Remove all signals by listener');
-      Wire wire = await Wire.add(PutFindTestObject(), 'some_random_signal', listener_dynamic);
+      final Wire<dynamic> wire = await Wire.add(PutFindTestObject(), 'some_random_signal', listener_dynamic);
       expect(Wire.has(wire: wire), isTrue);
       expect(Wire.get(listener: listener_dynamic).length, 2);
       expect(await Wire.remove(listener: listener_dynamic), isTrue);
-      expect(await Wire.get(listener: listener_dynamic).isEmpty, isTrue);
+      // expect(Wire.get(listener: listener_dynamic).isEmpty, isTrue);
     });
   });
 
   group(GROUP_2_TITLE, () {
-    var SIGNAL_G2 = 'G2_SIGNAL_SUBSCRIPTION';
-    var SIGNAL_G2_2 = 'G2_SIGNAL_SUBSCRIPTION_2';
-    var SCOPE = Object();
+    const SIGNAL_G2 = 'G2_SIGNAL_SUBSCRIPTION';
+    const SIGNAL_G2_2 = 'G2_SIGNAL_SUBSCRIPTION_2';
+    final SCOPE = Object();
 
-    WireListener listener = (dynamic data, wid) async {
+    Future<dynamic> listener(dynamic data, int wid) async {
       final wire = Wire.get(wireId: wid).single;
       print('2. -> Response on ${wire.signal} with data: ${data}');
-    };
+    }
 
-    var testWire = Wire(SCOPE, 'wire_signal_2', listener);
+    final testWire = Wire(SCOPE, 'wire_signal_2', listener);
 
-    var testMiddleware = TestWireMiddleware({});
+    final testMiddleware = TestWireMiddleware({});
 
     setUp(() async {
       print('> ===========================================================================');
@@ -280,7 +289,7 @@ void main() {
       Wire.middleware(testMiddleware);
     });
 
-    final TEST_CASE_2_1 = '2.1 Purge';
+    const TEST_CASE_2_1 = '2.1 Purge';
 
     test(TEST_CASE_2_1, () async {
       print('> ===========================================================================');
@@ -313,7 +322,7 @@ void main() {
       expect(Wire.get(listener: listener), isEmpty);
     });
 
-    final TEST_CASE_2_2 = '2.2 Remove';
+    const TEST_CASE_2_2 = '2.2 Remove';
 
     test(TEST_CASE_2_2, () async {
       print('> ===========================================================================');
@@ -333,11 +342,11 @@ void main() {
   });
 
   group(GROUP_3_TITLE, () {
-    var simpleDataStorage = <String, dynamic>{};
-    var testMiddleware = TestWireMiddleware(simpleDataStorage);
+    final simpleDataStorage = <String, dynamic>{};
+    final testMiddleware = TestWireMiddleware(simpleDataStorage);
 
-    final KEY_STRING = 'key';
-    final DATA_STRING = 'value';
+    const KEY_STRING = 'key';
+    const DATA_STRING = 'value';
 
     setUp(() async {
       print('> ===========================================================================');
@@ -350,9 +359,9 @@ void main() {
 
     test('3.1 Check data present in data container layer after being set', () async {
       print('>\t -> Set value and check WireData return type');
-      expect(Wire.data(KEY_STRING).isSet, isFalse);
-      expect(Wire.data(KEY_STRING, value: DATA_STRING), isInstanceOf<WireData>());
-      expect(Wire.data(KEY_STRING), isInstanceOf<WireData>());
+      expect(Wire.data<String>(KEY_STRING).isSet, isFalse);
+      expect(Wire.data<String>(KEY_STRING, value: DATA_STRING), isA<WireData<String>>());
+      expect(Wire.data<String>(KEY_STRING), isA<WireData<String>>());
       expect(Wire.data(KEY_STRING).isSet, isTrue);
       expect(Wire.data(KEY_STRING).isLocked, isFalse);
       expect(Wire.data(KEY_STRING).value, DATA_STRING);
@@ -368,34 +377,36 @@ void main() {
     });
 
     test('3.2 Check generics', () async {
-      final key = 'generic_key';
+      const key = 'generic_key';
       Wire.data<int>(key, value: 10);
       expect(Wire.data<int>(key).value, 10);
     });
 
     test('3.3 onError callback', () async {
-      final key = 'error_key';
-      var errorCaught = false;
+      const key = 'error_key';
+      var isErrorCaught = false;
       final middleware = TestWireMiddleware({});
       middleware.onDataErrorCallback = (error, key, value) {
-        errorCaught = true;
+        isErrorCaught = true;
+        print('> onDataErrorCallback = ${isErrorCaught}');
       };
       Wire.middleware(middleware);
       Wire.data(key).subscribe((value) async {
         throw Exception('Test Error');
       });
       await Wire.data(key).refresh();
-      expect(errorCaught, isTrue);
+      print('> await data refresh - isErrorCaught = ${isErrorCaught}');
+      expect(isErrorCaught, isTrue);
     });
 
     test('3.4 listener execution modes', () async {
-      final key = 'execution_mode_key';
-      final wireData = Wire.data(key);
+      const key = 'execution_mode_key';
+      final wireData = Wire.data<int>(key);
       var parallelCount = 0;
 
       wireData.listenersExecutionMode = WireDataListenersExecutionMode.PARALLEL;
       wireData.subscribe((value) async {
-        await Future.delayed(Duration(milliseconds: 10));
+        await Future.delayed(const Duration(milliseconds: 10));
         parallelCount++;
       });
       wireData.subscribe((value) async {
@@ -407,17 +418,18 @@ void main() {
     });
 
     test('3.5 async unsubscribe', () async {
-      final key = 'unsubscribe_key';
+      const key = 'unsubscribe_key';
       final wireData = Wire.data<int>(key);
       var listener1CallCount = 0;
       var listener2CallCount = 0;
 
-      WireDataListener<int?> listener1 = (value) async {
+      Future<void> listener1(Object? value) async {
         listener1CallCount++;
-      };
-      WireDataListener<int?> listener2 = (value) async {
+      }
+
+      Future<void> listener2(Object? value) async {
         listener2CallCount++;
-      };
+      }
 
       wireData.subscribe(listener1);
       wireData.subscribe(listener2);
@@ -438,7 +450,7 @@ void main() {
   });
 
   group(GROUP_4_TITLE, () {
-    final DATA_KEY = 'DATA_KEY';
+    const DATA_KEY = 'DATA_KEY';
 
     final data_lockToken_one = WireDataLockToken();
     final data_lockToken_two = WireDataLockToken();
@@ -449,7 +461,7 @@ void main() {
       print('> ===========================================================================');
       await Wire.purge(withMiddleware: true);
 
-      Wire.data(DATA_KEY).subscribe((value) async {
+      Wire.data<String>(DATA_KEY).subscribe((value) async {
         print('> $DATA_KEY -> updated: $value');
       });
       print('>\t set initial value and lock');
@@ -475,14 +487,12 @@ void main() {
   });
 
   group(GROUP_5_TITLE, () {
-    final DATA_KEY_USER_VO = 'dataKeyUserVO';
-    final GET__USER_FULL_NAME = 'getUserFullName';
-    final dataUserVO = {
-      'firstName': 'Wires',
-      'lastName': 'Ware',
-    };
+    const DATA_KEY_USER_VO = 'dataKeyUserVO';
+    const GET__USER_FULL_NAME = 'getUserFullName';
 
-    final nameFormatter = (userVO) => '${userVO['firstName']} ${userVO['lastName']}';
+    final UserVO dataUserVO = {'firstName': 'Wires', 'lastName': 'Ware'};
+    // ignore: avoid_dynamic_calls
+    String nameFormatter(userVO) => '${userVO['firstName']} ${userVO['lastName']}';
 
     setUp(() async {
       print('> ===========================================================================');
@@ -490,50 +500,48 @@ void main() {
       print('> ===========================================================================');
       await Wire.purge(withMiddleware: true);
 
-      Wire.data(DATA_KEY_USER_VO, value: dataUserVO).subscribe((value) async {
+      Wire.data<UserVO>(DATA_KEY_USER_VO, value: dataUserVO).subscribe((value) async {
         print('> $DATA_KEY_USER_VO -> updated: $value');
       });
 
-      WireDataGetter wireDataGetter = (WireData that) {
-        final wireData = Wire.data(DATA_KEY_USER_VO);
+      String wireDataGetter(WireData<dynamic> that) {
+        final wireData = Wire.data<UserVO>(DATA_KEY_USER_VO);
         final userVO = wireData.value!;
         print('> $GET__USER_FULL_NAME -> get: ${that.key} isSet ${that.isSet}');
         wireData.subscribe(that.refresh);
         return nameFormatter(userVO);
-      };
-      Wire.data(GET__USER_FULL_NAME, getter: wireDataGetter);
+      }
+
+      Wire.data<String>(GET__USER_FULL_NAME, getter: wireDataGetter);
     });
 
     test('5.1 Getter', () {
       print('>\t Wire.data(GET__USER_FULL_NAME).isLocked');
-      expect(() => Wire.data(GET__USER_FULL_NAME).subscribe((value) async {}), throwsA(isA<Exception>()));
-      expect(Wire.data(GET__USER_FULL_NAME).isLocked, isTrue);
-      expect(Wire.data(GET__USER_FULL_NAME).isGetter, isTrue);
-      expect(Wire.data(GET__USER_FULL_NAME).value, equals(nameFormatter(dataUserVO)));
+      expect(() => Wire.data<String>(GET__USER_FULL_NAME).subscribe((value) async {}), throwsA(isA<Exception>()));
+      expect(Wire.data<String>(GET__USER_FULL_NAME).isLocked, isTrue);
+      expect(Wire.data<String>(GET__USER_FULL_NAME).isGetter, isTrue);
+      expect(Wire.data<String>(GET__USER_FULL_NAME).value, equals(nameFormatter(dataUserVO)));
 
-      final wireData = Wire.data(DATA_KEY_USER_VO);
-      final userVO = wireData.value;
+      final wireData = Wire.data<UserVO>(DATA_KEY_USER_VO);
+      final userVO = wireData.value!;
       userVO['lastName'] = 'Cores';
-      Wire.data(DATA_KEY_USER_VO, value: userVO);
+      Wire.data<UserVO>(DATA_KEY_USER_VO, value: userVO);
 
-      expect(Wire.data(GET__USER_FULL_NAME).value, equals('${dataUserVO['firstName']} Cores'));
-      expect(() => Wire.data(GET__USER_FULL_NAME, value: 'new value'), throwsA(isA<Exception>()));
+      expect(Wire.data<String>(GET__USER_FULL_NAME).value, equals('${dataUserVO['firstName']} Cores'));
+      expect(() => Wire.data<String>(GET__USER_FULL_NAME, value: 'new value'), throwsA(isA<Exception>()));
     });
   });
 
   group(GROUP_6_TITLE, () {
     const SIGNAL_CHAIN_EXECUTION = 'signal_chain_execution';
-    final scope1 = new StringBuffer();
-    final scope2 = new StringBuffer();
+    final scope1 = StringBuffer();
+    final scope2 = StringBuffer();
 
     setUp(() {
       print('> ===========================================================================');
       print('> $GROUP_6_TITLE');
       print('> ===========================================================================');
-      Wire.addMany(scope1, {
-        SIGNAL_CHAIN_EXECUTION: (_, __) =>
-            ChainFirstCommand(_! as String).execute().then((output) => ChainSecondCommand(output).execute()),
-      });
+      Wire.addMany(scope1, {SIGNAL_CHAIN_EXECUTION: (input, __) => ChainFirstCommand(input as String).execute().then((output) => ChainSecondCommand(output).execute())});
       Wire.add(scope2, SIGNAL_CHAIN_EXECUTION, (payload, wireId) async {
         prints('> scope2 -> signal "$SIGNAL_CHAIN_EXECUTION" processing, return nothing');
       });

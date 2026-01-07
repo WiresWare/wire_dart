@@ -17,10 +17,10 @@ class CompleteAllTodosCommand extends WireCommandWithWireData<void> {
       if (todoVO.completed != isComplete) {
         count += isComplete ? -1 : 1;
         todoVO.completed = isComplete;
-        update(todoId, data: todoVO);
+        update<TodoVO>(todoId, data: todoVO);
       }
     });
-    update(DataKeys.COUNT, data: count);
-    update(DataKeys.COMPLETE_ALL, data: isComplete);
+    update<int>(DataKeys.COUNT, data: count);
+    update<bool>(DataKeys.COMPLETE_ALL, data: isComplete);
   }
 }

@@ -1,4 +1,6 @@
-import 'dart:html';
+import 'dart:js_interop';
+
+import 'package:web/web.dart';
 
 import '../../base/component.dart';
 
@@ -7,16 +9,16 @@ class Header extends Component {
     dom.style.backgroundColor = 'wheat';
   }
 
-  final _btnIndex = ButtonElement();
-  final _btnGallery = ButtonElement();
+  final _btnIndex = HTMLButtonElement();
+  final _btnGallery = HTMLButtonElement();
 
   @override
   void render() {
-    _btnIndex.addEventListener('click', _handleClickEvent);
-    _btnIndex.text = 'INDEX';
+    _btnIndex.addEventListener('click', _handleClickEvent.toJS);
+    _btnIndex.textContent = 'INDEX';
 
-    _btnGallery.addEventListener('click', _handleClickEvent);
-    _btnGallery.text = 'GALLERY';
+    _btnGallery.addEventListener('click', _handleClickEvent.toJS);
+    _btnGallery.textContent = 'GALLERY';
 
     dom.append(_btnIndex);
     dom.append(_btnGallery);
@@ -24,8 +26,8 @@ class Header extends Component {
 
   @override
   void destroy() {
-    _btnIndex.removeEventListener('click', _handleClickEvent);
-    _btnGallery.removeEventListener('click', _handleClickEvent);
+    _btnIndex.removeEventListener('click', _handleClickEvent.toJS);
+    _btnGallery.removeEventListener('click', _handleClickEvent.toJS);
     _btnIndex.remove();
     _btnGallery.remove();
 

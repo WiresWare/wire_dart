@@ -1,9 +1,7 @@
-library wire;
-
-part 'const.dart';
-part 'data.dart';
-part 'layers.dart';
-part 'results.dart';
+import 'package:wire/src/const.dart';
+import 'package:wire/src/data.dart';
+import 'package:wire/src/layers.dart';
+import 'package:wire/src/results.dart';
 
 /// Wire - communication and data layers which consist of string keys, thus realization of String API when each component of the system - logical or visual - represented as a set of Strings - what it consumes is Data API and what it produces or reacts to is Signals API.
 ///
@@ -16,7 +14,7 @@ part 'results.dart';
 ///
 
 typedef WireListener<T> = Future<dynamic> Function(T? payload, int wireId);
-typedef WireValueFunction<T> = Function(T? prevValue);
+typedef WireValueFunction<T> = T? Function(T? prevValue);
 
 abstract class WireMiddleware {
   Future<void> onAdd(Wire<dynamic> wire);
@@ -61,7 +59,7 @@ class Wire<T> {
   /// The SIGNAL associated with this Wire.
   ///
   /// @private
-  String? _signal;
+  late String? _signal;
   String get signal => _signal!;
 
   ///
@@ -79,7 +77,7 @@ class Wire<T> {
   /// Unique identification for wire instance.
   ///
   /// @private
-  int? _id;
+  late int? _id;
   int get id => _id!;
 
   ///
@@ -109,8 +107,8 @@ class Wire<T> {
     if (_listener == null) throw Exception(ERROR__LISTENER_IS_NULL);
     // Call a listener in this Wire only in case data type match it's listener type.
     final isFilterByPayloadType = payload is T || payload == null;
-    // print('> Wire -> transfer(${T}): filterByPayloadType = ${filterByPayloadType}');
-    if (isFilterByPayloadType) return _listener!(payload as T?, _id!);
+    print('> Wire -> transfer(${T}): isFilterByPayloadType = ${isFilterByPayloadType}');
+    if (isFilterByPayloadType) return _listener!(payload, _id!);
   }
 
   /// Nullify all relations
@@ -196,14 +194,22 @@ class Wire<T> {
 
   static Future<List<bool>> _removeAllByScope<T>(Object scope, {WireListener<dynamic>? listener}) async {
     final listOfWiresForScope = List.from(_COMMUNICATION_LAYER.getByScope(scope));
-    return Future.wait(listOfWiresForScope
-        .map((Wire<dynamic> wire) async => _removeAllBySignal(wire.signal, scope: scope, listener: listener)));
+    return Future.wait(
+      listOfWiresForScope.map((dynamic item) async {
+        final wire = item as Wire<dynamic>;
+        return _removeAllBySignal(wire.signal, scope: scope, listener: listener);
+      }),
+    );
   }
 
   static Future<List<bool>> _removeAllByListener(WireListener<dynamic> listener) async {
     final listOfWiresWithListener = List.from(_COMMUNICATION_LAYER.getByListener(listener));
-    return Future.wait(listOfWiresWithListener
-        .map((Wire<dynamic> wire) async => _removeAllBySignal(wire.signal, scope: wire.scope, listener: listener)));
+    return Future.wait(
+      listOfWiresWithListener.map((dynamic item) async {
+        final wire = item as Wire<dynamic>;
+        return _removeAllBySignal(wire.signal, scope: wire.scope, listener: listener);
+      }),
+    );
   }
 
   /// Class extending [WireMiddleware] can listen to all processes inside Wire
@@ -252,26 +258,18 @@ class Wire<T> {
   /// void remove()
   /// ```
   /// Returns [WireData]
-  static WireData<T> data<T>(String key, {T? value, WireDataGetter<T>? getter}) {
-    if (_DATA_CONTAINER_LAYER.has(key)) {
-      final wireData = _DATA_CONTAINER_LAYER.get(key);
-      if (wireData is! WireData<T>) {
-        throw Exception(ERROR__DATA_TYPE_MISMATCH);
-      }
-      return wireData;
-    }
-
-    final wireData = _DATA_CONTAINER_LAYER.create<T>(key, _MIDDLEWARE_LAYER.onReset, _MIDDLEWARE_LAYER.onDataError);
+  static WireData<T> data<T>(String key, {dynamic value, WireDataGetter<T>? getter}) {
+    final wireData = _DATA_CONTAINER_LAYER.has(key) ? _DATA_CONTAINER_LAYER.get<T>(key) : _DATA_CONTAINER_LAYER.create<T>(key, _MIDDLEWARE_LAYER.onReset, _MIDDLEWARE_LAYER.onDataError);
 
     if (getter != null) {
       wireData.getter = getter;
       wireData.lock(WireDataLockToken());
     }
-    // print('> Wire -> WireData - data key = ${key}, value = ${value}, getter = ${getter}');
+    // print('> Wire -> WireData - data key = ${key}, value = ${value}, getter = ${getter}, isGetter: ${wireData.isGetter}');
     if (value != null) {
       if (wireData.isGetter) throw Exception(ERROR__VALUE_IS_NOT_ALLOWED_TOGETHER_WITH_GETTER);
       final prevValue = wireData.isSet ? wireData.value : null;
-      final nextValue = (value is WireValueFunction) ? value(prevValue) : value;
+      final nextValue = ((value is WireValueFunction<T>) ? value(prevValue) : value) as T;
       _MIDDLEWARE_LAYER.onData(key, prevValue, nextValue);
       wireData.value = nextValue;
     }
@@ -281,15 +279,23 @@ class Wire<T> {
   /// Store an instance of the object by it's type, and lock it, so it can't be overwritten
   static T put<T>(T instance, {WireDataLockToken? lock}) {
     final key = instance.runtimeType.toString();
-    if (Wire.data(key).isLocked) throw AssertionError(ERROR__CANT_PUT_ALREADY_EXISTING_INSTANCE);
-    Wire.data(key, value: instance).lock(lock ?? WireDataLockToken());
+    // print('> WireData -> put: ${key} - ${instance}');
+    final wireData = Wire.data<T>(key);
+    if (wireData.isSet && wireData.isLocked) {
+      throw AssertionError(ERROR__CANT_PUT_ALREADY_EXISTING_INSTANCE);
+    }
+    Wire.data<T>(key, value: instance).lock(lock ?? WireDataLockToken());
     return instance;
   }
 
   /// Return an instance of an object by its type, throw an error in case it is not set
   static T find<T>() {
     final key = T.toString();
-    if (Wire.data(key).isSet == false) throw AssertionError(ERROR__CANT_FIND_INSTANCE_NULL);
-    return Wire.data(key).value! as T;
+    final wireData = Wire.data<T>(key);
+    // print('> WireData -> find: ${key} - ${Wire.data<T>(key).value}');
+    if (wireData.isSet == false) {
+      throw AssertionError(ERROR__CANT_FIND_INSTANCE_NULL);
+    }
+    return wireData.value!;
   }
 }

@@ -1,4 +1,6 @@
-import 'dart:html';
+import 'dart:js_interop';
+
+import 'package:web/web.dart';
 
 import 'package:wire/wire.dart';
 
@@ -11,16 +13,16 @@ class MainPage extends Page {
     dom.style.backgroundColor = 'wheat';
   }
 
-  final _btnTrials = ButtonElement();
-  final _btnGallery = ButtonElement();
+  final _btnTrials = HTMLButtonElement();
+  final _btnGallery = HTMLButtonElement();
 
   @override
   void render() {
-    _btnTrials.addEventListener('click', _handleClickEvent);
-    _btnTrials.text = 'TRIALS';
+    _btnTrials.addEventListener('click', _handleClickEvent.toJS);
+    _btnTrials.textContent = 'TRIALS';
 
-    _btnGallery.addEventListener('click', _handleClickEvent);
-    _btnGallery.text = 'GALLERY';
+    _btnGallery.addEventListener('click', _handleClickEvent.toJS);
+    _btnGallery.textContent = 'GALLERY';
 
     dom.append(_btnTrials);
     dom.append(_btnGallery);
@@ -28,8 +30,8 @@ class MainPage extends Page {
 
   @override
   void destroy() {
-    _btnTrials.removeEventListener('click', _handleClickEvent);
-    _btnGallery.removeEventListener('click', _handleClickEvent);
+    _btnTrials.removeEventListener('click', _handleClickEvent.toJS);
+    _btnGallery.removeEventListener('click', _handleClickEvent.toJS);
     _btnTrials.remove();
     _btnGallery.remove();
 

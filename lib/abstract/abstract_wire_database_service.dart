@@ -1,3 +1,5 @@
+library;
+
 abstract class WireDatabaseServiceAbstract {
   Future<bool> init([String key]);
   bool exist(String key);

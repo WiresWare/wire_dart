@@ -16,7 +16,9 @@ class StorageMiddleware extends WireMiddleware with WireMixinWithDatabase, WireM
       await databaseService.init();
       // final wireDataTodoList = Wire.data(DataKeys.LIST_OF_IDS);
       // final todoList = wireDataTodoList.value as List<String>;
-      if (exist(DataKeys.LIST_OF_IDS)) {
+      final hasStoredList = exist(DataKeys.LIST_OF_IDS);
+      print('> StorageMiddleware -> setup - hasStoredList: ${hasStoredList}');
+      if (hasStoredList) {
         final todoIdsListRaw = await retrieve(DataKeys.LIST_OF_IDS) as String;
         final todoIdsList = <String>[];
         await Future.forEach(jsonDecode(todoIdsListRaw) as List<dynamic>, (v) async {
@@ -24,29 +26,30 @@ class StorageMiddleware extends WireMiddleware with WireMixinWithDatabase, WireM
           if (exist(todoId)) {
             final todoRaw = jsonDecode(await retrieve(todoId) as String) as Map<String, dynamic>;
             print('> \t todoRaw(${todoId}): ${todoRaw}');
-            update(todoId, data: TodoVO.fromJson(todoRaw));
+            update<TodoVO>(todoId, data: TodoVO.fromJson(todoRaw));
           }
           todoIdsList.add(todoId);
         });
         print('> StorageMiddleware -> LIST_OF_IDS: ${todoIdsList}');
-        update(DataKeys.LIST_OF_IDS, data: todoIdsList);
+        update<List<String>>(DataKeys.LIST_OF_IDS, data: todoIdsList);
 
         if (exist(DataKeys.COUNT)) {
           final countRaw = int.parse(await retrieve(DataKeys.COUNT) as String);
           print('> StorageMiddleware -> COUNT: ${countRaw}');
-          update(DataKeys.COUNT, data: countRaw);
-        } else update(DataKeys.COUNT, data: todoIdsList.length);
+          update<int>(DataKeys.COUNT, data: countRaw);
+        } else
+          update<int>(DataKeys.COUNT, data: todoIdsList.length);
 
         if (exist(DataKeys.COMPLETE_ALL)) {
           final completeAllRaw = await retrieve(DataKeys.COMPLETE_ALL) as String;
           print('> StorageMiddleware -> COMPLETE_ALL: ${completeAllRaw}');
-          update(DataKeys.COMPLETE_ALL, data: completeAllRaw == 'true');
-        } else update(DataKeys.COMPLETE_ALL, data: false);
-
+          update<bool>(DataKeys.COMPLETE_ALL, data: completeAllRaw == 'true');
+        } else
+          update<bool>(DataKeys.COMPLETE_ALL, data: false);
       } else {
-        update(DataKeys.LIST_OF_IDS, data: <String>[]);
-        update(DataKeys.COMPLETE_ALL, data: false);
-        update(DataKeys.COUNT, data: 0);
+        update<List<String>>(DataKeys.LIST_OF_IDS, data: <String>[]);
+        update<bool>(DataKeys.COMPLETE_ALL, data: false);
+        update<int>(DataKeys.COUNT, data: 0);
       }
       return Future.value(true);
     });
@@ -57,8 +60,10 @@ class StorageMiddleware extends WireMiddleware with WireMixinWithDatabase, WireM
 
   @override
   Future<void> onData(String key, prevValue, nextValue) async {
-    // print('> StorageMiddleware -> onData: key = '
-    //   '${key} | $prevValue | $nextValue');
+    print(
+      '> StorageMiddleware -> onData: key = '
+      '${key} | $prevValue | $nextValue',
+    );
     persist(key, nextValue);
   }
 
@@ -67,4 +72,22 @@ class StorageMiddleware extends WireMiddleware with WireMixinWithDatabase, WireM
 
   @override
   Future<void> onSend(signal, [payload, scope]) async {}
+
+  @override
+  Future<void> onDataError(error, String key, value) {
+    print(
+      '> StorageMiddleware -> onDataError: key = '
+      '${key} | $value',
+    );
+    return Future.value();
+  }
+
+  @override
+  Future<void> onReset(String key, value) {
+    print(
+      '> StorageMiddleware -> onReset: key = '
+      '${key} | $value',
+    );
+    return Future.value();
+  }
 }

@@ -1,4 +1,4 @@
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:wire/wire.dart';
 import 'package:wire_example_shared/todo/controller/route_controller.dart';
@@ -13,6 +13,7 @@ void main() async {
 
   final databaseService = WebDatabaseService();
   final todoModel = TodoModel(databaseService);
+
   if (await todoModel.whenReady) {
     TodoController(todoModel);
     RouteController();

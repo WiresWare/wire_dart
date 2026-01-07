@@ -1,4 +1,4 @@
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'src/constants/dom.dart';
 import 'src/constants/pages.dart';
@@ -8,8 +8,8 @@ import 'src/view/application.dart';
 
 void main() async {
   print('> main -> step 1 - get the dom');
-  final rootDOM = querySelector(DOM.ID_ROOT)! as HtmlElement;
-  final routerDOM = rootDOM.querySelector(DOM.ID_ROUTER)! as DivElement;
+  final rootDOM = document.querySelector(DOM.ID_ROOT)! as HTMLElement;
+  final routerDOM = rootDOM.querySelector(DOM.ID_ROUTER)! as HTMLDivElement;
 
   print('> main -> step 2 - instantiate controllers');
   final authController = AuthController();

@@ -1,4 +1,4 @@
-part of wire;
+import 'package:wire/src/const.dart';
 
 ///
 /// Created by Vladimir Cores (Minkin) on 12/06/20.
@@ -76,22 +76,24 @@ class WireData<T> {
     final valueForListener = optionalValue ?? value;
     final listeners = Set<WireDataListener<T?>>.from(_listeners);
     if (listenersExecutionMode == WireDataListenersExecutionMode.PARALLEL) {
-      await _refreshInParallel(listeners, valueForListener);
+      return _refreshInParallel(listeners, valueForListener);
     } else {
-      await _refreshSequentially(listeners, valueForListener);
+      return _refreshSequentially(listeners, valueForListener);
     }
   }
 
   Future<void> _refreshInParallel(Set<WireDataListener<T?>> listeners, T? valueForListener) async {
     final futures = <Future<void>>[];
     for (final listener in listeners) {
-      futures.add(Future.microtask(() async {
-        try {
-          await listener(valueForListener);
-        } catch (error) {
-          _onError?.call(error, key, valueForListener);
-        }
-      }));
+      futures.add(
+        Future.microtask(() async {
+          try {
+            await listener(valueForListener);
+          } catch (error) {
+            return _onError?.call(error, key, valueForListener);
+          }
+        }),
+      );
     }
     await Future.wait(futures);
   }
@@ -102,7 +104,8 @@ class WireData<T> {
         try {
           await listener(valueForListener);
         } catch (error) {
-          _onError?.call(error, key, valueForListener);
+          print('> WireData -> _refreshSequentially: error = ${error}');
+          return _onError?.call(error, key, valueForListener);
         }
       }
     }

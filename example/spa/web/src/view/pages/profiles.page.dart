@@ -1,4 +1,6 @@
-import 'dart:html';
+import 'dart:js_interop';
+
+import 'package:web/web.dart';
 
 import '../base/page.dart';
 
@@ -8,25 +10,25 @@ class ProfilesPage extends Page {
     dom.style.backgroundColor = '#f1f1f1';
   }
 
-  final _btnLogin = ButtonElement();
+  final _btnLogin = HTMLButtonElement();
 
   @override
   void render() {
-    _btnLogin.addEventListener('click', _handleClickEvent);
-    _btnLogin.text = 'LOGIN';
+    _btnLogin.addEventListener('click', _handleClickEvent.toJS);
+    _btnLogin.textContent = 'LOGIN';
 
     dom.children.add(_btnLogin);
   }
 
   @override
   void destroy() {
-    _btnLogin.removeEventListener('click', _handleClickEvent);
+    _btnLogin.removeEventListener('click', _handleClickEvent.toJS);
     _btnLogin.remove();
 
     super.destroy();
   }
 
-  void _handleClickEvent(event) {
+  void _handleClickEvent(MouseEvent event) {
     print('> ProfilesPage -> _handleClickEvent');
     // dispatchAction(Action.INDEX_PAGE_BUTTON_LOGIN_CLICKED);
   }

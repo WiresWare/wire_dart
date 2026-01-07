@@ -1,4 +1,4 @@
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:wire/wire.dart';
 import 'package:wire_example_shared/todo/controller/route_controller.dart';
@@ -23,6 +23,7 @@ void main() async {
     TodoView();
   } catch (e) {
     /// Show error message
+    print('> main -> error: ${e}');
   } finally {
     document.querySelector('#loading')?.remove();
   }
