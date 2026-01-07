@@ -1,6 +1,6 @@
 name: wire
 description: Communication and data container layers library aimed to decouple UI from business logic
-version: 1.6.0
+version: 1.6.1
 homepage: https://github.com/WiresWare/wire_dart
 
 environment:
@@ -9,5 +9,3 @@ environment:
 dev_dependencies:
   test: ^1.25.6
   lints: ^6.0.0
-dependencies:
-  oktoast: ^3.4.0

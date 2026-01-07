@@ -1,3 +1,7 @@
+## Version 1.6.1:
+
+- Remove oktoast dependency
+
 ## Version 1.6.0:
 
 - Massive update of the library to match new features from Wire TypeScript version.
