@@ -109,26 +109,40 @@ class CounterButton extends DomElement {
 #### Steps: 4, 5 - "middleman" who catch all what's happening in the system (in this example it stores counter value to localStorage):
 
 ```dart
+import 'package:web/web.dart';
+
 class CounterStorageMiddleware extends WireMiddleware {
-  final ls = window.localStorage;
+  final storage = window.localStorage;
 
   int getInitialValue() {
-    return ls.containsKey(CounterDataKeys.COUNT) ?
-      int.parse(ls[CounterDataKeys.COUNT]) : 0;
+    return storage.has(CounterDataKeys.COUNT)
+      ? int.parse(storage.getItem(CounterDataKeys.COUNT)!)
+      : 0;
   }
 
   @override
-  void onData(String key, prevValue, nextValue) {
+  Future<void> onData(String key, prevValue, nextValue) async {
     print('> CounterMiddleware -> onData: key = ${key} | ${prevValue}-${nextValue}');
     if (key == CounterDataKeys.COUNT) {
-      if (nextValue != null) ls[key] = nextValue.toString();
-      else { if (ls.containsValue(key)) ls.remove(key); }
+      if (nextValue != null) storage.setItem(key, nextValue.toString());
+      else if (storage.has(key)) storage.removeItem(key);
     }
   }
 
-  @override void onAdd(Wire wire) { }
-  @override void onRemove(String signal, [Object scope, listener]) { }
-  @override void onSend(String signal, [data, scope]) { }
+  @override
+  Future<void> onAdd(Wire<dynamic> wire) async {}
+
+  @override
+  Future<void> onRemove(String signal, [Object? scope, listener]) async {}
+
+  @override
+  Future<void> onSend(String? signal, [data, scope]) async {}
+
+  @override
+  Future<void> onDataError(error, String key, value) async {}
+
+  @override
+  Future<void> onReset(String key, value) async {}
 }
 ```
 
