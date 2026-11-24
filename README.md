@@ -244,18 +244,19 @@ In this way, entities in the system expose two things:
 
 A component exposes this information in a unique collection of strings — its "Signals API" and "Data API" — or it can use shared, general collections of APIs represented as strings only. Either way, it doesn't know where the data comes from or who will process its actions.
 
-## General Concepts of MVC
+## General concepts of MVC
+
 A software system consists of three main concepts:
 1. Data storage and distribution.
 2. Events listening and propagation.
-3. Decisions making based on that data (and FSM).
+3. Decision-making based on that data (and FSM).
 
-You find these concepts in every program. Basically it's called - Model-View-Controller - meta-pattern or idea of separating program on functional pieces.
+You'll find these concepts in every program. Collectively, they're called Model-View-Controller — a meta-pattern, or the idea of separating a program into functional pieces.
 
 ### Model
-Data structure and the ways how to access data define how an application works and how to apply changes. Therefore data definition is the first step in software development. All starts with data. In MVC, the fact that Model is in the first position emphasize it as well. Models in application play a wider role than just value objects definition, it's also a way of how these objects are stored and retrieved, you can think of it as a data API - create, update, delete, and etc. Does model make any decisions on how to modify the data? Probably not, maybe only update related data (e.g. in-memory counter of completed todos). And don't forget that there are two types of models - active and passive, one can notify when changes have occurred (active) and another is a plain storage, file or database (passive) - it has to be monitored by a controller or another agent.
+The data structure and the ways to access data define how an application works and how changes are applied. Therefore, defining the data is the first step in software development — it all starts with data. In MVC, the fact that Model comes first emphasizes this as well. Models in an application play a wider role than just defining value objects; they also determine how those objects are stored and retrieved. You can think of a model as a data API — create, update, delete, and so on. Does a model make any decisions about how to modify the data? Probably not — perhaps only updating related data (e.g., an in-memory count of completed todos). And don't forget that there are two types of models — active and passive. One can notify when changes have occurred (active); the other is plain storage such as a file or database (passive) and has to be monitored by a controller or another agent.
 
-Next an example of one of TodoModel's methods (from Todo Application example, different from one above in Command Pattern):
+Next is an example of one of `TodoModel`'s methods (from the Todo application example, different from the one in the Command Pattern section above):
 
 ```dart
 TodoVO create(String text, String note, bool completed) {
@@ -282,10 +283,10 @@ TodoVO create(String text, String note, bool completed) {
 }
 ```
 
-`Wire.data('key')` plays a role of active model, it holds `WireData` instances associated with string key, `WireData` is a container with data (value accessed from `.value` property) and it can be observed for changes by subscribing - `WireData.subscribe((value) => { ... })`. To update the value and notify listeners just set the value: `Wire.data('key', value: value)`. It's up to you to decide from where the value (`WireData.value`) will be updated either from separate entity, a model (together with physical storing in database or sending to a server), or you can update data directly from controller, or a command.
+`Wire.data('key')` plays the role of an active model: it holds `WireData` instances associated with string keys. `WireData` is a container for data (accessed through the `.value` property) and can be observed for changes by subscribing — `wireData.subscribe((value) { ... })`. To update the value and notify listeners, just set it: `Wire.data('key', value: value)`. It's up to you where the value (`WireData.value`) is updated from: a separate entity, a model (with persistence to a database or a server), or directly from a controller or command.
 
 ### View
-UI also could have its own state - visual state, and this state might not need to be stored in persistent storage at all, only temporarily. Example - accordion’s opened tab, or button hover state, tooltips, input highlight and etc. These states might depend on domain's data and are generated in run-time based on some conditions. Yes, view could have logic inside, it could be branching conditions that depend on data passed in (`WireDataGetter` could simplify multiple conditions with `WireData`). With `Wire` view consume data from Data Container Layer - `Wire.data`, then view subscribes to update and re-render itself when change will happen - `WireData.subscribe((value) => { ... })`. If domain data suppose to be changed or modified in the view (forms) it is good practice to copy it and send to process after modification in the view.
+The UI can also have its own state — visual state — which might not need to be stored persistently at all, only temporarily. Examples include an accordion's open tab, a button's hover state, tooltips, input highlighting, and so on. These states might depend on domain data and are generated at runtime based on certain conditions. Yes, a view can contain logic — for example, branching conditions that depend on the data passed in (`WireDataGetter` can simplify multiple conditions involving `WireData`). With Wire, a view consumes data from the data-container layer via `Wire.data`, then subscribes to updates and re-renders itself when a change happens — `wireData.subscribe((value) { ... })`. If domain data is meant to be changed in the view (e.g., forms), it's good practice to copy it and send the copy for processing after modification in the view.
 
 ```dart
 class CounterDisplay extends DomElement {
@@ -303,16 +304,18 @@ class CounterDisplay extends DomElement {
 }
 ```
 
-This how data distribution might looks like in an app
+This is what data distribution might look like in an app:
 ![Schema](assets/wire-data-keys-destributon.jpg)
 
-#### Network Communication
-Not every program has a view, servers might not have UI, and it all depends on the definition of the view. Saying View we mean something that can emit external events about outside world or interaction, and incoming network traffic fit to this definition quite well, and in this case Wire can be a distribution gate for network API calls, just call `Wire.send(signal, dto)` on network events and every part of internal system can react to it. `Wire.send` is a Communication Layer - a way to completely separate parts of the application. View sends signals and waits for data to be updated. Other parts of the view can listen for signals as well and update themselves accordingly.
+#### Network communication
+
+Not every program has a view — servers might not have a UI — and it all depends on the definition of the view. By "view" we mean something that can emit external events about the outside world or interactions, and incoming network traffic fits this definition quite well. In this case, Wire can act as a distribution gate for network API calls: just call `Wire.send(signal, dto)` on network events, and every part of the internal system can react to it. `Wire.send` belongs to the communication layer — a way to completely decouple parts of the application. A view sends signals and waits for data to be updated. Other parts of the view can listen for signals as well and update themselves accordingly.
 
 ### Controller
- Decision-making on multiple sources of data - business logic - the rules, the controller. It's a place where data meet signals (events), their data are mixed with data from other sources, compared and CRUD operations, then view updates.
 
- > We believe and promote the idea that's view is 'just' the UI layer, with the real app being the logic and data kept outside the components tree.
+Decision-making based on multiple sources of data — business logic, the rules — belongs to the controller. It's the place where data meets signals (events): data is combined with data from other sources, compared, and subjected to CRUD operations, and then the view is updated.
+
+ > We believe and promote the idea that view is 'just' the UI layer, with the real app being the logic and data kept outside the components tree.
 
 <sub align="right">from original article [Thoughts on React Hooks, Redux, and Separation of Concerns](https://blog.isquaredsoftware.com/2019/07/blogged-answers-thoughts-on-hooks/)</sub>
 
@@ -354,22 +357,23 @@ class TodoController {
 }
 ```
 
-In a controller you make a decision of how to process input data, do calculation, then data delegated to a model(s) if any, stored or sent to the server, then controller might initiate reaction - send another signal or if data was not updated from model (in Data Container Layer) then controller might update data manually (with `Wire.data(key, value)`). Application can have multiple controllers each responsible to its particular data processing. You might also think of them as reducers from Redux world or commands from PureMVC.
+In a controller, you decide how to process input data, perform calculations, and then delegate the data to a model (if any), store it, or send it to the server. The controller might then initiate a reaction — send another signal, or, if the data wasn't updated by the model (in the data-container layer), update the data manually with `Wire.data(key, value: value)`. An application can have multiple controllers, each responsible for its own data processing. You can also think of them as reducers in the Redux world or commands in PureMVC.
 
-## Few words about FLUX
-[FLUX pattern](https://facebook.github.io/flux/docs/in-depth-overview) is a modification of MVC idea, where **data flow unidirectional** and controllers replaced with so-called "controller-views":
+## A few words about Flux
+
+The [Flux pattern](https://facebook.github.io/flux/docs/in-depth-overview) is a variation of the MVC idea in which **data flow is unidirectional** and controllers are replaced with so-called "controller-views":
 > "Views often found at the top of the hierarchy that retrieve data from the stores and pass this data down to their children."
 
-![FLUX Diagram](./assets/wire-flux-concept.svg)
+![Flux diagram](./assets/wire-flux-concept.svg)
 
-But in general it's all MVC, **Wire** incorporate these ideas of Flux, but also allows consumers of data additional reaction on signals from other parts of the system, basically from anywhere, beside provides a way to manually subscribe to data changes. The basic flow is next:
-1. Consumers request the data and subscribe for its updates - register reactions.
-2. Signals produced somewhere in the system (maybe by the same data consumers) or come from outside (e.g. network requests).
-3. Listeners react to signals and process incoming data, these listeners are controllers and update data in stores, which then will trigger reactions (also they can send new signals, but its just an options).
+In general, though, it's all MVC. **Wire** incorporates these ideas from Flux, but it also lets data consumers react to signals from other parts of the system — basically from anywhere — and provides a way to subscribe to data changes manually. The basic flow is as follows:
+1. Consumers request data and subscribe to its updates, registering reactions.
+2. Signals are produced somewhere in the system (perhaps by the same data consumers) or come from outside (e.g., network requests).
+3. Listeners react to signals and process incoming data. These listeners are controllers; they update data in stores, which then triggers reactions. (They can also send new signals, but that's optional.)
 
-## Wire in Flutter / [WireDataBuilder<T>](https://pub.dev/packages/wire_flutter)
-Having business logic separated from presentation, events distributed in Communication Layer and data accessible from shared layer (Wire.data) it's now possible to consume the data and send signal from UI easily. In Flutter this means that we can leave visual hierarchy, UI rendering and transitions between screens/pages to the Flutter framework, and consume data in places where it's needed, we can do this with special widget - `WireDataBuilder<T>({Key key, String dataKey, Builder builder})` which subscribe with a string `dataKey` to WireData value and its changes, it rebuilds underlying widget you return from `builder` function when WireData value updated. However if you need only data in place you still can get it directly with `Wire.data('key').value`. Here is an example from [Todo](https://github.com/WiresWare/wire_flutter/tree/master/example/wire_flutter_todo) application:
-Here is Wire in Flutter
+## Wire in Flutter / [`WireDataBuilder<T>`](https://pub.dev/packages/wire_flutter)
+
+With business logic separated from presentation, events distributed in the communication layer, and data accessible from a shared layer (`Wire.data`), it's easy to consume data and send signals from the UI. In Flutter, this means leaving the visual hierarchy, UI rendering, and transitions between screens to the framework and consuming data wherever it's needed. We can do this with a special widget — `WireDataBuilder<T>({Key key, String dataKey, Builder builder})` — which subscribes with a string `dataKey` to a `WireData` value and its changes, and rebuilds the widget you return from `builder` when the value is updated. If you only need the data at a specific point, you can still get it directly with `Wire.data('key').value`. Here is an example from the [Todo application](https://github.com/WiresWare/wire_flutter/tree/master/example/wire_flutter_todo):
 ```dart
 class StatsCounter extends StatelessWidget {
   StatsCounter() : super(key: ArchSampleKeys.statsCounter);
