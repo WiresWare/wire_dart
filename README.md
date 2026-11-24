@@ -43,35 +43,35 @@ Wire has also been ported to:
 - [Wire Haxe](https://github.com/WiresWare/wire_haxe), which can compile — or, more precisely, transpile — reusable code to any of the following languages: **JavaScript, Java, C#, C++, HL, Lua, PHP**.
 - [Wire TS](https://github.com/WiresWare/wire_ts), with a todo-commands example.
 
-## Usage:
+## Usage
 
-Steps from diagram's description above. It's example of counter web-application (see folder `./example/counter`).
+The steps below refer to the diagram and legend above. This is an example of a counter web application (see the `./example/counter` folder).
 
-#### Steps: 1, 4, 6 - "box" that processes signals:
+#### Steps 1, 4, 6 — a "box" that processes signals
 
-Adding wires and `WireListener`s to the system. In response, it's immediately set new value to data-container layer from function that do decision-making `Wire.data(CounterDataKeys.COUNT, (oldValue) => newValue)`.
+First, add wires and `WireListener`s to the system. In response, the controller immediately sets a new value in the data-container layer from a function that makes the decision: `Wire.data(CounterDataKeys.COUNT, value: (oldValue) => newValue)`.
 
 ```dart
 class CounterController {
   CounterController() {
     // 1. scope, string key, handler function
     Wire.add(this, CounterSignalsKeys.INCREASE, (dynamic payload, wireId) async {
-      // 4. handler function process signal async
-      // new value could be function or plain value
+      // 4. the handler processes the signal asynchronously
+      // the new value can be a function or a plain value
       Wire.data(CounterDataKeys.COUNT, value: (value) {
         final count = value as int?;
         // 6. Update data
         return (count ?? 0) + 1;
       });
     });
-    // Handler for CounterSignalsKeys.DECREASE see in the source code
+    // The handler for CounterSignalsKeys.DECREASE is in the source code
   }
 }
 ```
 
-Since there is no Model "box" in counter example, the controller updates data by itself in steps 4 and 6.
+Since the counter example has no Model "box," the controller updates the data itself in steps 4 and 6.
 
-#### Steps: 2, 7 - View subscribes to data changes and knows how to update itself:
+#### Steps 2, 7 — the view subscribes to data changes and knows how to update itself
 
 ```dart
 class CounterDisplay extends DomElement {
@@ -80,7 +80,7 @@ class CounterDisplay extends DomElement {
 
     final wireData = Wire.data(CounterDataKeys.COUNT);
     wireData.subscribe(update);
-    update(wireData.value ?? 0); // View could define default value
+    update(wireData.value ?? 0); // the view can define a default value
   }
 
   Future<void> update(value) async {
@@ -90,11 +90,11 @@ class CounterDisplay extends DomElement {
 }
 ```
 
-#### Step: 3 - another View translate UI event to a signal:
+#### Step 3 — another view translates a UI event into a signal
 
 ```dart
 class CounterButton extends DomElement {
-  CounterButton(String title, String signal):super(ButtonElement()) {
+  CounterButton(String title, String signal) : super(ButtonElement()) {
     // DOM initialization and styling
     final span = SpanElement()
       ..text = title
@@ -102,13 +102,13 @@ class CounterButton extends DomElement {
       ..className = 'spectrum-Button-label';
     dom // dom is a component from super constructor
       ..className = 'spectrum-Button spectrum-Button--primary'
-      ..onClick.listen((event) => Wire.send(signal)) // Catch user interaction and produce signal
+      ..onClick.listen((event) => Wire.send(signal)) // catch a user interaction and produce a signal
       ..append(span);
   }
 }
 ```
 
-#### Steps: 4, 5 - "middleman" who catch all what's happening in the system (in this example it stores counter value to localStorage):
+#### Steps 4, 5 — a "middleman" that catches everything happening in the system (in this example, it stores the counter value in `localStorage`)
 
 ```dart
 import 'package:web/web.dart';
@@ -148,21 +148,21 @@ class CounterStorageMiddleware extends WireMiddleware {
 }
 ```
 
-This middleware may be considered as a part of a Model.
+This middleware can be considered part of the Model.
 
-### Initialization:
+### Initialization
 
 ```dart
 void main() {
   /// COUNTER EXAMPLE ======================================
   final counterStorageMiddleware = CounterStorageMiddleware();
-  // Set initial value from local storage, could be part of CounterStorageMiddleware constructor.
+  // Set the initial value from local storage; this could be part of the CounterStorageMiddleware constructor.
   Wire.data(CounterDataKeys.COUNT, value: counterStorageMiddleware.getInitialValue());
-  // Register middleware after setting initial value to prevent saving initial value
+  // Register the middleware after setting the initial value to avoid saving it.
   Wire.middleware(counterStorageMiddleware);
-  // Instantiate controller that register all signal processing
+  // Instantiate the controller that registers all signal handlers.
   CounterController();
-  // Find root in index.html and map it to functional component
+  // Find the root element in index.html and map it to a functional component
   final root = document.querySelector('#root');
   ApplicationView(root as DivElement?);
 }
@@ -305,7 +305,7 @@ class CounterDisplay extends DomElement {
 ```
 
 This is what data distribution might look like in an app:
-![Schema](assets/wire-data-keys-destributon.jpg)
+![Schema](assets/wire-data-keys-distribution.jpg)
 
 #### Network communication
 
@@ -479,36 +479,41 @@ abstract class WireMiddleware {
 Generate UML with `dcdg` (PlantUML): `pub global run dcdg -o ./uml/configuration`
 
 ## Examples
-### 1. Counter (web):
-- Open IDEA
-- Select build target - Dart Web, point to example/counter/index.html
-- Run Debug
 
-### 2. Todo MVC:
-**2.1 Dart Web and HTML template (or commands)**:
+### 1. Counter (web)
+
+- Open IntelliJ IDEA.
+- Select the build target — Dart Web — pointing to `example/counter/index.html`.
+- Run Debug.
+
+### 2. TodoMVC
+
+**2.1 Dart Web and HTML template (or commands)**
 
 ![Todo web with Wire](/assets/wire_example_todo_web.gif)
-- Open IDEA
-- Select build target - Dart Web, point to example/todo/index.html
-- Run Debug or `sh run_debug.sh`
+- Open IntelliJ IDEA.
+- Select the build target — Dart Web — pointing to `example/todo/index.html`.
+- Run Debug or `sh run_debug.sh`.
 
-**2.2 Todo MVC and Flutter**:
+**2.2 TodoMVC and Flutter**
 
 ![Todo Flutter with Wire](https://github.com/WiresWare/wire_flutter/blob/master/assets/wire_flutter_example_todo.gif)
 [repo](https://github.com/WiresWare/wire_flutter/tree/master/example/wire_flutter_todo)
 
-### 2.1 Todo Angular
+### 2.3 Todo Angular
+
 ![Todo Example with AngularDart using shared code](/assets/wire_example_todo_angular.gif)
-- Open IDEA
-- Create symlink (or anchor on Windows) from "_shared/todo" folder in "example" folder and put the link in to "todo_angular/lib/src/_shared" folder.
-- Run DartWeb configuration with index.html
+- Open IntelliJ IDEA.
+- Create a symlink (or a junction on Windows) to the `_shared/todo` folder in `example`, and put the link in the `todo_angular/lib/src/_shared` folder.
+- Run the Dart Web configuration with `index.html`.
 
-### 3. API calls variations (console):
-- Open IDEA
-- Select build target - Dart Command Line App, point to example/api/wire_api_example.dart
-- Run Debug
+### 3. API call variations (console)
 
-## Licence
+- Open IntelliJ IDEA.
+- Select the build target — Dart Command Line App — pointing to `example/api/wire_api_example.dart`.
+- Run Debug.
+
+## License
 
 ```
 Copyright 2020-2022 Vladimir Cores (Minkin)
