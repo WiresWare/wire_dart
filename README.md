@@ -27,6 +27,7 @@ Terms used throughout this document:
 - **Middleware** — an observer of add/send/remove/data events, typically used for persistence or logging.
 
 ## A library aimed at decoupling UI from business logic
+
 ![Schema](assets/wire-schema.jpeg)
 
 Wire has two layers:
@@ -171,7 +172,7 @@ void main() {
 ## A few words on architecture
 
 The key to a good software product is understanding how things work together, what does what, and where — software design, separation of concerns and responsibilities, DRY, KISS, and SOLID principles. Here is a good saying from Robert C. Martin:
- > "Architecture is not about making decisions earlier, but making decisions late. Good architecture is a software structure that allows you to defer critical decisions for as long as possible, defer them to the point where you've got enough information to actually make them, or not make them".
+> "Architecture is not about making decisions earlier, but making decisions late. Good architecture is a software structure that allows you to defer critical decisions for as long as possible, defer them to the point where you've got enough information to actually make them, or not make them".
 
 It's always good to separate (protect) your business rules from UI changes and make the user interface **a plug-in** to the business rules (and vice versa). The same applies to domain data: make it a plug-in to both the business rules and the UI.
 
@@ -203,7 +204,6 @@ class TodoController {
 Each `...Command` is a class that extends the utility class `WireCommandWithWireData`, which provides an `execute` method and helper methods that simplify data extraction from `Wire.data` (get, update, delete). Command constructors may accept properties, and the business logic is written in `execute`:
 
 ```dart
-
 class TodoEditCommand extends WireCommandWithWireData<void> {
   TodoEditCommand(this.editTodoDTO);
 
@@ -254,6 +254,7 @@ A software system consists of three main concepts:
 You'll find these concepts in every program. Collectively, they're called Model-View-Controller — a meta-pattern, or the idea of separating a program into functional pieces.
 
 ### Model
+
 The data structure and the ways to access data define how an application works and how changes are applied. Therefore, defining the data is the first step in software development — it all starts with data. In MVC, the fact that Model comes first emphasizes this as well. Models in an application play a wider role than just defining value objects; they also determine how those objects are stored and retrieved. You can think of a model as a data API — create, update, delete, and so on. Does a model make any decisions about how to modify the data? Probably not — perhaps only updating related data (e.g., an in-memory count of completed todos). And don't forget that there are two types of models — active and passive. One can notify when changes have occurred (active); the other is plain storage such as a file or database (passive) and has to be monitored by a controller or another agent.
 
 Next is an example of one of `TodoModel`'s methods (from the Todo application example, different from the one in the Command Pattern section above):
@@ -286,6 +287,7 @@ TodoVO create(String text, String note, bool completed) {
 `Wire.data('key')` plays the role of an active model: it holds `WireData` instances associated with string keys. `WireData` is a container for data (accessed through the `.value` property) and can be observed for changes by subscribing — `wireData.subscribe((value) { ... })`. To update the value and notify listeners, just set it: `Wire.data('key', value: value)`. It's up to you where the value (`WireData.value`) is updated from: a separate entity, a model (with persistence to a database or a server), or directly from a controller or command.
 
 ### View
+
 The UI can also have its own state — visual state — which might not need to be stored persistently at all, only temporarily. Examples include an accordion's open tab, a button's hover state, tooltips, input highlighting, and so on. These states might depend on domain data and are generated at runtime based on certain conditions. Yes, a view can contain logic — for example, branching conditions that depend on the data passed in (`WireDataGetter` can simplify multiple conditions involving `WireData`). With Wire, a view consumes data from the data-container layer via `Wire.data`, then subscribes to updates and re-renders itself when a change happens — `wireData.subscribe((value) { ... })`. If domain data is meant to be changed in the view (e.g., forms), it's good practice to copy it and send the copy for processing after modification in the view.
 
 ```dart
@@ -305,6 +307,7 @@ class CounterDisplay extends DomElement {
 ```
 
 This is what data distribution might look like in an app:
+
 ![Schema](assets/wire-data-keys-distribution.jpg)
 
 #### Network communication
@@ -315,11 +318,11 @@ Not every program has a view — servers might not have a UI — and it all depe
 
 Decision-making based on multiple sources of data — business logic, the rules — belongs to the controller. It's the place where data meets signals (events): data is combined with data from other sources, compared, and subjected to CRUD operations, and then the view is updated.
 
- > We believe and promote the idea that view is 'just' the UI layer, with the real app being the logic and data kept outside the components tree.
+> We believe and promote the idea that view is 'just' the UI layer, with the real app being the logic and data kept outside the components tree.
 
 <sub align="right">from original article [Thoughts on React Hooks, Redux, and Separation of Concerns](https://blog.isquaredsoftware.com/2019/07/blogged-answers-thoughts-on-hooks/)</sub>
 
-Based on this belief we recommend to keep all your business logic, all these data processing and decisions making logic outside of a view - in controllers, this is the only right place to do that. **Signals listeners placed inside controller**. You register a signal by adding it to the Communication Layer with `Wire.add(scope, signal, listener)` or `Wire.addMany(scope, signalToHandlerMap)`. Many signals can be connected to the same listener and vice versa. The listener must follow the `WireListener` specification and take two parameters: a data payload and an integer wire identifier (`wireId`).
+Based on this belief, we recommend keeping all your business logic — all data processing and decision-making logic — outside the view, in controllers; that's the only place for it. **Signal listeners belong inside the controller.** You register a signal by adding it to the communication layer with `Wire.add(scope, signal, listener)` or `Wire.addMany(scope, signalToHandlerMap)`. Many signals can be connected to the same listener and vice versa. The listener must follow the `WireListener` specification and take two parameters: a data payload and an integer wire identifier (`wireId`).
 
 ```dart
 class TodoController {
@@ -341,7 +344,7 @@ class TodoController {
       todoModel.remove(todoId);
     });
 
-    // Or there can be one listener - signal processor
+    // Or a single listener can process several signals
     Wire.add(this, ViewSignals.INPUT,  _signalProcessor);
     Wire.add(this, ViewSignals.EDIT,   _signalProcessor);
     Wire.add(this, ViewSignals.DELETE, _signalProcessor);
@@ -374,6 +377,7 @@ In general, though, it's all MVC. **Wire** incorporates these ideas from Flux, b
 ## Wire in Flutter / [`WireDataBuilder<T>`](https://pub.dev/packages/wire_flutter)
 
 With business logic separated from presentation, events distributed in the communication layer, and data accessible from a shared layer (`Wire.data`), it's easy to consume data and send signals from the UI. In Flutter, this means leaving the visual hierarchy, UI rendering, and transitions between screens to the framework and consuming data wherever it's needed. We can do this with a special widget — `WireDataBuilder<T>({Key key, String dataKey, Builder builder})` — which subscribes with a string `dataKey` to a `WireData` value and its changes, and rebuilds the widget you return from `builder` when the value is updated. If you only need the data at a specific point, you can still get it directly with `Wire.data('key').value`. Here is an example from the [Todo application](https://github.com/WiresWare/wire_flutter/tree/master/example/wire_flutter_todo):
+
 ```dart
 class StatsCounter extends StatelessWidget {
   StatsCounter() : super(key: ArchSampleKeys.statsCounter);
