@@ -29,17 +29,19 @@ Terms used throughout this document:
 ## A library aimed at decoupling UI from business logic
 ![Schema](assets/wire-schema.jpeg)
 
-It has two layers:
-- **Communication Layer** - consists of "signals" (string keys) with associated handlers bound to specific scope (instances of `Wire` object enclose them). This layer has main methods: `Wire.add` and `Wire.send`.
-- **Data Container Layer** - it is a key-value in-memory map, where each value is an instance of `WireData` - observer that holds dynamic value and can be subscribed for updates, its main method: `Wire.data`.
+Wire has two layers:
 
-`WireData` has special implementation for Flutter - [**WireDataBuilder** Widget](https://pub.dev/packages/wire_flutter). This widget makes it possible to reuse business logic in web and in mobile project with Flutter. Take a look at the "example" folder in both repositories (current and [wire_flutter](https://github.com/WiresWare/wire_flutter/tree/master/example)) where `_shared` folder contains reusable code imported in both projects as a dart package (with custom path to package), the folder shared as a separate git branch with [git-subrepo](https://github.com/ingydotnet/git-subrepo)
+- **Communication layer** — "signals" (string keys) with associated handlers bound to a specific scope; each scope is enclosed by an instance of `Wire`. Its main methods are `Wire.add` and `Wire.send`.
+- **Data-container layer** — an in-memory key-value map in which each value is an instance of `WireData`: an observable container holding a dynamic value that can be subscribed to for updates. Its main method is `Wire.data`.
+
+`WireData` also has a dedicated Flutter implementation — the [**`WireDataBuilder` widget**](https://pub.dev/packages/wire_flutter). It lets you reuse business logic across web and mobile projects built with Flutter. See the `example` folder in both this repository and [wire_flutter](https://github.com/WiresWare/wire_flutter/tree/master/example): the `_shared` folder contains reusable code imported into both projects as a Dart package (via a custom package path), shared as a separate Git branch using [git-subrepo](https://github.com/ingydotnet/git-subrepo).
 
 [![Shared code in Flutter mobile/web and custom HTML dart-web](https://img.youtube.com/vi/6e3OUaigjcw/0.jpg)](https://www.youtube.com/watch?v=6e3OUaigjcw)
 
-Wire library also ported to:
-- [Wire Haxe](https://github.com/WiresWare/wire_haxe) that can help to compile, or better say transpile, reusable code in one of the following language: __JavaScript, Java, C#, C++, HL, Lua, PHP__.
-- [Wire TS](https://github.com/WiresWare/wire_ts) with example of todo-commands
+Wire has also been ported to:
+
+- [Wire Haxe](https://github.com/WiresWare/wire_haxe), which can compile — or, more precisely, transpile — reusable code to any of the following languages: **JavaScript, Java, C#, C++, HL, Lua, PHP**.
+- [Wire TS](https://github.com/WiresWare/wire_ts), with a todo-commands example.
 
 ## Usage:
 
@@ -166,18 +168,18 @@ void main() {
 }
 ```
 
-## Words on architecture
+## A few words on architecture
 
-Key to a good software product is understanding of how things work together, what do what and where - software design - separation of concerns and responsibilities, DRY, KISS and SOLID principles. Here is a good saying from Robert C. Martin:
+The key to a good software product is understanding how things work together, what does what, and where — software design, separation of concerns and responsibilities, DRY, KISS, and SOLID principles. Here is a good saying from Robert C. Martin:
  > "Architecture is not about making decisions earlier, but making decisions late. Good architecture is a software structure that allows you to defer critical decisions for as long as possible, defer them to the point where you've got enough information to actually make them, or not make them".
 
-It's always good to separate (protect) your business rules from UI changes and make the user interface **a plug-in** to the business rules (and vice-versa), same for domain data make it as a plug-in to the business rules and UI.
+It's always good to separate (protect) your business rules from UI changes and make the user interface **a plug-in** to the business rules (and vice versa). The same applies to domain data: make it a plug-in to both the business rules and the UI.
 
-## Use of Command Pattern
+## Using the Command Pattern
 
-Good practice is to extract data manipulation logic in a reusable, composable classes. The Command Pattern together with Wire is a perfect fit for that. Let's explore example of Todo Application with use of commands as processing units for signals (see project in folder`example/todo-commands`).
+It's good practice to extract data-manipulation logic into reusable, composable classes. The Command Pattern together with Wire is a perfect fit for that. Let's explore an example of a Todo application that uses commands as processing units for signals (see the project in the `example/todo-commands` folder).
 
-### Register commands
+### Registering commands
 
 ```dart
 class TodoController {
@@ -192,13 +194,13 @@ class TodoController {
       ViewSignals.CLEAR_COMPLETED: (_, __) => ClearCompletedTodosCommand().execute(),
       ViewSignals.COMPLETE_ALL:    (_, __) => CompleteAllTodosCommand(_! as bool).execute()
     });
-    // Getter - shrink complex conditions on multiple data source to single data key
+    // Getter — shrink complex conditions across multiple data sources to a single data key
     Wire.data(DataKeys.GET_COUNT_COMPLETED, getter: CountCompletedGetter().getter);
   }
 }
 ```
 
-Each `...Command` is a class extended from utility class `WireCommandWithWireData` that has `execute` method and some utilities methods to simplify data extraction from `Wire.data` (get, update, delete) and their constructor may accept properties. In that `execute` method logic is written:
+Each `...Command` is a class that extends the utility class `WireCommandWithWireData`, which provides an `execute` method and helper methods that simplify data extraction from `Wire.data` (get, update, delete). Command constructors may accept properties, and the business logic is written in `execute`:
 
 ```dart
 
@@ -217,29 +219,30 @@ class TodoEditCommand extends WireCommandWithWireData<void> {
     } else {
       _updateTodo(todoId, todoText, todoNote);
     }
-    print('> TodoEditCommand -> toggled: id = ${todoId} - ${todoText} - ${todoNote}');
+    print('> TodoEditCommand -> edited: id = ${todoId} - ${todoText} - ${todoNote}');
   }
   //... _removeTodo and _updateTodo methods implementation
 }
 ```
 
-You don't need to use `WireCommandWithWireData` as a base for your commands with additional helper methods but `WireCommandAbstract` might be useful as a mark for commands that processed from Wire's signals, and asynchronous nature allow to use them in a sequence.
+You don't need to use `WireCommandWithWireData` as a base for your commands with helper methods, but `WireCommandAbstract` can be useful as a marker for commands processed from Wire's signals; its asynchronous nature allows them to be used in a sequence.
 
-## Some history of Strings API idea
+## Some history of the Strings API idea
 
-Being in software development over decade now I have seen many projects built with different tools and technologies, most of them dealt with user interactions and UI layer(s), and I’ve seen, and still see, the same problems everywhere - no strict rules between UI and data, rules are needed to create order, order creates beauty, and beauty survive and thrive. Even if some framework provides these rules and relations between entities they don't have specific tools to force use of them, and usually people break them in favor to release feature fast, therefore a software systems could end up in chaos, where business logic mixed with UI and other parts, domain data generated (or resend) from view and coupled with logic of how this data rendered, and other operations that is not related to the view layer (e.g. requests to remote end points). Remember (from Robert C. Martin):
+Having worked in software development for over a decade, I've seen the same problem in most projects that deal with user interactions and UI layers: there are no strict rules between UI and data. Rules are needed to create order, order creates beauty, and beauty survives and thrives. Even when a framework provides rules and defines relationships between entities, it rarely offers tools to enforce them — so people break the rules to ship features faster. Software systems can end up in chaos: business logic is mixed with the UI, domain data is generated (or re-sent) from the view and coupled to the logic that renders it, and operations that don't belong to the view layer at all (e.g., requests to remote endpoints). As Robert C. Martin put it:
 > "The only way to go fast, is to go well."
 
-Separation, putting things outside of boundaries, make parts as **plugins** - that's what I've been thinking about over years, looking at how others work, how things connected, how data propagated through and used in different popular frameworks and in companies custom solutions. And what I realized is that - it all rotated around two concepts:
+Separation — putting things outside their boundaries and making parts into **plug-ins** — is what I've been thinking about over the years, watching how things connect and how data propagates through and is used in popular frameworks and custom company solutions. What I realized is that it all revolves around two concepts:
 1. Data propagation mechanism
 2. Events distribution system
 
-And they both can be represented as an API of a component - **Events API** and **Data API**, both could be just a sets of keys (strings) without any obligations. This idea leads to the concept of layers - two distribution layers one for communication, events or signals, another for data. That was how idea of Wire came to life!
-This way entities of the system expose two parts:
-- what it needs (what data it uses or expects to use)
-- what actions it produces (what can be processed)
+Both can be represented as a component's API — a **Signals API** and a **Data API** — and both can be simple sets of keys (strings) with no obligations attached. This idea leads to the concept of layers: two distribution layers, one for communication (events or signals) and another for data. That's how the idea of Wire came to life!
 
-Component exposes this information in unique collection of strings - component's "Events API" and "Data API", or it might use general collections shared APIs presented as strings only. Anyway it does not know from where the data come from and who will process actions.
+In this way, entities in the system expose two things:
+- what they need (the data they use or expect to use)
+- what actions they produce (what can be processed)
+
+A component exposes this information in a unique collection of strings — its "Signals API" and "Data API" — or it can use shared, general collections of APIs represented as strings only. Either way, it doesn't know where the data comes from or who will process its actions.
 
 ## General Concepts of MVC
 A software system consists of three main concepts:
