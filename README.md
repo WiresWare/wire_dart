@@ -1,7 +1,32 @@
-# Wire is communication and data-container layers
-These two layers consist of string keys that bound to handlers (communication) and data observers (data-container). This is realization of idea of ["Strings API"](https://medium.com/@vladimir.cores/introduction-of-strings-api-741f080ec63d) when each component of the system - logical or visual - represented as a set of strings: one set is whats component consumes as data ("Data API") and another set of string is what component producing or reacts on ("Signals API").
+# Wire: communication and data-container layers
 
-## Library aimed to decouple UI from business logic
+Wire implements the ["Strings API"](https://medium.com/@vladimir.cores/introduction-of-strings-api-741f080ec63d) idea: a system's components — logical or visual — are described with sets of string keys instead of direct references. It provides two layers built from string keys: one binds keys to handlers (**communication**), the other binds keys to data observers (**data container**). One set of keys describes the data a component consumes (its **Data API**); another describes the signals it produces or reacts to (its **Signals API**).
+
+## Legend
+
+The examples below follow the numbered steps from the diagram in the next section:
+
+| Step | What happens |
+| --- | --- |
+| 1 | A controller registers a handler for a signal in a scope — `Wire.add`. |
+| 2 | A view subscribes to a data key so it can react to updates — `Wire.data(key).subscribe(...)`. |
+| 3 | A view (or an external source such as network traffic) turns an interaction into a signal — `Wire.send`. |
+| 4 | The controller's handler processes the signal asynchronously. |
+| 5 | A model or middleware processes and persists the data. |
+| 6 | The new value is written to the data-container layer — `Wire.data(key, value: ...)`. |
+| 7 | Subscribers are notified and the view re-renders itself. |
+
+Terms used throughout this document:
+
+- **Signal** — a string key used for system-wide communication (Communication Layer).
+- **Wire** — a handler bound to a signal and a scope; also the name of the library and its static API.
+- **Scope** — the object that owns a handler, used to group and later remove related wires.
+- **Data API** — the set of string keys a component consumes as data.
+- **Signals API** — the set of string keys a component produces or reacts to.
+- **`WireData`** — an observable container holding the value for one data key (Data Container Layer).
+- **Middleware** — an observer of add/send/remove/data events, typically used for persistence or logging.
+
+## A library aimed at decoupling UI from business logic
 ![Schema](assets/wire-schema.jpeg)
 
 It has two layers:
