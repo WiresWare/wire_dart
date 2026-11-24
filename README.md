@@ -313,14 +313,14 @@ Not every program has a view, servers might not have UI, and it all depends on t
 
 <sub align="right">from original article [Thoughts on React Hooks, Redux, and Separation of Concerns](https://blog.isquaredsoftware.com/2019/07/blogged-answers-thoughts-on-hooks/)</sub>
 
-Based on this belief we recommend to keep all your business logic, all these data processing and decisions making logic outside of a view - in controllers, this is the only right place to do that. **Signals listeners placed inside controller**. You register a signal by adding it to the Communication Layer with `Wire.add(scope, signal, listener)` or `Wire.addMany(scope, signalToHandlerMap)`. Many signals can be connected to the same listener and vice versa. The listener should follow the specification of `WireListener` and has two params - data payload and wire identifier (wid - string constant).
+Based on this belief we recommend to keep all your business logic, all these data processing and decisions making logic outside of a view - in controllers, this is the only right place to do that. **Signals listeners placed inside controller**. You register a signal by adding it to the Communication Layer with `Wire.add(scope, signal, listener)` or `Wire.addMany(scope, signalToHandlerMap)`. Many signals can be connected to the same listener and vice versa. The listener must follow the `WireListener` specification and take two parameters: a data payload and an integer wire identifier (`wireId`).
 
 ```dart
 class TodoController {
     TodoModel todoModel;
     TodoController(this.todoModel) {
 
-    Wire.add(this, ViewSignals.INPUT, (String data, int wid) {
+    Wire.add(this, ViewSignals.INPUT, (String data, int wireId) {
       var text = data;
       print('> TodoProcessor -> TodoViewOutputSignal.INPUT: ' + text);
       if (text != null && text.isNotEmpty) {
@@ -329,7 +329,7 @@ class TodoController {
       }
     });
 
-    Wire.add(this, ViewSignals.DELETE, (String data, int wid) {
+    Wire.add(this, ViewSignals.DELETE, (String data, int wireId) {
       var todoId = data;
       print('> TodoProcessor -> TodoViewOutputSignal.DELETE: ' + todoId);
       todoModel.remove(todoId);
@@ -343,8 +343,8 @@ class TodoController {
     // ...
   }
 
-  void _signalProcessor(DTO payload, int wid) {
-    var wire = Wire.get(wid: wid).single;
+  void _signalProcessor(DTO payload, int wireId) {
+    var wire = Wire.get(wireId: wireId).single;
     print('> TodoProcessor -> ${wire.signal}: data = ' + payload.toString());
     // ...
   }
@@ -388,67 +388,82 @@ class StatsCounter extends StatelessWidget {
 }
 ```
 
-# WIRE API
-### Wire<T> (static methods):
-```
-Future<Wire<T>> .add<T>(Object scope, String signal, WireListener<T> listener, [int replies = 0])
-Future<List<Wire<dynamic>>> .addMany(Object scope, Map<String, WireListener<dynamic>> signalToHandlerMap)
-Future<WireSendResults> .send<T>(String signal, {T payload, Object scope}) // Payload or DTO stands for Data Transfer Object
-Future<bool> .remove(String signal, {Object scope, WireListener listener})
-bool .has({String signal, Wire wire})
-void .attach(Wire wire)
-bool .detach(Wire wire)
-Future<void> .purge({bool? withMiddleware})
-void .middleware(WireMiddleware value)
-List<Wire> .get({String signal, Object scope, WireListener listener, int wid})
+## Wire API
 
-WireData .data<T>(String key, [T value])
-```
-`Wire.send` executes all handlers added to any scope for the signal, executes asynchronous and return result's object `WireSendResults` with data list of length equal to the number of handlers that return not null results, in case of error, the "chain" of consequent transfers to listeners won't be stopped but special `WireSendError` will be added to the `WireSendResults` list (the results object has method - `hasError`). The signal also propagated to all registered middlewares in `onSend(signal: string, payload?: any | null, scope?: object | null): void`;  
+### `Wire<T>` (static methods)
 
-### WireSendResults:
+All methods below are static — call them as `Wire.add(...)`, `Wire.data(...)`, and so on.
+
+```dart
+Future<Wire<T>>             add<T>(Object scope, String signal, WireListener<T> listener, {int replies = 0})
+Future<List<Wire<dynamic>>> addMany(Object scope, Map<String, WireListener<dynamic>> signalToHandlerMap)
+Future<WireSendResults>     send<T>(String signal, {T? payload, Object? scope}) // payload/DTO = Data Transfer Object
+Future<bool>                remove({String? signal, Object? scope, WireListener<dynamic>? listener})
+bool                        has<T>({String? signal, Wire<T>? wire})
+void                        attach(Wire<dynamic> wire)
+Future<bool>                detach(Wire<dynamic> wire)
+Future<void>                purge({bool? withMiddleware})
+void                        middleware(WireMiddleware value)
+List<Wire<dynamic>>         get<T>({String? signal, Object? scope, WireListener<dynamic>? listener, int? wireId})
+
+WireData<T>                 data<T>(String key, {dynamic value, WireDataGetter<T>? getter})
 ```
+
+`Wire.send` executes all handlers registered for the signal in every scope. It runs asynchronously and returns a `WireSendResults` object whose `list` contains one entry per handler that returned a non-null result. If a handler fails, the chain of subsequent listeners is not stopped; instead, a `WireSendError` is added to the results (check it with `hasError`). The signal is also propagated to every registered middleware through `onSend(String signal, [Object? payload, Object? scope])`.
+
+### `WireSendResults`
+
+```dart
 bool get hasError
 List<dynamic> get list
 bool get signalHasNoSubscribers
 ```
 
-### WireListener<T>:
-Definition of listener to a signal in `Wire.add(scope, signal, listener)`
-To get signal use `Wire.get(wid:wid).single`
-```
-void Function(T payload, int wid)
+### `WireListener<T>`
+
+Defines a listener for a signal in `Wire.add(scope, signal, listener)`. To retrieve the associated `Wire`, call `Wire.get(wireId: wireId).single`.
+
+```dart
+typedef WireListener<T> = Future<dynamic> Function(T? payload, int wireId);
 ```
 
-### WireData<T>:
-It is a data container that holds dynamic value. WireData can be subscribed (and unsubscribed). It is associated with string key and retrieved from in-memory map with `Wire.data(key)`. WireData **can't** be null and `Wire.data(key)` will always return WireData instance, but its **initial value can be null** (if first call does not have value, e.g.`Wire.data(key, null)`), to check this initial null value WireData has special property `isSet`, which is `false` until not null value won't be set for the first time. To remove value from Data Container Layer use method `remove()` - it emits null value before remove subscribers and WireData instance, use `isSet` property to distinguish between newly created (false) and removed.
+### `WireData<T>`
 
-```
-WireData subscribe(WireDataListener<T> listener)
-WireData unsubscribe(WireDataListener<T> listener)
-void refresh()
-void remove()
-dynamic get value
+`WireData` is a data container that holds a dynamic value associated with a string key. It is retrieved from the in-memory map with `Wire.data(key)` and can be subscribed to (and unsubscribed from) for updates.
+
+`WireData` itself can never be null: `Wire.data(key)` always returns an instance. Its **value**, however, may be null initially (for example, when the first call provides no `value`). The `isSet` property is `false` until a non-null value is set for the first time. Note that `remove()` also resets the value to null, so `isSet` alone does not tell you whether the data was never set or has been removed.
+
+```dart
+WireData<T>         subscribe(WireDataListener<T?> listener)
+Future<WireData<T>> unsubscribe({WireDataListener<T?>? listener, bool immediate = false})
+Future<void>        refresh([T? optionalValue])
+Future<void>        remove({bool clean = false})
+T? get value
 bool lock(WireDataLockToken token)
 bool unlock(WireDataLockToken token)
 bool get isLocked
 ```
 
-### WireDataListener<T>:
-Definition of WireData listener in `WireData.subscribe(WireDataListener)`
-```
-Future<void> Function(dynamic value);
+### `WireDataListener<T>`
+
+Defines a listener for `WireData.subscribe(WireDataListener)`.
+
+```dart
+typedef WireDataListener<T> = Future<void> Function(T value);
 ```
 
-### WireMiddleware:
-Class that extends WireMiddlewares methods can be added to `Wire.middleware(WireMiddleware)`
+### `WireMiddleware`
 
-```
+Extend this abstract class and register an instance with `Wire.middleware(...)` to observe add, send, remove, and data events.
+
+```dart
 abstract class WireMiddleware {
-  void onAdd(Wire wire);
-  void onSend(String signal, [payload, scope]);
-  void onRemove(String signal, [Object scope, WireListener listener]);
-  void onData(String param, dynamic prevValue, dynamic nextValue);
+  Future<void> onAdd(Wire<dynamic> wire);
+  Future<void> onSend(String signal, [Object? payload, Object? scope]);
+  Future<void> onRemove(String signal, [Object? scope, WireListener<dynamic>? listener]);
+  Future<void> onData(String key, dynamic prevValue, dynamic nextValue);
+  Future<void> onDataError(dynamic error, String key, dynamic value);
+  Future<void> onReset(String key, dynamic value);
 }
 ```
 
