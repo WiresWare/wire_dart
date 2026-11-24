@@ -112,6 +112,8 @@ class CounterButton extends DomElement {
 #### Steps 4, 5 — a "middleman" that catches everything happening in the system (in this example, it stores the counter value in `localStorage`)
 
 ```dart
+import 'dart:js_interop_unsafe';
+
 import 'package:web/web.dart';
 
 class CounterStorageMiddleware extends WireMiddleware {
@@ -186,14 +188,14 @@ It's good practice to extract data-manipulation logic into reusable, composable 
 class TodoController {
   TodoController() {
     Wire.addMany(this, {
-      ViewSignals.INPUT:    (_, __) => TodoInputCommand(_! as InputDTO).execute(),
-      ViewSignals.EDIT:     (_, __) => TodoEditCommand(_! as EditDTO).execute(),
-      ViewSignals.DELETE:   (_, __) => TodoDeleteCommand(_! as String).execute(),
-      ViewSignals.TOGGLE:   (_, __) => TodoToggleCommand(_! as String).execute(),
+      ViewSignals.INPUT:    (input, _) => TodoInputCommand(input as InputDTO).execute(),
+      ViewSignals.EDIT:     (input, _) => TodoEditCommand(input as EditDTO).execute(),
+      ViewSignals.DELETE:   (input, _) => TodoDeleteCommand(input as String).execute(),
+      ViewSignals.TOGGLE:   (input, _) => TodoToggleCommand(input as String).execute(),
       // Utilities
-      ViewSignals.FILTER:          (_, __) => ApplyFilterToTodosCommand(_! as FilterValues).execute(),
+      ViewSignals.FILTER:          (input, _) => ApplyFilterToTodosCommand(input as FilterValues).execute(),
       ViewSignals.CLEAR_COMPLETED: (_, __) => ClearCompletedTodosCommand().execute(),
-      ViewSignals.COMPLETE_ALL:    (_, __) => CompleteAllTodosCommand(_! as bool).execute()
+      ViewSignals.COMPLETE_ALL:    (input, _) => CompleteAllTodosCommand(input as bool).execute()
     });
     // Getter — shrink complex conditions across multiple data sources to a single data key
     Wire.data(DataKeys.GET_COUNT_COMPLETED, getter: CountCompletedGetter().getter);
@@ -284,11 +286,11 @@ TodoVO create(String text, String note, bool completed) {
 }
 ```
 
-`Wire.data('key')` plays the role of an active model: it holds `WireData` instances associated with string keys. `WireData` is a container for data (accessed through the `.value` property) and can be observed for changes by subscribing — `wireData.subscribe((value) { ... })`. To update the value and notify listeners, just set it: `Wire.data('key', value: value)`. It's up to you where the value (`WireData.value`) is updated from: a separate entity, a model (with persistence to a database or a server), or directly from a controller or command.
+`Wire.data('key')` plays the role of an active model: it holds `WireData` instances associated with string keys. `WireData` is a container for data (accessed through the `.value` property) and can be observed for changes by subscribing — `wireData.subscribe((value) async { ... })`. To update the value and notify listeners, just set it: `Wire.data('key', value: value)`. It's up to you where the value (`WireData.value`) is updated from: a separate entity, a model (with persistence to a database or a server), or directly from a controller or command.
 
 ### View
 
-The UI can also have its own state — visual state — which might not need to be stored persistently at all, only temporarily. Examples include an accordion's open tab, a button's hover state, tooltips, input highlighting, and so on. These states might depend on domain data and are generated at runtime based on certain conditions. Yes, a view can contain logic — for example, branching conditions that depend on the data passed in (`WireDataGetter` can simplify multiple conditions involving `WireData`). With Wire, a view consumes data from the data-container layer via `Wire.data`, then subscribes to updates and re-renders itself when a change happens — `wireData.subscribe((value) { ... })`. If domain data is meant to be changed in the view (e.g., forms), it's good practice to copy it and send the copy for processing after modification in the view.
+The UI can also have its own state — visual state — which might not need to be stored persistently at all, only temporarily. Examples include an accordion's open tab, a button's hover state, tooltips, input highlighting, and so on. These states might depend on domain data and are generated at runtime based on certain conditions. Yes, a view can contain logic — for example, branching conditions that depend on the data passed in (`WireDataGetter` can simplify multiple conditions involving `WireData`). With Wire, a view consumes data from the data-container layer via `Wire.data`, then subscribes to updates and re-renders itself when a change happens — `wireData.subscribe((value) async { ... })`. If domain data is meant to be changed in the view (e.g., forms), it's good practice to copy it and send the copy for processing after modification in the view.
 
 ```dart
 class CounterDisplay extends DomElement {
@@ -312,7 +314,7 @@ This is what data distribution might look like in an app:
 
 #### Network communication
 
-Not every program has a view — servers might not have a UI — and it all depends on the definition of the view. By "view" we mean something that can emit external events about the outside world or interactions, and incoming network traffic fits this definition quite well. In this case, Wire can act as a distribution gate for network API calls: just call `Wire.send(signal, dto)` on network events, and every part of the internal system can react to it. `Wire.send` belongs to the communication layer — a way to completely decouple parts of the application. A view sends signals and waits for data to be updated. Other parts of the view can listen for signals as well and update themselves accordingly.
+Not every program has a view — servers might not have a UI — and it all depends on the definition of the view. By "view" we mean something that can emit external events about the outside world or interactions, and incoming network traffic fits this definition quite well. In this case, Wire can act as a distribution gate for network API calls: just call `Wire.send(signal, payload: dto)` on network events, and every part of the internal system can react to it. `Wire.send` belongs to the communication layer — a way to completely decouple parts of the application. A view sends signals and waits for data to be updated. Other parts of the view can listen for signals as well and update themselves accordingly.
 
 ### Controller
 
@@ -329,7 +331,7 @@ class TodoController {
     TodoModel todoModel;
     TodoController(this.todoModel) {
 
-    Wire.add(this, ViewSignals.INPUT, (String data, int wireId) {
+    Wire.add(this, ViewSignals.INPUT, (dynamic data, int wireId) async {
       var text = data;
       print('> TodoProcessor -> TodoViewOutputSignal.INPUT: ' + text);
       if (text != null && text.isNotEmpty) {
@@ -338,7 +340,7 @@ class TodoController {
       }
     });
 
-    Wire.add(this, ViewSignals.DELETE, (String data, int wireId) {
+    Wire.add(this, ViewSignals.DELETE, (dynamic data, int wireId) async {
       var todoId = data;
       print('> TodoProcessor -> TodoViewOutputSignal.DELETE: ' + todoId);
       todoModel.remove(todoId);
@@ -352,7 +354,7 @@ class TodoController {
     // ...
   }
 
-  void _signalProcessor(DTO payload, int wireId) {
+  Future<void> _signalProcessor(dynamic payload, int wireId) async {
     var wire = Wire.get(wireId: wireId).single;
     print('> TodoProcessor -> ${wire.signal}: data = ' + payload.toString());
     // ...
