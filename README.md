@@ -1,50 +1,78 @@
-# Wire is communication and data-container layers
-These two layers consist of string keys that bound to handlers (communication) and data observers (data-container). This is realization of idea of ["Strings API"](https://medium.com/@vladimir.cores/introduction-of-strings-api-741f080ec63d) when each component of the system - logical or visual - represented as a set of strings: one set is whats component consumes as data ("Data API") and another set of string is what component producing or reacts on ("Signals API").
+# Wire: communication and data-container layers
 
-## Library aimed to decouple UI from business logic
+Wire implements the ["Strings API"](https://medium.com/@vladimir.cores/introduction-of-strings-api-741f080ec63d) idea: a system's components — logical or visual — are described with sets of string keys instead of direct references. It provides two layers built from string keys: one binds keys to handlers (**communication**), the other binds keys to data observers (**data container**). One set of keys describes the data a component consumes (its **Data API**); another describes the signals it produces or reacts to (its **Signals API**).
+
+## Legend
+
+The examples below follow the numbered steps from the diagram in the next section:
+
+| Step | What happens |
+| --- | --- |
+| 1 | A controller registers a handler for a signal in a scope — `Wire.add`. |
+| 2 | A view subscribes to a data key so it can react to updates — `Wire.data(key).subscribe(...)`. |
+| 3 | A view (or an external source such as network traffic) turns an interaction into a signal — `Wire.send`. |
+| 4 | The controller's handler processes the signal asynchronously. |
+| 5 | A model or middleware processes and persists the data. |
+| 6 | The new value is written to the data-container layer — `Wire.data(key, value: ...)`. |
+| 7 | Subscribers are notified and the view re-renders itself. |
+
+Terms used throughout this document:
+
+- **Signal** — a string key used for system-wide communication (Communication Layer).
+- **Wire** — a handler bound to a signal and a scope; also the name of the library and its static API.
+- **Scope** — the object that owns a handler, used to group and later remove related wires.
+- **Data API** — the set of string keys a component consumes as data.
+- **Signals API** — the set of string keys a component produces or reacts to.
+- **`WireData`** — an observable container holding the value for one data key (Data Container Layer).
+- **Middleware** — an observer of add/send/remove/data events, typically used for persistence or logging.
+
+## A library aimed at decoupling UI from business logic
+
 ![Schema](assets/wire-schema.jpeg)
 
-It has two layers:
-- **Communication Layer** - consists of "signals" (string keys) with associated handlers bound to specific scope (instances of `Wire` object enclose them). This layer has main methods: `Wire.add` and `Wire.send`.
-- **Data Container Layer** - it is a key-value in-memory map, where each value is an instance of `WireData` - observer that holds dynamic value and can be subscribed for updates, its main method: `Wire.data`.
+Wire has two layers:
 
-`WireData` has special implementation for Flutter - [**WireDataBuilder** Widget](https://pub.dev/packages/wire_flutter). This widget makes it possible to reuse business logic in web and in mobile project with Flutter. Take a look at the "example" folder in both repositories (current and [wire_flutter](https://github.com/WiresWare/wire_flutter/tree/master/example)) where `_shared` folder contains reusable code imported in both projects as a dart package (with custom path to package), the folder shared as a separate git branch with [git-subrepo](https://github.com/ingydotnet/git-subrepo)
+- **Communication layer** — "signals" (string keys) with associated handlers bound to a specific scope; each scope is enclosed by an instance of `Wire`. Its main methods are `Wire.add` and `Wire.send`.
+- **Data-container layer** — an in-memory key-value map in which each value is an instance of `WireData`: an observable container holding a dynamic value that can be subscribed to for updates. Its main method is `Wire.data`.
+
+`WireData` also has a dedicated Flutter implementation — the [**`WireDataBuilder` widget**](https://pub.dev/packages/wire_flutter). It lets you reuse business logic across web and mobile projects built with Flutter. See the `example` folder in both this repository and [wire_flutter](https://github.com/WiresWare/wire_flutter/tree/master/example): the `_shared` folder contains reusable code imported into both projects as a Dart package (via a custom package path), shared as a separate Git branch using [git-subrepo](https://github.com/ingydotnet/git-subrepo).
 
 [![Shared code in Flutter mobile/web and custom HTML dart-web](https://img.youtube.com/vi/6e3OUaigjcw/0.jpg)](https://www.youtube.com/watch?v=6e3OUaigjcw)
 
-Wire library also ported to:
-- [Wire Haxe](https://github.com/WiresWare/wire_haxe) that can help to compile, or better say transpile, reusable code in one of the following language: __JavaScript, Java, C#, C++, HL, Lua, PHP__.
-- [Wire TS](https://github.com/WiresWare/wire_ts) with example of todo-commands
+Wire has also been ported to:
 
-## Usage:
+- [Wire Haxe](https://github.com/WiresWare/wire_haxe), which can compile — or, more precisely, transpile — reusable code to any of the following languages: **JavaScript, Java, C#, C++, HL, Lua, PHP**.
+- [Wire TS](https://github.com/WiresWare/wire_ts), with a todo-commands example.
 
-Steps from diagram's description above. It's example of counter web-application (see folder `./example/counter`).
+## Usage
 
-#### Steps: 1, 4, 6 - "box" that processes signals:
+The steps below refer to the diagram and legend above. This is an example of a counter web application (see the `./example/counter` folder).
 
-Adding wires and `WireListener`s to the system. In response, it's immediately set new value to data-container layer from function that do decision-making `Wire.data(CounterDataKeys.COUNT, (oldValue) => newValue)`.
+#### Steps 1, 4, 6 — a "box" that processes signals
+
+First, add wires and `WireListener`s to the system. In response, the controller immediately sets a new value in the data-container layer from a function that makes the decision: `Wire.data(CounterDataKeys.COUNT, value: (oldValue) => newValue)`.
 
 ```dart
 class CounterController {
   CounterController() {
     // 1. scope, string key, handler function
     Wire.add(this, CounterSignalsKeys.INCREASE, (dynamic payload, wireId) async {
-      // 4. handler function process signal async
-      // new value could be function or plain value
+      // 4. the handler processes the signal asynchronously
+      // the new value can be a function or a plain value
       Wire.data(CounterDataKeys.COUNT, value: (value) {
         final count = value as int?;
         // 6. Update data
         return (count ?? 0) + 1;
       });
     });
-    // Handler for CounterSignalsKeys.DECREASE see in the source code
+    // The handler for CounterSignalsKeys.DECREASE is in the source code
   }
 }
 ```
 
-Since there is no Model "box" in counter example, the controller updates data by itself in steps 4 and 6.
+Since the counter example has no Model "box," the controller updates the data itself in steps 4 and 6.
 
-#### Steps: 2, 7 - View subscribes to data changes and knows how to update itself:
+#### Steps 2, 7 — the view subscribes to data changes and knows how to update itself
 
 ```dart
 class CounterDisplay extends DomElement {
@@ -53,7 +81,7 @@ class CounterDisplay extends DomElement {
 
     final wireData = Wire.data(CounterDataKeys.COUNT);
     wireData.subscribe(update);
-    update(wireData.value ?? 0); // View could define default value
+    update(wireData.value ?? 0); // the view can define a default value
   }
 
   Future<void> update(value) async {
@@ -63,11 +91,11 @@ class CounterDisplay extends DomElement {
 }
 ```
 
-#### Step: 3 - another View translate UI event to a signal:
+#### Step 3 — another view translates a UI event into a signal
 
 ```dart
 class CounterButton extends DomElement {
-  CounterButton(String title, String signal):super(ButtonElement()) {
+  CounterButton(String title, String signal) : super(ButtonElement()) {
     // DOM initialization and styling
     final span = SpanElement()
       ..text = title
@@ -75,94 +103,109 @@ class CounterButton extends DomElement {
       ..className = 'spectrum-Button-label';
     dom // dom is a component from super constructor
       ..className = 'spectrum-Button spectrum-Button--primary'
-      ..onClick.listen((event) => Wire.send(signal)) // Catch user interaction and produce signal
+      ..onClick.listen((event) => Wire.send(signal)) // catch a user interaction and produce a signal
       ..append(span);
   }
 }
 ```
 
-#### Steps: 4, 5 - "middleman" who catch all what's happening in the system (in this example it stores counter value to localStorage):
+#### Steps 4, 5 — a "middleman" that catches everything happening in the system (in this example, it stores the counter value in `localStorage`)
 
 ```dart
+import 'dart:js_interop_unsafe';
+
+import 'package:web/web.dart';
+
 class CounterStorageMiddleware extends WireMiddleware {
-  final ls = window.localStorage;
+  final storage = window.localStorage;
 
   int getInitialValue() {
-    return ls.containsKey(CounterDataKeys.COUNT) ?
-      int.parse(ls[CounterDataKeys.COUNT]) : 0;
+    return storage.has(CounterDataKeys.COUNT)
+      ? int.parse(storage.getItem(CounterDataKeys.COUNT)!)
+      : 0;
   }
 
   @override
-  void onData(String key, prevValue, nextValue) {
+  Future<void> onData(String key, prevValue, nextValue) async {
     print('> CounterMiddleware -> onData: key = ${key} | ${prevValue}-${nextValue}');
     if (key == CounterDataKeys.COUNT) {
-      if (nextValue != null) ls[key] = nextValue.toString();
-      else { if (ls.containsValue(key)) ls.remove(key); }
+      if (nextValue != null) storage.setItem(key, nextValue.toString());
+      else if (storage.has(key)) storage.removeItem(key);
     }
   }
 
-  @override void onAdd(Wire wire) { }
-  @override void onRemove(String signal, [Object scope, listener]) { }
-  @override void onSend(String signal, [data, scope]) { }
+  @override
+  Future<void> onAdd(Wire<dynamic> wire) async {}
+
+  @override
+  Future<void> onRemove(String signal, [Object? scope, listener]) async {}
+
+  @override
+  Future<void> onSend(String? signal, [data, scope]) async {}
+
+  @override
+  Future<void> onDataError(error, String key, value) async {}
+
+  @override
+  Future<void> onReset(String key, value) async {}
 }
 ```
 
-This middleware may be considered as a part of a Model.
+This middleware can be considered part of the Model.
 
-### Initialization:
+### Initialization
 
 ```dart
 void main() {
   /// COUNTER EXAMPLE ======================================
   final counterStorageMiddleware = CounterStorageMiddleware();
-  // Set initial value from local storage, could be part of CounterStorageMiddleware constructor.
+  // Set the initial value from local storage; this could be part of the CounterStorageMiddleware constructor.
   Wire.data(CounterDataKeys.COUNT, value: counterStorageMiddleware.getInitialValue());
-  // Register middleware after setting initial value to prevent saving initial value
+  // Register the middleware after setting the initial value to avoid saving it.
   Wire.middleware(counterStorageMiddleware);
-  // Instantiate controller that register all signal processing
+  // Instantiate the controller that registers all signal handlers.
   CounterController();
-  // Find root in index.html and map it to functional component
+  // Find the root element in index.html and map it to a functional component
   final root = document.querySelector('#root');
   ApplicationView(root as DivElement?);
 }
 ```
 
-## Words on architecture
+## A few words on architecture
 
-Key to a good software product is understanding of how things work together, what do what and where - software design - separation of concerns and responsibilities, DRY, KISS and SOLID principles. Here is a good saying from Robert C. Martin:
- > "Architecture is not about making decisions earlier, but making decisions late. Good architecture is a software structure that allows you to defer critical decisions for as long as possible, defer them to the point where you've got enough information to actually make them, or not make them".
+The key to a good software product is understanding how things work together, what does what, and where — software design, separation of concerns and responsibilities, DRY, KISS, and SOLID principles. Here is a good saying from Robert C. Martin:
+> "Architecture is not about making decisions earlier, but making decisions late. Good architecture is a software structure that allows you to defer critical decisions for as long as possible, defer them to the point where you've got enough information to actually make them, or not make them".
 
-It's always good to separate (protect) your business rules from UI changes and make the user interface **a plug-in** to the business rules (and vice-versa), same for domain data make it as a plug-in to the business rules and UI.
+It's always good to separate (protect) your business rules from UI changes and make the user interface **a plug-in** to the business rules (and vice versa). The same applies to domain data: make it a plug-in to both the business rules and the UI.
 
-## Use of Command Pattern
+## Using the Command Pattern
 
-Good practice is to extract data manipulation logic in a reusable, composable classes. The Command Pattern together with Wire is a perfect fit for that. Let's explore example of Todo Application with use of commands as processing units for signals (see project in folder`example/todo-commands`).
+It's good practice to extract data-manipulation logic into reusable, composable classes. The Command Pattern together with Wire is a perfect fit for that. Let's explore an example of a Todo application that uses commands as processing units for signals (see the project in the `example/todo-commands` folder).
 
-### Register commands
+### Registering commands
 
 ```dart
 class TodoController {
   TodoController() {
     Wire.addMany(this, {
-      ViewSignals.INPUT:    (_, __) => TodoInputCommand(_! as InputDTO).execute(),
-      ViewSignals.EDIT:     (_, __) => TodoEditCommand(_! as EditDTO).execute(),
-      ViewSignals.DELETE:   (_, __) => TodoDeleteCommand(_! as String).execute(),
-      ViewSignals.TOGGLE:   (_, __) => TodoToggleCommand(_! as String).execute(),
+      ViewSignals.INPUT:    (input, _) => TodoInputCommand(input as InputDTO).execute(),
+      ViewSignals.EDIT:     (input, _) => TodoEditCommand(input as EditDTO).execute(),
+      ViewSignals.DELETE:   (input, _) => TodoDeleteCommand(input as String).execute(),
+      ViewSignals.TOGGLE:   (input, _) => TodoToggleCommand(input as String).execute(),
       // Utilities
-      ViewSignals.FILTER:          (_, __) => ApplyFilterToTodosCommand(_! as FilterValues).execute(),
+      ViewSignals.FILTER:          (input, _) => ApplyFilterToTodosCommand(input as FilterValues).execute(),
       ViewSignals.CLEAR_COMPLETED: (_, __) => ClearCompletedTodosCommand().execute(),
-      ViewSignals.COMPLETE_ALL:    (_, __) => CompleteAllTodosCommand(_! as bool).execute()
+      ViewSignals.COMPLETE_ALL:    (input, _) => CompleteAllTodosCommand(input as bool).execute()
     });
-    // Getter - shrink complex conditions on multiple data source to single data key
+    // Getter — shrink complex conditions across multiple data sources to a single data key
     Wire.data(DataKeys.GET_COUNT_COMPLETED, getter: CountCompletedGetter().getter);
   }
 }
 ```
 
-Each `...Command` is a class extended from utility class `WireCommandWithWireData` that has `execute` method and some utilities methods to simplify data extraction from `Wire.data` (get, update, delete) and their constructor may accept properties. In that `execute` method logic is written:
+Each `...Command` is a class that extends the utility class `WireCommandWithWireData`, which provides an `execute` method and helper methods that simplify data extraction from `Wire.data` (get, update, delete). Command constructors may accept properties, and the business logic is written in `execute`:
 
 ```dart
-
 class TodoEditCommand extends WireCommandWithWireData<void> {
   TodoEditCommand(this.editTodoDTO);
 
@@ -178,42 +221,45 @@ class TodoEditCommand extends WireCommandWithWireData<void> {
     } else {
       _updateTodo(todoId, todoText, todoNote);
     }
-    print('> TodoEditCommand -> toggled: id = ${todoId} - ${todoText} - ${todoNote}');
+    print('> TodoEditCommand -> edited: id = ${todoId} - ${todoText} - ${todoNote}');
   }
   //... _removeTodo and _updateTodo methods implementation
 }
 ```
 
-You don't need to use `WireCommandWithWireData` as a base for your commands with additional helper methods but `WireCommandAbstract` might be useful as a mark for commands that processed from Wire's signals, and asynchronous nature allow to use them in a sequence.
+You don't need to use `WireCommandWithWireData` as a base for your commands with helper methods, but `WireCommandAbstract` can be useful as a marker for commands processed from Wire's signals; its asynchronous nature allows them to be used in a sequence.
 
-## Some history of Strings API idea
+## Some history of the Strings API idea
 
-Being in software development over decade now I have seen many projects built with different tools and technologies, most of them dealt with user interactions and UI layer(s), and I’ve seen, and still see, the same problems everywhere - no strict rules between UI and data, rules are needed to create order, order creates beauty, and beauty survive and thrive. Even if some framework provides these rules and relations between entities they don't have specific tools to force use of them, and usually people break them in favor to release feature fast, therefore a software systems could end up in chaos, where business logic mixed with UI and other parts, domain data generated (or resend) from view and coupled with logic of how this data rendered, and other operations that is not related to the view layer (e.g. requests to remote end points). Remember (from Robert C. Martin):
+Having worked in software development for over a decade, I've seen the same problem in most projects that deal with user interactions and UI layers: there are no strict rules between UI and data. Rules are needed to create order, order creates beauty, and beauty survives and thrives. Even when a framework provides rules and defines relationships between entities, it rarely offers tools to enforce them — so people break the rules to ship features faster. Software systems can end up in chaos: business logic is mixed with the UI, domain data is generated (or re-sent) from the view and coupled to the logic that renders it, and operations that don't belong to the view layer at all (e.g., requests to remote endpoints). As Robert C. Martin put it:
 > "The only way to go fast, is to go well."
 
-Separation, putting things outside of boundaries, make parts as **plugins** - that's what I've been thinking about over years, looking at how others work, how things connected, how data propagated through and used in different popular frameworks and in companies custom solutions. And what I realized is that - it all rotated around two concepts:
+Separation — putting things outside their boundaries and making parts into **plug-ins** — is what I've been thinking about over the years, watching how things connect and how data propagates through and is used in popular frameworks and custom company solutions. What I realized is that it all revolves around two concepts:
 1. Data propagation mechanism
 2. Events distribution system
 
-And they both can be represented as an API of a component - **Events API** and **Data API**, both could be just a sets of keys (strings) without any obligations. This idea leads to the concept of layers - two distribution layers one for communication, events or signals, another for data. That was how idea of Wire came to life!
-This way entities of the system expose two parts:
-- what it needs (what data it uses or expects to use)
-- what actions it produces (what can be processed)
+Both can be represented as a component's API — a **Signals API** and a **Data API** — and both can be simple sets of keys (strings) with no obligations attached. This idea leads to the concept of layers: two distribution layers, one for communication (events or signals) and another for data. That's how the idea of Wire came to life!
 
-Component exposes this information in unique collection of strings - component's "Events API" and "Data API", or it might use general collections shared APIs presented as strings only. Anyway it does not know from where the data come from and who will process actions.
+In this way, entities in the system expose two things:
+- what they need (the data they use or expect to use)
+- what actions they produce (what can be processed)
 
-## General Concepts of MVC
+A component exposes this information in a unique collection of strings — its "Signals API" and "Data API" — or it can use shared, general collections of APIs represented as strings only. Either way, it doesn't know where the data comes from or who will process its actions.
+
+## General concepts of MVC
+
 A software system consists of three main concepts:
 1. Data storage and distribution.
 2. Events listening and propagation.
-3. Decisions making based on that data (and FSM).
+3. Decision-making based on that data (and FSM).
 
-You find these concepts in every program. Basically it's called - Model-View-Controller - meta-pattern or idea of separating program on functional pieces.
+You'll find these concepts in every program. Collectively, they're called Model-View-Controller — a meta-pattern, or the idea of separating a program into functional pieces.
 
 ### Model
-Data structure and the ways how to access data define how an application works and how to apply changes. Therefore data definition is the first step in software development. All starts with data. In MVC, the fact that Model is in the first position emphasize it as well. Models in application play a wider role than just value objects definition, it's also a way of how these objects are stored and retrieved, you can think of it as a data API - create, update, delete, and etc. Does model make any decisions on how to modify the data? Probably not, maybe only update related data (e.g. in-memory counter of completed todos). And don't forget that there are two types of models - active and passive, one can notify when changes have occurred (active) and another is a plain storage, file or database (passive) - it has to be monitored by a controller or another agent.
 
-Next an example of one of TodoModel's methods (from Todo Application example, different from one above in Command Pattern):
+The data structure and the ways to access data define how an application works and how changes are applied. Therefore, defining the data is the first step in software development — it all starts with data. In MVC, the fact that Model comes first emphasizes this as well. Models in an application play a wider role than just defining value objects; they also determine how those objects are stored and retrieved. You can think of a model as a data API — create, update, delete, and so on. Does a model make any decisions about how to modify the data? Probably not — perhaps only updating related data (e.g., an in-memory count of completed todos). And don't forget that there are two types of models — active and passive. One can notify when changes have occurred (active); the other is plain storage such as a file or database (passive) and has to be monitored by a controller or another agent.
+
+Next is an example of one of `TodoModel`'s methods (from the Todo application example, different from the one in the Command Pattern section above):
 
 ```dart
 TodoVO create(String text, String note, bool completed) {
@@ -240,10 +286,11 @@ TodoVO create(String text, String note, bool completed) {
 }
 ```
 
-`Wire.data('key')` plays a role of active model, it holds `WireData` instances associated with string key, `WireData` is a container with data (value accessed from `.value` property) and it can be observed for changes by subscribing - `WireData.subscribe((value) => { ... })`. To update the value and notify listeners just set the value: `Wire.data('key', value: value)`. It's up to you to decide from where the value (`WireData.value`) will be updated either from separate entity, a model (together with physical storing in database or sending to a server), or you can update data directly from controller, or a command.
+`Wire.data('key')` plays the role of an active model: it holds `WireData` instances associated with string keys. `WireData` is a container for data (accessed through the `.value` property) and can be observed for changes by subscribing — `wireData.subscribe((value) async { ... })`. To update the value and notify listeners, just set it: `Wire.data('key', value: value)`. It's up to you where the value (`WireData.value`) is updated from: a separate entity, a model (with persistence to a database or a server), or directly from a controller or command.
 
 ### View
-UI also could have its own state - visual state, and this state might not need to be stored in persistent storage at all, only temporarily. Example - accordion’s opened tab, or button hover state, tooltips, input highlight and etc. These states might depend on domain's data and are generated in run-time based on some conditions. Yes, view could have logic inside, it could be branching conditions that depend on data passed in (`WireDataGetter` could simplify multiple conditions with `WireData`). With `Wire` view consume data from Data Container Layer - `Wire.data`, then view subscribes to update and re-render itself when change will happen - `WireData.subscribe((value) => { ... })`. If domain data suppose to be changed or modified in the view (forms) it is good practice to copy it and send to process after modification in the view.
+
+The UI can also have its own state — visual state — which might not need to be stored persistently at all, only temporarily. Examples include an accordion's open tab, a button's hover state, tooltips, input highlighting, and so on. These states might depend on domain data and are generated at runtime based on certain conditions. Yes, a view can contain logic — for example, branching conditions that depend on the data passed in (`WireDataGetter` can simplify multiple conditions involving `WireData`). With Wire, a view consumes data from the data-container layer via `Wire.data`, then subscribes to updates and re-renders itself when a change happens — `wireData.subscribe((value) async { ... })`. If domain data is meant to be changed in the view (e.g., forms), it's good practice to copy it and send the copy for processing after modification in the view.
 
 ```dart
 class CounterDisplay extends DomElement {
@@ -261,27 +308,30 @@ class CounterDisplay extends DomElement {
 }
 ```
 
-This how data distribution might looks like in an app
-![Schema](assets/wire-data-keys-destributon.jpg)
+This is what data distribution might look like in an app:
 
-#### Network Communication
-Not every program has a view, servers might not have UI, and it all depends on the definition of the view. Saying View we mean something that can emit external events about outside world or interaction, and incoming network traffic fit to this definition quite well, and in this case Wire can be a distribution gate for network API calls, just call `Wire.send(signal, dto)` on network events and every part of internal system can react to it. `Wire.send` is a Communication Layer - a way to completely separate parts of the application. View sends signals and waits for data to be updated. Other parts of the view can listen for signals as well and update themselves accordingly.
+![Schema](assets/wire-data-keys-distribution.jpg)
+
+#### Network communication
+
+Not every program has a view — servers might not have a UI — and it all depends on the definition of the view. By "view" we mean something that can emit external events about the outside world or interactions, and incoming network traffic fits this definition quite well. In this case, Wire can act as a distribution gate for network API calls: just call `Wire.send(signal, payload: dto)` on network events, and every part of the internal system can react to it. `Wire.send` belongs to the communication layer — a way to completely decouple parts of the application. A view sends signals and waits for data to be updated. Other parts of the view can listen for signals as well and update themselves accordingly.
 
 ### Controller
- Decision-making on multiple sources of data - business logic - the rules, the controller. It's a place where data meet signals (events), their data are mixed with data from other sources, compared and CRUD operations, then view updates.
 
- > We believe and promote the idea that's view is 'just' the UI layer, with the real app being the logic and data kept outside the components tree.
+Decision-making based on multiple sources of data — business logic, the rules — belongs to the controller. It's the place where data meets signals (events): data is combined with data from other sources, compared, and subjected to CRUD operations, and then the view is updated.
+
+> We believe and promote the idea that view is 'just' the UI layer, with the real app being the logic and data kept outside the components tree.
 
 <sub align="right">from original article [Thoughts on React Hooks, Redux, and Separation of Concerns](https://blog.isquaredsoftware.com/2019/07/blogged-answers-thoughts-on-hooks/)</sub>
 
-Based on this belief we recommend to keep all your business logic, all these data processing and decisions making logic outside of a view - in controllers, this is the only right place to do that. **Signals listeners placed inside controller**. You register a signal by adding it to the Communication Layer with `Wire.add(scope, signal, listener)` or `Wire.addMany(scope, signalToHandlerMap)`. Many signals can be connected to the same listener and vice versa. The listener should follow the specification of `WireListener` and has two params - data payload and wire identifier (wid - string constant).
+Based on this belief, we recommend keeping all your business logic — all data processing and decision-making logic — outside the view, in controllers; that's the only place for it. **Signal listeners belong inside the controller.** You register a signal by adding it to the communication layer with `Wire.add(scope, signal, listener)` or `Wire.addMany(scope, signalToHandlerMap)`. Many signals can be connected to the same listener and vice versa. The listener must follow the `WireListener` specification and take two parameters: a data payload and an integer wire identifier (`wireId`).
 
 ```dart
 class TodoController {
     TodoModel todoModel;
     TodoController(this.todoModel) {
 
-    Wire.add(this, ViewSignals.INPUT, (String data, int wid) {
+    Wire.add(this, ViewSignals.INPUT, (dynamic data, int wireId) async {
       var text = data;
       print('> TodoProcessor -> TodoViewOutputSignal.INPUT: ' + text);
       if (text != null && text.isNotEmpty) {
@@ -290,13 +340,13 @@ class TodoController {
       }
     });
 
-    Wire.add(this, ViewSignals.DELETE, (String data, int wid) {
+    Wire.add(this, ViewSignals.DELETE, (dynamic data, int wireId) async {
       var todoId = data;
       print('> TodoProcessor -> TodoViewOutputSignal.DELETE: ' + todoId);
       todoModel.remove(todoId);
     });
 
-    // Or there can be one listener - signal processor
+    // Or a single listener can process several signals
     Wire.add(this, ViewSignals.INPUT,  _signalProcessor);
     Wire.add(this, ViewSignals.EDIT,   _signalProcessor);
     Wire.add(this, ViewSignals.DELETE, _signalProcessor);
@@ -304,30 +354,32 @@ class TodoController {
     // ...
   }
 
-  void _signalProcessor(DTO payload, int wid) {
-    var wire = Wire.get(wid: wid).single;
+  Future<void> _signalProcessor(dynamic payload, int wireId) async {
+    var wire = Wire.get(wireId: wireId).single;
     print('> TodoProcessor -> ${wire.signal}: data = ' + payload.toString());
     // ...
   }
 }
 ```
 
-In a controller you make a decision of how to process input data, do calculation, then data delegated to a model(s) if any, stored or sent to the server, then controller might initiate reaction - send another signal or if data was not updated from model (in Data Container Layer) then controller might update data manually (with `Wire.data(key, value)`). Application can have multiple controllers each responsible to its particular data processing. You might also think of them as reducers from Redux world or commands from PureMVC.
+In a controller, you decide how to process input data, perform calculations, and then delegate the data to a model (if any), store it, or send it to the server. The controller might then initiate a reaction — send another signal, or, if the data wasn't updated by the model (in the data-container layer), update the data manually with `Wire.data(key, value: value)`. An application can have multiple controllers, each responsible for its own data processing. You can also think of them as reducers in the Redux world or commands in PureMVC.
 
-## Few words about FLUX
-[FLUX pattern](https://facebook.github.io/flux/docs/in-depth-overview) is a modification of MVC idea, where **data flow unidirectional** and controllers replaced with so-called "controller-views":
+## A few words about Flux
+
+The [Flux pattern](https://facebook.github.io/flux/docs/in-depth-overview) is a variation of the MVC idea in which **data flow is unidirectional** and controllers are replaced with so-called "controller-views":
 > "Views often found at the top of the hierarchy that retrieve data from the stores and pass this data down to their children."
 
-![FLUX Diagram](./assets/wire-flux-concept.svg)
+![Flux diagram](./assets/wire-flux-concept.svg)
 
-But in general it's all MVC, **Wire** incorporate these ideas of Flux, but also allows consumers of data additional reaction on signals from other parts of the system, basically from anywhere, beside provides a way to manually subscribe to data changes. The basic flow is next:
-1. Consumers request the data and subscribe for its updates - register reactions.
-2. Signals produced somewhere in the system (maybe by the same data consumers) or come from outside (e.g. network requests).
-3. Listeners react to signals and process incoming data, these listeners are controllers and update data in stores, which then will trigger reactions (also they can send new signals, but its just an options).
+In general, though, it's all MVC. **Wire** incorporates these ideas from Flux, but it also lets data consumers react to signals from other parts of the system — basically from anywhere — and provides a way to subscribe to data changes manually. The basic flow is as follows:
+1. Consumers request data and subscribe to its updates, registering reactions.
+2. Signals are produced somewhere in the system (perhaps by the same data consumers) or come from outside (e.g., network requests).
+3. Listeners react to signals and process incoming data. These listeners are controllers; they update data in stores, which then triggers reactions. (They can also send new signals, but that's optional.)
 
-## Wire in Flutter / [WireDataBuilder<T>](https://pub.dev/packages/wire_flutter)
-Having business logic separated from presentation, events distributed in Communication Layer and data accessible from shared layer (Wire.data) it's now possible to consume the data and send signal from UI easily. In Flutter this means that we can leave visual hierarchy, UI rendering and transitions between screens/pages to the Flutter framework, and consume data in places where it's needed, we can do this with special widget - `WireDataBuilder<T>({Key key, String dataKey, Builder builder})` which subscribe with a string `dataKey` to WireData value and its changes, it rebuilds underlying widget you return from `builder` function when WireData value updated. However if you need only data in place you still can get it directly with `Wire.data('key').value`. Here is an example from [Todo](https://github.com/WiresWare/wire_flutter/tree/master/example/wire_flutter_todo) application:
-Here is Wire in Flutter
+## Wire in Flutter / [`WireDataBuilder<T>`](https://pub.dev/packages/wire_flutter)
+
+With business logic separated from presentation, events distributed in the communication layer, and data accessible from a shared layer (`Wire.data`), it's easy to consume data and send signals from the UI. In Flutter, this means leaving the visual hierarchy, UI rendering, and transitions between screens to the framework and consuming data wherever it's needed. We can do this with a special widget — `WireDataBuilder<T>({Key? key, required String dataKey, required WireDataWidgetBuilder<T> builder})` — which subscribes with a string `dataKey` to a `WireData` value and its changes, and rebuilds the widget you return from `builder` when the value is updated. It also accepts optional `rebuildWhen`, `nullBuilder`, and `isStatic` parameters. If you only need the data at a specific point, you can still get it directly with `Wire.data('key').value`. Here is an example from the [Todo application](https://github.com/WiresWare/wire_flutter/tree/master/example/wire_flutter_todo):
+
 ```dart
 class StatsCounter extends StatelessWidget {
   StatsCounter() : super(key: ArchSampleKeys.statsCounter);
@@ -349,67 +401,82 @@ class StatsCounter extends StatelessWidget {
 }
 ```
 
-# WIRE API
-### Wire<T> (static methods):
-```
-Future<Wire<T>> .add<T>(Object scope, String signal, WireListener<T> listener, [int replies = 0])
-Future<List<Wire<dynamic>>> .addMany(Object scope, Map<String, WireListener<dynamic>> signalToHandlerMap)
-Future<WireSendResults> .send<T>(String signal, {T payload, Object scope}) // Payload or DTO stands for Data Transfer Object
-Future<bool> .remove(String signal, {Object scope, WireListener listener})
-bool .has({String signal, Wire wire})
-void .attach(Wire wire)
-bool .detach(Wire wire)
-Future<void> .purge({bool? withMiddleware})
-void .middleware(WireMiddleware value)
-List<Wire> .get({String signal, Object scope, WireListener listener, int wid})
+## Wire API
 
-WireData .data<T>(String key, [T value])
-```
-`Wire.send` executes all handlers added to any scope for the signal, executes asynchronous and return result's object `WireSendResults` with data list of length equal to the number of handlers that return not null results, in case of error, the "chain" of consequent transfers to listeners won't be stopped but special `WireSendError` will be added to the `WireSendResults` list (the results object has method - `hasError`). The signal also propagated to all registered middlewares in `onSend(signal: string, payload?: any | null, scope?: object | null): void`;  
+### `Wire<T>` (static methods)
 
-### WireSendResults:
+All methods below are static — call them as `Wire.add(...)`, `Wire.data(...)`, and so on.
+
+```dart
+Future<Wire<T>>             add<T>(Object scope, String signal, WireListener<T> listener, {int replies = 0})
+Future<List<Wire<dynamic>>> addMany(Object scope, Map<String, WireListener<dynamic>> signalToHandlerMap)
+Future<WireSendResults>     send<T>(String signal, {T? payload, Object? scope}) // payload/DTO = Data Transfer Object
+Future<bool>                remove({String? signal, Object? scope, WireListener<dynamic>? listener})
+bool                        has<T>({String? signal, Wire<T>? wire})
+void                        attach(Wire<dynamic> wire)
+Future<bool>                detach(Wire<dynamic> wire)
+Future<void>                purge({bool? withMiddleware})
+void                        middleware(WireMiddleware value)
+List<Wire<dynamic>>         get<T>({String? signal, Object? scope, WireListener<dynamic>? listener, int? wireId})
+
+WireData<T>                 data<T>(String key, {dynamic value, WireDataGetter<T>? getter})
 ```
+
+`Wire.send` executes all handlers registered for the signal in every scope. It runs asynchronously and returns a `WireSendResults` object whose `list` contains one entry per handler that returned a non-null result. If a handler fails, the chain of subsequent listeners is not stopped; instead, a `WireSendError` is added to the results (check it with `hasError`). The signal is also propagated to every registered middleware through `onSend(String signal, [Object? payload, Object? scope])`.
+
+### `WireSendResults`
+
+```dart
 bool get hasError
 List<dynamic> get list
 bool get signalHasNoSubscribers
 ```
 
-### WireListener<T>:
-Definition of listener to a signal in `Wire.add(scope, signal, listener)`
-To get signal use `Wire.get(wid:wid).single`
-```
-void Function(T payload, int wid)
+### `WireListener<T>`
+
+Defines a listener for a signal in `Wire.add(scope, signal, listener)`. To retrieve the associated `Wire`, call `Wire.get(wireId: wireId).single`.
+
+```dart
+typedef WireListener<T> = Future<dynamic> Function(T? payload, int wireId);
 ```
 
-### WireData<T>:
-It is a data container that holds dynamic value. WireData can be subscribed (and unsubscribed). It is associated with string key and retrieved from in-memory map with `Wire.data(key)`. WireData **can't** be null and `Wire.data(key)` will always return WireData instance, but its **initial value can be null** (if first call does not have value, e.g.`Wire.data(key, null)`), to check this initial null value WireData has special property `isSet`, which is `false` until not null value won't be set for the first time. To remove value from Data Container Layer use method `remove()` - it emits null value before remove subscribers and WireData instance, use `isSet` property to distinguish between newly created (false) and removed.
+### `WireData<T>`
 
-```
-WireData subscribe(WireDataListener<T> listener)
-WireData unsubscribe(WireDataListener<T> listener)
-void refresh()
-void remove()
-dynamic get value
+`WireData` is a data container that holds a dynamic value associated with a string key. It is retrieved from the in-memory map with `Wire.data(key)` and can be subscribed to (and unsubscribed from) for updates.
+
+`WireData` itself can never be null: `Wire.data(key)` always returns an instance. Its **value**, however, may be null initially (for example, when the first call provides no `value`). The `isSet` property is `false` until a non-null value is set for the first time. Note that `remove()` also resets the value to null, so `isSet` alone does not tell you whether the data was never set or has been removed.
+
+```dart
+WireData<T>         subscribe(WireDataListener<T?> listener)
+Future<WireData<T>> unsubscribe({WireDataListener<T?>? listener, bool immediate = false})
+Future<void>        refresh([T? optionalValue])
+Future<void>        remove({bool clean = false})
+T? get value
 bool lock(WireDataLockToken token)
 bool unlock(WireDataLockToken token)
 bool get isLocked
 ```
 
-### WireDataListener<T>:
-Definition of WireData listener in `WireData.subscribe(WireDataListener)`
-```
-Future<void> Function(dynamic value);
+### `WireDataListener<T>`
+
+Defines a listener for `WireData.subscribe(WireDataListener)`.
+
+```dart
+typedef WireDataListener<T> = Future<void> Function(T value);
 ```
 
-### WireMiddleware:
-Class that extends WireMiddlewares methods can be added to `Wire.middleware(WireMiddleware)`
+### `WireMiddleware`
 
-```
+Extend this abstract class and register an instance with `Wire.middleware(...)` to observe add, send, remove, and data events.
+
+```dart
 abstract class WireMiddleware {
-  void onAdd(Wire wire);
-  void onSend(String signal, [payload, scope]);
-  void onRemove(String signal, [Object scope, WireListener listener]);
-  void onData(String param, dynamic prevValue, dynamic nextValue);
+  Future<void> onAdd(Wire<dynamic> wire);
+  Future<void> onSend(String signal, [Object? payload, Object? scope]);
+  Future<void> onRemove(String signal, [Object? scope, WireListener<dynamic>? listener]);
+  Future<void> onData(String key, dynamic prevValue, dynamic nextValue);
+  Future<void> onDataError(dynamic error, String key, dynamic value);
+  Future<void> onReset(String key, dynamic value);
 }
 ```
 
@@ -418,36 +485,41 @@ abstract class WireMiddleware {
 Generate UML with `dcdg` (PlantUML): `pub global run dcdg -o ./uml/configuration`
 
 ## Examples
-### 1. Counter (web):
-- Open IDEA
-- Select build target - Dart Web, point to example/counter/index.html
-- Run Debug
 
-### 2. Todo MVC:
-**2.1 Dart Web and HTML template (or commands)**:
+### 1. Counter (web)
+
+- Open IntelliJ IDEA.
+- Select the build target — Dart Web — pointing to `example/counter/index.html`.
+- Run Debug.
+
+### 2. TodoMVC
+
+**2.1 Dart Web and HTML template (or commands)**
 
 ![Todo web with Wire](/assets/wire_example_todo_web.gif)
-- Open IDEA
-- Select build target - Dart Web, point to example/todo/index.html
-- Run Debug or `sh run_debug.sh`
+- Open IntelliJ IDEA.
+- Select the build target — Dart Web — pointing to `example/todo/index.html`.
+- Run Debug or `sh run_debug.sh`.
 
-**2.2 Todo MVC and Flutter**:
+**2.2 TodoMVC and Flutter**
 
 ![Todo Flutter with Wire](https://github.com/WiresWare/wire_flutter/blob/master/assets/wire_flutter_example_todo.gif)
 [repo](https://github.com/WiresWare/wire_flutter/tree/master/example/wire_flutter_todo)
 
-### 2.1 Todo Angular
+### 2.3 Todo Angular
+
 ![Todo Example with AngularDart using shared code](/assets/wire_example_todo_angular.gif)
-- Open IDEA
-- Create symlink (or anchor on Windows) from "_shared/todo" folder in "example" folder and put the link in to "todo_angular/lib/src/_shared" folder.
-- Run DartWeb configuration with index.html
+- Open IntelliJ IDEA.
+- Create a symlink (or a junction on Windows) to the `_shared/todo` folder in `example`, and put the link in the `todo_angular/lib/src/_shared` folder.
+- Run the Dart Web configuration with `index.html`.
 
-### 3. API calls variations (console):
-- Open IDEA
-- Select build target - Dart Command Line App, point to example/api/wire_api_example.dart
-- Run Debug
+### 3. API call variations (console)
 
-## Licence
+- Open IntelliJ IDEA.
+- Select the build target — Dart Command Line App — pointing to `example/api/wire_api_example.dart`.
+- Run Debug.
+
+## License
 
 ```
 Copyright 2020-2022 Vladimir Cores (Minkin)
