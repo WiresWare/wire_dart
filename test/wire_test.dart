@@ -559,6 +559,22 @@ void main() {
       print('>\t WireSendResults.list.length = ${results.list.length}');
       expect(results.list.length, 1);
     });
+
+    test('6.2 Race condition with replies', () async {
+      const signal = 'race_condition_signal';
+      var callCount = 0;
+      await Wire.add(
+        Object(),
+        signal,
+        (_, __) async {
+          callCount++;
+          await Wire.send(signal);
+        },
+        replies: 1,
+      );
+      await Wire.send(signal);
+      expect(callCount, 1);
+    });
   });
 }
 

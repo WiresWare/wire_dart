@@ -56,15 +56,33 @@ class WireCommunicateLayer {
   }
 
   Future<dynamic> _transferOnWire(int wireId, [payload, scope]) async {
+    if (!_wireById.containsKey(wireId)) return null;
     final wire = _wireById[wireId]!;
     final isLookingInScope = scope != null;
     if (isLookingInScope && wire.scope != scope) return null;
     print('> WireLayers -> _transferOnWire: ${payload}');
     try {
-      final result = await wire.transfer(payload).catchError(_processSendError);
-      if (wire.withReplies && wire.replies-- == 1) {
-        await _removeWire(wire);
+      // Consume the reply BEFORE running the handler so that a handler which
+      // re-sends the same signal cannot re-trigger a wire that has exhausted
+      // its replies (fixes the replies race condition). The wire is removed
+      // from the lookup maps up front, but its listener is cleared only after
+      // transfer completes so the current invocation can still run.
+      bool clearAfter = false;
+      if (wire.withReplies) {
+        if (wire.replies == 1) {
+          _wireById.remove(wireId);
+          final wireIdsForSignal = _wireIdsBySignal[wire.signal];
+          if (wireIdsForSignal != null) {
+            wireIdsForSignal.remove(wireId);
+            if (wireIdsForSignal.isEmpty) _wireIdsBySignal.remove(wire.signal);
+          }
+          clearAfter = true;
+        } else {
+          wire.replies--;
+        }
       }
+      final result = await wire.transfer(payload).catchError(_processSendError);
+      if (clearAfter) wire.clear();
       return result;
     } catch (e) {
       print('> WireLayers -> _transferOnWire -> failed to transfer data: ${payload} | ${e}');
