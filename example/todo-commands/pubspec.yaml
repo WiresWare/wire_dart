@@ -7,7 +7,7 @@ environment:
   sdk: "^3.10.4"
 
 dependencies:
-  wire: ^1.5.4
+  wire: ^1.6.1
   wire_example_shared:
     path: ../_shared
   wire_example_todo:
