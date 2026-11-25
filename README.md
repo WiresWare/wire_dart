@@ -47,7 +47,7 @@ Terms used throughout this document:
 
 Wire has two layers:
 
-- **Communication layer** — "signals" (string keys) with associated handlers bound to a specific scope; each scope is enclosed by an instance of `Wire`. Its main methods are `Wire.add` and `Wire.send`.
+- **Communication layer** — "signals" (string keys) with associated handlers bound to a specific scope. Each `Wire` instance holds a scope, and many wires can share the same scope. Its main methods are `Wire.add` and `Wire.send`.
 - **Data-container layer** — an in-memory key-value map in which each value is an instance of `WireData`: an observable container holding a dynamic value that can be subscribed to for updates. Its main method is `Wire.data`.
 
 `WireData` also has a dedicated Flutter implementation — the [**`WireDataBuilder` widget**](https://pub.dev/packages/wire_flutter). It lets you reuse business logic across web and mobile projects built with Flutter. See the `example` folder in both this repository and [wire_flutter](https://github.com/WiresWare/wire_flutter/tree/master/example): the `_shared` folder contains reusable code imported into both projects as a Dart package (via a custom package path), shared as a separate Git branch using [git-subrepo](https://github.com/ingydotnet/git-subrepo).
@@ -153,16 +153,16 @@ class CounterStorageMiddleware extends WireMiddleware {
   Future<void> onAdd(Wire<dynamic> wire) async {}
 
   @override
-  Future<void> onRemove(String signal, [Object? scope, listener]) async {}
+  Future<void> onRemove(String signal, [Object? scope, WireListener<dynamic>? listener]) async {}
 
   @override
-  Future<void> onSend(String? signal, [data, scope]) async {}
+  Future<void> onSend(String signal, [Object? payload, Object? scope]) async {}
 
   @override
-  Future<void> onDataError(error, String key, value) async {}
+  Future<void> onDataError(dynamic error, String key, dynamic value) async {}
 
   @override
-  Future<void> onReset(String key, value) async {}
+  Future<void> onReset(String key, dynamic value) async {}
 }
 ```
 
@@ -437,7 +437,7 @@ List<Wire<dynamic>>         get<T>({String? signal, Object? scope, WireListener<
 WireData<T>                 data<T>(String key, {dynamic value, WireDataGetter<T>? getter})
 ```
 
-`Wire.send` executes all handlers registered for the signal in every scope. It runs asynchronously and returns a `WireSendResults` object whose `list` contains one entry per handler that returned a non-null result. If a handler fails, the chain of subsequent listeners is not stopped; instead, a `WireSendError` is added to the results (check it with `hasError`). The signal is also propagated to every registered middleware through `onSend(String signal, [Object? payload, Object? scope])`.
+`Wire.send` executes all handlers registered for the signal; when a `scope` is supplied, only handlers with that scope run. It runs asynchronously and returns a `WireSendResults` object whose `list` contains one entry per handler that returned a non-null result. If a handler fails, the chain of subsequent listeners is not stopped; instead, a `WireSendError` is added to the results (check it with `hasError`). The signal is also propagated to every registered middleware through `onSend(String signal, [Object? payload])` — the send `scope` is currently not forwarded to middleware, so the optional `scope` argument there is always `null`.
 
 ### `WireSendResults`
 
