@@ -62,13 +62,12 @@ class WireCommunicateLayer {
     if (isLookingInScope && wire.scope != scope) return null;
     print('> WireLayers -> _transferOnWire: ${payload}');
     try {
-      final isLastReply = wire.withReplies && wire.replies == 1;
-      if (isLastReply) {
-        await _removeWire(wire, clear: false);
-      }
       if (wire.withReplies) {
+        final isLastReply = wire.replies == 1;
+        if (isLastReply) await _removeWire(wire, clear: false);
         wire.replies--;
       }
+
       final result = await wire.transfer(payload).catchError(_processSendError);
       final wasExhausted = !_wireById.containsKey(wireId);
       if (wasExhausted) wire.clear();
