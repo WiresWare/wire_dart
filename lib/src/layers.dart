@@ -8,8 +8,6 @@ import 'package:wire/src/results.dart';
 /// Github: https://github.com/vladimircores
 /// License: APACHE LICENSE, VERSION 2.0
 ///
-const int _lastReplyCount = 1;
-
 class WireCommunicateLayer {
   final _wireById = <int, Wire<dynamic>>{};
   final _wireIdsBySignal = <String, List<int>>{};
@@ -64,13 +62,13 @@ class WireCommunicateLayer {
     if (isLookingInScope && wire.scope != scope) return null;
     print('> WireLayers -> _transferOnWire: ${payload}');
     try {
-      final bool isLastReply = wire.withReplies && wire.replies == _lastReplyCount;
+      final isLastReply = wire.withReplies && wire.replies == 1;
       if (isLastReply) {
         _wireById.remove(wireId);
         final wireIdsForSignal = _wireIdsBySignal[wire.signal];
         if (wireIdsForSignal != null) {
           wireIdsForSignal.remove(wireId);
-          final bool noMoreWiresForSignal = wireIdsForSignal.isEmpty;
+          final noMoreWiresForSignal = wireIdsForSignal.isEmpty;
           if (noMoreWiresForSignal) _wireIdsBySignal.remove(wire.signal);
         }
       }
@@ -78,7 +76,7 @@ class WireCommunicateLayer {
         wire.replies--;
       }
       final result = await wire.transfer(payload).catchError(_processSendError);
-      final bool wasExhausted = !_wireById.containsKey(wireId);
+      final wasExhausted = !_wireById.containsKey(wireId);
       if (wasExhausted) wire.clear();
       return result;
     } catch (e) {
