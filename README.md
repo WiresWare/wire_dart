@@ -435,6 +435,8 @@ void                        middleware(WireMiddleware value)
 List<Wire<dynamic>>         get<T>({String? signal, Object? scope, WireListener<dynamic>? listener, int? wireId})
 
 WireData<T>                 data<T>(String key, {dynamic value, WireDataGetter<T>? getter})
+T                           put<T>(T instance, {WireDataLockToken? lock})
+T                           find<T>()
 ```
 
 `Wire.send` executes all handlers registered for the signal; when a `scope` is supplied, only handlers with that scope run. It runs asynchronously and returns a `WireSendResults` object whose `list` contains one entry per handler that returned a non-null result. If a handler fails, the chain of subsequent listeners is not stopped; instead, a `WireSendError` is added to the results (check it with `hasError`). The signal is also propagated to every registered middleware through `onSend(String signal, [Object? payload])` — the send `scope` is currently not forwarded to middleware, so the optional `scope` argument there is always `null`.
@@ -443,6 +445,8 @@ WireData<T>                 data<T>(String key, {dynamic value, WireDataGetter<T
 
 ```dart
 bool get hasError
+List<WireSendError> get errors
+String get errorsString
 List<dynamic> get list
 bool get signalHasNoSubscribers
 ```
@@ -465,12 +469,21 @@ typedef WireListener<T> = Future<dynamic> Function(T? payload, int wireId);
 WireData<T>         subscribe(WireDataListener<T?> listener)
 Future<WireData<T>> unsubscribe({WireDataListener<T?>? listener, bool immediate = false})
 Future<void>        refresh([T? optionalValue])
+Future<void>        reset()
 Future<void>        remove({bool clean = false})
 T? get value
 bool lock(WireDataLockToken token)
 bool unlock(WireDataLockToken token)
 bool get isLocked
+bool get isGetter
+String get key
+int get numberOfListeners
+bool hasListener(WireDataListener<T?> listener)
+WireDataListenersExecutionMode get listenersExecutionMode
 ```
+
+`listenersExecutionMode` selects how listeners are notified on a value change:
+`enum WireDataListenersExecutionMode { SEQUENTIAL, PARALLEL }`.
 
 ### `WireDataListener<T>`
 
@@ -478,6 +491,14 @@ Defines a listener for `WireData.subscribe(WireDataListener)`.
 
 ```dart
 typedef WireDataListener<T> = Future<void> Function(T value);
+```
+
+### `WireDataGetter<T>`
+
+Computes a value on demand from the `WireData` instance instead of storing one. Pass it via `Wire.data(key, getter: ...)`.
+
+```dart
+typedef WireDataGetter<T> = T Function(WireData<T> that);
 ```
 
 ### `WireMiddleware`
