@@ -484,6 +484,8 @@ abstract class WireMiddleware {
 
 The UML source is `uml/configuration` (PlantUML). To regenerate `uml/configuration.png`, run `GRAPHVIZ_DOT=$(which dot) java -jar uml/plantuml.jar -tpng uml/configuration` (Graphviz is required).
 
+You can also take a look online [here](https://t.ly/wire-plantuml-web) (link to PlantUML Web Server)
+
 ## Examples
 
 ### 1. Counter (web)
