@@ -62,21 +62,19 @@ class WireCommunicateLayer {
     if (isLookingInScope && wire.scope != scope) return null;
     print('> WireLayers -> _transferOnWire: ${payload}');
     try {
-      if (wire.withReplies) {
-        if (wire.replies == 1) {
-          _wireById.remove(wireId);
-          final wireIdsForSignal = _wireIdsBySignal[wire.signal];
-          if (wireIdsForSignal != null) {
-            wireIdsForSignal.remove(wireId);
-            if (wireIdsForSignal.isEmpty) _wireIdsBySignal.remove(wire.signal);
-          }
-          wire.replies = 0;
-        } else {
-          wire.replies--;
+      if (wire.withReplies && wire.replies == 1) {
+        _wireById.remove(wireId);
+        final wireIdsForSignal = _wireIdsBySignal[wire.signal];
+        if (wireIdsForSignal != null) {
+          wireIdsForSignal.remove(wireId);
+          if (wireIdsForSignal.isEmpty) _wireIdsBySignal.remove(wire.signal);
         }
+        wire.replies = 0;
+      } else if (wire.withReplies) {
+        wire.replies--;
       }
       final result = await wire.transfer(payload).catchError(_processSendError);
-      if (wire.withReplies && wire.replies == 0) wire.clear();
+      if (!_wireById.containsKey(wireId)) wire.clear();
       return result;
     } catch (e) {
       print('> WireLayers -> _transferOnWire -> failed to transfer data: ${payload} | ${e}');
