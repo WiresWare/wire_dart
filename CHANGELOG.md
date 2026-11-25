@@ -1,3 +1,10 @@
+## Version 1.6.2:
+
+- Fixed a replies race condition: a wire that exhausts its replies is now removed from the lookup maps before its handler runs, so a handler that re-sends the same signal cannot re-trigger it.
+- Updated the UML class diagram (`uml/configuration.puml` / `.png`) to match the current API.
+- README: added section links, corrected API reference and example paths, documented API behavior, and surfaced the utility classes.
+- `lib/wire.dart` now re-exports the public utility classes and mixins.
+
 ## Version 1.6.1:
 
 - Remove oktoast dependency
