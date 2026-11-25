@@ -45,6 +45,10 @@ Terms used throughout this document:
 - **`WireData`** — an observable container holding the value for one data key (Data Container Layer).
 - **Middleware** — an observer of add/send/remove/data events, typically used for persistence or logging.
 
+"Box" in the examples means a logical component: a controller, model, view, or middleware.
+
+The snippets use symbols defined in the `example/` projects rather than in the library: `CounterDataKeys`/`CounterSignalsKeys`, `DomElement`, `DivElement`, `ButtonElement`, `SpanElement`, `DomElement.dom`, `ViewSignals`, `DataKeys`, `InputDTO`/`EditDTO`/`FilterValues`, `CountCompletedGetter`, `TodoModel`, `TodoVO`, the `Todo*Command` classes, `ApplicationView`, and `ArchSampleKeys`. Look them up under `example/counter/lib/mvc`, `example/todo-commands/lib/src`, and `example/_shared/lib/todo`; `WireDataWidgetBuilder` is part of `wire_flutter`.
+
 Wire has two layers:
 
 - **Communication layer** — "signals" (string keys) with associated handlers bound to a specific scope. Each `Wire` instance holds a scope, and many wires can share the same scope. Its main methods are `Wire.add` and `Wire.send`.
@@ -56,7 +60,7 @@ Wire has two layers:
 
 Wire has also been ported to:
 
-- [Wire Haxe](https://github.com/WiresWare/wire_haxe), which can compile — or, more precisely, transpile — reusable code to any of the following languages: **JavaScript, Java, C#, C++, HL, Lua, PHP**.
+- [Wire Haxe](https://github.com/WiresWare/wire_haxe), which can compile — or, more precisely, transpile — reusable code to any of the following languages: **JavaScript, Java, C#, C++, HL (HashLink), Lua, PHP**.
 - [Wire TS](https://github.com/WiresWare/wire_ts), with a todo-commands example.
 
 ## Usage
@@ -65,7 +69,7 @@ The steps below refer to the diagram and legend above. This is an example of a c
 
 #### Steps 1, 4, 6 — a "box" that processes signals
 
-First, add wires and `WireListener`s to the system. In response, the controller immediately sets a new value in the data-container layer from a function that makes the decision: `Wire.data(CounterDataKeys.COUNT, value: (oldValue) => newValue)`.
+First, add wires and `WireListener`s to the system. In response, the controller immediately sets a new value in the data-container layer from a function that makes the decision: `Wire.data(CounterDataKeys.COUNT, value: (oldValue) => (oldValue as int? ?? 0) + 1)`.
 
 ```dart
 class CounterController {
@@ -80,7 +84,7 @@ class CounterController {
         return (count ?? 0) + 1;
       });
     });
-    // The handler for CounterSignalsKeys.DECREASE is in the source code
+    // The handler for CounterSignalsKeys.DECREASE is in example/counter/lib/mvc/controller/counter_controller.dart
   }
 }
 ```
@@ -188,7 +192,7 @@ void main() {
 
 ## A few words on architecture
 
-The key to a good software product is understanding how things work together, what does what, and where — software design, separation of concerns and responsibilities, DRY, KISS, and SOLID principles. Here is a good saying from Robert C. Martin:
+The two layers and their key terms are introduced at the top of this document. The design goal behind them is separation of concerns: here is a good saying from Robert C. Martin:
 > "Architecture is not about making decisions earlier, but making decisions late. Good architecture is a software structure that allows you to defer critical decisions for as long as possible, defer them to the point where you've got enough information to actually make them, or not make them".
 
 It's always good to separate (protect) your business rules from UI changes and make the user interface **a plug-in** to the business rules (and vice versa). The same applies to domain data: make it a plug-in to both the business rules and the UI.
@@ -246,8 +250,7 @@ You don't need to use `WireCommandWithWireData` as a base for your commands with
 
 ## Some history of the Strings API idea
 
-Having worked in software development for over a decade, I've seen the same problem in most projects that deal with user interactions and UI layers: there are no strict rules between UI and data. Rules are needed to create order, order creates beauty, and beauty survives and thrives. Even when a framework provides rules and defines relationships between entities, it rarely offers tools to enforce them — so people break the rules to ship features faster. Software systems can end up in chaos: business logic is mixed with the UI, domain data is generated (or re-sent) from the view and coupled to the logic that renders it, and operations that don't belong to the view layer at all (e.g., requests to remote endpoints). As Robert C. Martin put it:
-> "The only way to go fast, is to go well."
+Having worked in software development for over a decade, I've seen the same problem in most projects that deal with user interactions and UI layers: there are no strict rules between UI and data. Rules are needed to create order, order creates beauty, and beauty survives and thrives. Even when a framework provides rules and defines relationships between entities, it rarely offers tools to enforce them — so people break the rules to ship features faster. Software systems can end up in chaos: business logic is mixed with the UI, domain data is generated (or re-sent) from the view and coupled to the logic that renders it, and operations that don't belong to the view layer at all (e.g., requests to remote endpoints). Keeping those boundaries explicit is what makes a system easy to change and quick to extend.
 
 Separation — putting things outside their boundaries and making parts into **plug-ins** — is what I've been thinking about over the years, watching how things connect and how data propagates through and is used in popular frameworks and custom company solutions. What I realized is that it all revolves around two concepts:
 1. Data propagation mechanism
@@ -307,21 +310,7 @@ TodoVO create(String text, String note, bool completed) {
 
 The UI can also have its own state — visual state — which might not need to be stored persistently at all, only temporarily. Examples include an accordion's open tab, a button's hover state, tooltips, input highlighting, and so on. These states might depend on domain data and are generated at runtime based on certain conditions. Yes, a view can contain logic — for example, branching conditions that depend on the data passed in (`WireDataGetter` can simplify multiple conditions involving `WireData`). With Wire, a view consumes data from the data-container layer via `Wire.data`, then subscribes to updates and re-renders itself when a change happens — `wireData.subscribe((value) async { ... })`. If domain data is meant to be changed in the view (e.g., forms), it's good practice to copy it and send the copy for processing after modification in the view.
 
-```dart
-class CounterDisplay extends DomElement {
-  CounterDisplay() : super(DivElement()) {
-    dom.className = 'spectrum-Body spectrum-Body--L';
-    final wireData = Wire.data(CounterDataKeys.COUNT);
-    wireData.subscribe(update);
-    update(wireData.value ?? 0);
-  }
-
-  Future<void> update(value) async {
-    print('> CounterDisplay -> update: ${value}');
-    dom.text = value.toString();
-  }
-}
-```
+The `CounterDisplay` view shown in the counter example above is the concrete implementation: it subscribes to a data key and re-renders itself in `update`.
 
 This is what data distribution might look like in an app:
 
@@ -350,7 +339,7 @@ class TodoController {
       var text = data;
       print('> TodoProcessor -> TodoViewOutputSignal.INPUT: ' + text);
       if (text != null && text.isNotEmpty) {
-        todoModel.create(text);
+        todoModel.create(text, '', false);
         Wire.send(ViewSignals.CLEAR_INPUT);
       }
     });
