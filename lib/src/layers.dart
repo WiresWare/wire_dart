@@ -64,7 +64,7 @@ class WireCommunicateLayer {
     try {
       final isLastReply = wire.withReplies && wire.replies == 1;
       if (isLastReply) {
-        _removeWireFromMaps(wire);
+        await _removeWire(wire, clear: false);
       }
       if (wire.withReplies) {
         wire.replies--;
@@ -160,21 +160,21 @@ class WireCommunicateLayer {
   /// @param    The Wire to remove.
   /// @return If there is no ids (no Wires) for that SIGNAL stop future perform
   ///
-  bool _removeWireFromMaps(Wire<dynamic> wire) {
+  Future<bool> _removeWire(Wire<dynamic> wire, {bool clear = true}) async {
     final wireId = wire.id;
     final signal = wire.signal;
+
     _wireById.remove(wireId);
+
     final wireIdsForSignal = _wireIdsBySignal[signal];
     if (wireIdsForSignal == null) return true;
     wireIdsForSignal.remove(wireId);
-    final noMoreWiresForSignal = wireIdsForSignal.isEmpty;
-    if (noMoreWiresForSignal) _wireIdsBySignal.remove(signal);
-    return noMoreWiresForSignal;
-  }
 
-  Future<bool> _removeWire(Wire<dynamic> wire) async {
-    final noMoreSignals = _removeWireFromMaps(wire);
-    wire.clear();
+    final noMoreSignals = wireIdsForSignal.isEmpty;
+    if (noMoreSignals) _wireIdsBySignal.remove(signal);
+
+    if (clear) wire.clear();
+
     return noMoreSignals;
   }
 }
