@@ -1,0 +1,165 @@
+@startuml
+set namespaceSeparator ::
+skinparam classAttributeIconSize 0
+skinparam classFontSize 13
+skinparam packageFontSize 14
+
+package "wire::src::main.dart" {
+  abstract class "WireMiddleware" {
+    +Future<void> onAdd()
+    +Future<void> onSend()
+    +Future<void> onRemove()
+    +Future<void> onData()
+    +Future<void> onDataError()
+    +Future<void> onReset()
+  }
+
+  class "Wire<T>" {
+    {static} -int _INDEX
+    {static} -WireCommunicateLayer _COMMUNICATION_LAYER
+    {static} -WireDataContainerLayer _DATA_CONTAINER_LAYER
+    {static} -WireMiddlewaresLayer _MIDDLEWARE_LAYER
+    -String _signal
+    -WireListener<T> _listener
+    -int _id
+    -Object _scope
+    -int _replies
+    -bool _withReplies
+    +int replies
+    +bool withReplies
+    +String signal
+    +int id
+    +Object scope
+    +bool listenerEqual()
+    +Future<dynamic> transfer()
+    +void clear()
+    {static} +void attach()
+    {static} +Future<bool> detach()
+    {static} +Future<Wire<T>> add()
+    {static} +Future<List<Wire<dynamic>>> addMany()
+    {static} +bool has()
+    {static} +Future<WireSendResults> send()
+    {static} +Future<void> purge()
+    {static} +Future<bool> remove()
+    {static} +void middleware()
+    {static} +List<Wire<dynamic>> get()
+    {static} +WireData<T> data()
+    {static} +T put()
+    {static} +T find()
+  }
+}
+
+package "wire::src::layers.dart" {
+  class "WireCommunicateLayer" {
+    -Map<int, Wire> _wireById
+    -Map<String, List<int>> _wireIdsBySignal
+    +Wire add()
+    +bool hasSignal()
+    +bool hasWire()
+    +Future<WireSendResults> send()
+    +Future<bool> remove()
+    +Future<void> clear()
+    +List<Wire> getBySignal()
+    +List<Wire> getByScope()
+    +List<Wire> getByListener()
+    +Wire getByWireId()
+    -Future<bool> _removeWire()
+  }
+
+  class "WireMiddlewaresLayer" {
+    -List<WireMiddleware> _MIDDLEWARE_LIST
+    +bool has()
+    +void add()
+    +void clear()
+    +Future<void> onAdd()
+    +Future<void> onSend()
+    +Future<void> onRemove()
+    +Future<void> onData()
+    +Future<void> onDataError()
+    +Future<void> onReset()
+    -Future<void> _process()
+  }
+
+  class "WireDataContainerLayer" {
+    -Map<String, WireData> _dataMap
+    -bool _remove()
+    +bool has()
+    +WireData get()
+    +WireData create()
+    +Future<void> clear()
+  }
+}
+
+package "wire::src::data.dart" {
+  enum "WireDataListenersExecutionMode" {
+    SEQUENTIAL
+    PARALLEL
+  }
+
+  class "WireDataLockToken" {
+    +bool equal()
+  }
+
+  class "WireData<T>" {
+    -String _key
+    -T _value
+    -Function _onRemove
+    -WireDataOnReset _onReset
+    -WireDataOnError _onError
+    -WireDataGetter _getter
+    -WireDataLockToken _lockToken
+    -WireDataListenersExecutionMode _listenersExecutionMode
+    -Set<WireDataListener> _listeners
+    -List<Future<void>> _refreshQueue
+    +bool isSet
+    +bool isLocked
+    +bool isGetter
+    +String key
+    +T value
+    +int numberOfListeners
+    +WireDataListenersExecutionMode listenersExecutionMode
+    +bool lock()
+    +bool unlock()
+    +Future<void> refresh()
+    +Future<void> reset()
+    +Future<void> remove()
+    +WireData subscribe()
+    +Future<WireData> unsubscribe()
+    +bool hasListener()
+    -void _guardian()
+    -Future<void> _refreshInParallel()
+    -Future<void> _refreshSequentially()
+  }
+}
+
+package "wire::src::results.dart" {
+  class "WireSendResults" {
+    -List<dynamic> _list
+    -bool _noSubscribers
+    +bool hasError
+    +List<WireSendError> errors
+    +String errorsString
+    +List<dynamic> list
+    +bool signalHasNoSubscribers
+  }
+
+  class "WireSendError" {
+    -StateError _error
+    -String _message
+    +String message
+    +StateError error
+  }
+}
+
+"Wire<T>" o-- "WireCommunicateLayer"
+"Wire<T>" o-- "WireDataContainerLayer"
+"Wire<T>" o-- "WireMiddlewaresLayer"
+"Wire<T>" ..> "WireMiddleware"
+"Wire<T>" ..> "WireSendResults"
+"WireCommunicateLayer" o-- "Wire<T>"
+"WireMiddlewaresLayer" o-- "WireMiddleware"
+"WireDataContainerLayer" o-- "WireData<T>"
+"WireData<T>" ..> "WireDataLockToken"
+"WireData<T>" ..> "WireDataListenersExecutionMode"
+"WireSendResults" o-- "WireSendError"
+@enduml

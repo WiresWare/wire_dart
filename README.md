@@ -482,7 +482,9 @@ abstract class WireMiddleware {
 
 ![UML](uml/configuration.png)
 
-Generate UML with `dcdg` (PlantUML): `pub global run dcdg -o ./uml/configuration`
+The UML source is `uml/configuration.puml` (PlantUML). To regenerate `uml/configuration.png`, run `GRAPHVIZ_DOT=$(which dot) java -jar uml/plantuml.jar -tpng uml/configuration.puml` (Graphviz is required).
+
+You can also take a look online [here](https://t.ly/wire-plantuml-web) (link to PlantUML Web Server)
 
 ## Examples
 
