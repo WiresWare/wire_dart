@@ -56,15 +56,21 @@ class WireCommunicateLayer {
   }
 
   Future<dynamic> _transferOnWire(int wireId, [payload, scope]) async {
+    if (!_wireById.containsKey(wireId)) return null;
     final wire = _wireById[wireId]!;
     final isLookingInScope = scope != null;
     if (isLookingInScope && wire.scope != scope) return null;
     print('> WireLayers -> _transferOnWire: ${payload}');
     try {
-      final result = await wire.transfer(payload).catchError(_processSendError);
-      if (wire.withReplies && wire.replies-- == 1) {
-        await _removeWire(wire);
+      if (wire.withReplies) {
+        final isLastReply = wire.replies == 1;
+        if (isLastReply) await _removeWire(wire, clear: false);
+        wire.replies--;
       }
+
+      final result = await wire.transfer(payload).catchError(_processSendError);
+      final wasExhausted = !_wireById.containsKey(wireId);
+      if (wasExhausted) wire.clear();
       return result;
     } catch (e) {
       print('> WireLayers -> _transferOnWire -> failed to transfer data: ${payload} | ${e}');
@@ -153,21 +159,20 @@ class WireCommunicateLayer {
   /// @param    The Wire to remove.
   /// @return If there is no ids (no Wires) for that SIGNAL stop future perform
   ///
-  Future<bool> _removeWire(Wire<dynamic> wire) async {
+  Future<bool> _removeWire(Wire<dynamic> wire, {bool clear = true}) async {
     final wireId = wire.id;
     final signal = wire.signal;
 
-    // Remove Wire by wid
     _wireById.remove(wireId);
 
-    // Remove wid for Wire signal
-    final wireIdsForSignal = _wireIdsBySignal[signal]!;
+    final wireIdsForSignal = _wireIdsBySignal[signal];
+    if (wireIdsForSignal == null) return true;
     wireIdsForSignal.remove(wireId);
 
     final noMoreSignals = wireIdsForSignal.isEmpty;
     if (noMoreSignals) _wireIdsBySignal.remove(signal);
 
-    wire.clear();
+    if (clear) wire.clear();
 
     return noMoreSignals;
   }

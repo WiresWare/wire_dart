@@ -559,6 +559,36 @@ void main() {
       print('>\t WireSendResults.list.length = ${results.list.length}');
       expect(results.list.length, 1);
     });
+
+    test('6.2 Signal is not processed once replies counter reaches zero', () async {
+      const signal = 'race_condition_signal';
+      var callCount = 0;
+      await Wire.add(
+        Object(),
+        signal,
+        (_, __) async {
+          callCount++;
+          // Re-sending during execution must not re-trigger an exhausted wire.
+          final recursive = await Wire.send(signal);
+          expect(recursive.signalHasNoSubscribers, isTrue);
+          expect(callCount, 1);
+        },
+        replies: 1,
+      );
+
+      // First send consumes the single reply (counter: 1 -> 0).
+      final first = await Wire.send(signal);
+      expect(callCount, 1,
+          reason: 'the single reply must be processed exactly once');
+      expect(Wire.get(signal: signal), isEmpty,
+          reason: 'exhausted wire must be removed from the communication layer');
+
+      // Counter is now zero: a follow-up send must NOT process the signal.
+      final second = await Wire.send(signal);
+      expect(callCount, 1, reason: 'handler must not run when replies counter is zero');
+      expect(second.signalHasNoSubscribers, isTrue);
+      expect(second.list, isEmpty);
+    });
   });
 }
 
