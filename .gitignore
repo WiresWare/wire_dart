@@ -2,6 +2,8 @@
 .dart_tool/
 **/.idea/
 .fleet
+.zed
+.run
 .packages
 *.lock
 *node_modules/*
