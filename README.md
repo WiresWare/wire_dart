@@ -2,9 +2,28 @@
 
 Wire implements the ["Strings API"](https://medium.com/@vladimir.cores/introduction-of-strings-api-741f080ec63d) idea: a system's components — logical or visual — are described with sets of string keys instead of direct references. It provides two layers built from string keys: one binds keys to handlers (**communication**), the other binds keys to data observers (**data container**). One set of keys describes the data a component consumes (its **Data API**); another describes the signals it produces or reacts to (its **Signals API**).
 
+## Contents
+
+- [Legend](#legend)
+- [A library aimed at decoupling UI from business logic](#a-library-aimed-at-decoupling-ui-from-business-logic)
+- [Usage](#usage)
+- [A few words on architecture](#a-few-words-on-architecture)
+- [Using the Command Pattern](#using-the-command-pattern)
+- [Some history of the Strings API idea](#some-history-of-the-strings-api-idea)
+- [General concepts of MVC](#general-concepts-of-mvc)
+- [A few words about Flux](#a-few-words-about-flux)
+- [Wire in Flutter / `WireDataBuilder<T>`](#wire-in-flutter--wiredatabuildert)
+- [Wire API](#wire-api)
+- [Examples](#examples)
+- [License](#license)
+
+## A library aimed at decoupling UI from business logic
+
+![Schema](assets/wire-schema.jpeg)
+
 ## Legend
 
-The examples below follow the numbered steps from the diagram in the next section:
+The examples below follow the numbered steps shown in the diagram above:
 
 | Step | What happens |
 | --- | --- |
@@ -25,10 +44,6 @@ Terms used throughout this document:
 - **Signals API** — the set of string keys a component produces or reacts to.
 - **`WireData`** — an observable container holding the value for one data key (Data Container Layer).
 - **Middleware** — an observer of add/send/remove/data events, typically used for persistence or logging.
-
-## A library aimed at decoupling UI from business logic
-
-![Schema](assets/wire-schema.jpeg)
 
 Wire has two layers:
 
