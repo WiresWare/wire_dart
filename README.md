@@ -4,8 +4,8 @@ Wire implements the ["Strings API"](https://medium.com/@vladimir.cores/introduct
 
 ## Contents
 
-- [Legend](#legend)
 - [A library aimed at decoupling UI from business logic](#a-library-aimed-at-decoupling-ui-from-business-logic)
+- [Diagram steps and terminology](#diagram-steps-and-terminology)
 - [Usage](#usage)
 - [A few words on architecture](#a-few-words-on-architecture)
 - [Using the Command Pattern](#using-the-command-pattern)
@@ -21,7 +21,7 @@ Wire implements the ["Strings API"](https://medium.com/@vladimir.cores/introduct
 
 ![Schema](assets/wire-schema.jpeg)
 
-## Legend
+## Diagram steps and terminology
 
 The examples below follow the numbered steps shown in the diagram above:
 
