@@ -9,6 +9,7 @@ Wire implements the ["Strings API"](https://medium.com/@vladimir.cores/introduct
 - [Usage](#usage)
 - [A few words on architecture](#a-few-words-on-architecture)
 - [Using the Command Pattern](#using-the-command-pattern)
+- [Utilities](#utilities)
 - [Some history of the Strings API idea](#some-history-of-the-strings-api-idea)
 - [General concepts of MVC](#general-concepts-of-mvc)
 - [A few words about Flux](#a-few-words-about-flux)
@@ -166,7 +167,7 @@ class CounterStorageMiddleware extends WireMiddleware {
 }
 ```
 
-This middleware can be considered part of the Model.
+This middleware can be considered part of the Model. For logging only, the library already ships `WireViewerMiddleware`; for persistence, `WireMixinWithDatabase` with a `WireDatabaseServiceAbstract` implementation covers the same pattern (see Utilities below).
 
 ### Initialization
 
@@ -218,7 +219,7 @@ class TodoController {
 }
 ```
 
-Each `...Command` is a class that extends the utility class `WireCommandWithWireData`, which provides an `execute` method and helper methods that simplify data extraction from `Wire.data` (get, update, delete). Command constructors may accept properties, and the business logic is written in `execute`:
+Each `...Command` extends `WireCommandWithWireData`, which mixes in `WireMixinWithWireData` for data helpers (`get`, `getMany`, `update`, `reset`, `remove`, `has`, `hasNot`). The `execute()` method is declared by `WireCommandAbstract<T>` and implemented by each command. Command constructors may accept properties, and the business logic is written in `execute`:
 
 ```dart
 class TodoEditCommand extends WireCommandWithWireData<void> {
@@ -243,6 +244,19 @@ class TodoEditCommand extends WireCommandWithWireData<void> {
 ```
 
 You don't need to use `WireCommandWithWireData` as a base for your commands with helper methods, but `WireCommandAbstract` can be useful as a marker for commands processed from Wire's signals; its asynchronous nature allows them to be used in a sequence.
+
+## Utilities
+
+The library ships helper classes and mixins for the patterns used above. They are exported from `package:wire/wire.dart`, so import them with `import 'package:wire/wire.dart';`:
+
+- `WireCommandAbstract<T>` — the abstract `execute()` contract.
+- `WireCommandWithWireData<T>` — command base that mixes in `WireMixinWithWireData`.
+- `WireCommandWithRequiredData<T>` — command that waits for required data keys via `whenRequiredDataReady`.
+- `WireMixinWithWireData` — `has`, `hasNot`, `get`, `getMany`, `update`, `reset`, `remove`.
+- `WireMixinWithDatabase` and `WireDatabaseServiceAbstract` — persistence helpers (`exist`, `retrieve`, `persist`, `delete`).
+- `WireMixinWithWhenReady` — a `whenReady` future for components that initialise asynchronously.
+
+`WireViewerMiddleware` is a ready-made logging middleware; it lives at `package:wire/src/viewer.dart` and is not re-exported from `wire.dart`. See `example/todo-commands` for the command-based TodoMVC and `example/counter` for a storage middleware.
 
 ## Some history of the Strings API idea
 
@@ -301,7 +315,7 @@ TodoVO create(String text, String note, bool completed) {
 }
 ```
 
-`Wire.data('key')` plays the role of an active model: it holds `WireData` instances associated with string keys. `WireData` is a container for data (accessed through the `.value` property) and can be observed for changes by subscribing — `wireData.subscribe((value) async { ... })`. To update the value and notify listeners, just set it: `Wire.data('key', value: value)`. It's up to you where the value (`WireData.value`) is updated from: a separate entity, a model (with persistence to a database or a server), or directly from a controller or command.
+`Wire.data('key')` plays the role of an active model: it holds `WireData` instances associated with string keys. `WireData` is a container for data (accessed through the `.value` property) and can be observed for changes by subscribing — `wireData.subscribe((value) async { ... })`. To update the value and notify listeners, just set it: `Wire.data('key', value: value)`. It's up to you where the value (`WireData.value`) is updated from: a separate entity, a model (with persistence to a database or a server), or directly from a controller or command. The manual `Wire.data(...).value` checks shown above are already encapsulated by `WireMixinWithWireData.get`, `getMany`, and `update`.
 
 ### View
 
