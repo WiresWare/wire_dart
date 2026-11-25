@@ -62,13 +62,6 @@ class WireCommunicateLayer {
     if (isLookingInScope && wire.scope != scope) return null;
     print('> WireLayers -> _transferOnWire: ${payload}');
     try {
-      // Consume the reply BEFORE running the handler so that a handler which
-      // re-sends the same signal cannot re-trigger a wire that has exhausted
-      // its replies (fixes the replies race condition). The wire is removed
-      // from the lookup maps up front, but its listener is cleared only after
-      // transfer completes so the current invocation can still run. The
-      // replies counter itself (0 == exhausted) doubles as the "clear" flag,
-      // so no extra boolean is needed.
       if (wire.withReplies) {
         if (wire.replies == 1) {
           _wireById.remove(wireId);
