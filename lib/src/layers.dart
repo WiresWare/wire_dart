@@ -66,8 +66,9 @@ class WireCommunicateLayer {
       // re-sends the same signal cannot re-trigger a wire that has exhausted
       // its replies (fixes the replies race condition). The wire is removed
       // from the lookup maps up front, but its listener is cleared only after
-      // transfer completes so the current invocation can still run.
-      bool clearAfter = false;
+      // transfer completes so the current invocation can still run. The
+      // replies counter itself (0 == exhausted) doubles as the "clear" flag,
+      // so no extra boolean is needed.
       if (wire.withReplies) {
         if (wire.replies == 1) {
           _wireById.remove(wireId);
@@ -76,13 +77,13 @@ class WireCommunicateLayer {
             wireIdsForSignal.remove(wireId);
             if (wireIdsForSignal.isEmpty) _wireIdsBySignal.remove(wire.signal);
           }
-          clearAfter = true;
+          wire.replies = 0;
         } else {
           wire.replies--;
         }
       }
       final result = await wire.transfer(payload).catchError(_processSendError);
-      if (clearAfter) wire.clear();
+      if (wire.withReplies && wire.replies == 0) wire.clear();
       return result;
     } catch (e) {
       print('> WireLayers -> _transferOnWire -> failed to transfer data: ${payload} | ${e}');
