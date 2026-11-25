@@ -64,7 +64,7 @@ class WireCommunicateLayer {
     try {
       final isLastReply = wire.withReplies && wire.replies == 1;
       if (isLastReply) {
-        _unregisterWire(wire);
+        _removeWireFromMaps(wire);
       }
       if (wire.withReplies) {
         wire.replies--;
@@ -160,7 +160,7 @@ class WireCommunicateLayer {
   /// @param    The Wire to remove.
   /// @return If there is no ids (no Wires) for that SIGNAL stop future perform
   ///
-  void _unregisterWire(Wire<dynamic> wire) {
+  void _removeWireFromMaps(Wire<dynamic> wire) {
     final wireId = wire.id;
     final signal = wire.signal;
     _wireById.remove(wireId);
