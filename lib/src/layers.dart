@@ -160,34 +160,21 @@ class WireCommunicateLayer {
   /// @param    The Wire to remove.
   /// @return If there is no ids (no Wires) for that SIGNAL stop future perform
   ///
-  void _removeWireFromMaps(Wire<dynamic> wire) {
+  bool _removeWireFromMaps(Wire<dynamic> wire) {
     final wireId = wire.id;
     final signal = wire.signal;
     _wireById.remove(wireId);
     final wireIdsForSignal = _wireIdsBySignal[signal];
-    if (wireIdsForSignal != null) {
-      wireIdsForSignal.remove(wireId);
-      final noMoreWiresForSignal = wireIdsForSignal.isEmpty;
-      if (noMoreWiresForSignal) _wireIdsBySignal.remove(signal);
-    }
+    if (wireIdsForSignal == null) return true;
+    wireIdsForSignal.remove(wireId);
+    final noMoreWiresForSignal = wireIdsForSignal.isEmpty;
+    if (noMoreWiresForSignal) _wireIdsBySignal.remove(signal);
+    return noMoreWiresForSignal;
   }
 
   Future<bool> _removeWire(Wire<dynamic> wire) async {
-    final wireId = wire.id;
-    final signal = wire.signal;
-
-    // Remove Wire by wid
-    _wireById.remove(wireId);
-
-    // Remove wid for Wire signal
-    final wireIdsForSignal = _wireIdsBySignal[signal]!;
-    wireIdsForSignal.remove(wireId);
-
-    final noMoreSignals = wireIdsForSignal.isEmpty;
-    if (noMoreSignals) _wireIdsBySignal.remove(signal);
-
+    final noMoreSignals = _removeWireFromMaps(wire);
     wire.clear();
-
     return noMoreSignals;
   }
 }
