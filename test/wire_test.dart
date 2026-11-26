@@ -1,5 +1,4 @@
 import 'package:test/test.dart';
-import 'package:wire/utils/wire_command_with_wire_data.dart';
 import 'package:wire/wire.dart';
 
 typedef UserVO = Map<String, dynamic>;
