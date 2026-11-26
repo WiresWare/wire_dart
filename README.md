@@ -167,7 +167,7 @@ class CounterStorageMiddleware extends WireMiddleware {
 }
 ```
 
-This middleware can be considered part of the Model. For logging only, the library already ships `WireViewerMiddleware`; for persistence, `WireMixinWithDatabase` with a `WireDatabaseServiceAbstract` implementation covers the same pattern (see Utilities below).
+This middleware can be considered part of the Model. For logging only, the library has `WireViewerMiddleware`, but it is still **in development** and not ready for general use; for persistence, `WireMixinWithDatabase` with a `WireDatabaseServiceAbstract` implementation covers the same pattern (see Utilities below).
 
 ### Initialization
 
@@ -256,7 +256,7 @@ The library ships helper classes and mixins for the patterns used above. They ar
 - `WireMixinWithDatabase` and `WireDatabaseServiceAbstract` — persistence helpers (`exist`, `retrieve`, `persist`, `delete`).
 - `WireMixinWithWhenReady` — a `whenReady` future for components that initialise asynchronously.
 
-`WireViewerMiddleware` is a ready-made logging middleware; it lives at `package:wire/src/viewer.dart` and is not re-exported from `wire.dart`. See `example/todo-commands` for the command-based TodoMVC and `example/counter` for a storage middleware.
+`WireViewerMiddleware` is a logging middleware that is still **in development** (not ready for general use); it lives at `package:wire/src/viewer.dart` and is not re-exported from `wire.dart`. See `example/todo-commands` for the command-based TodoMVC and `example/counter` for a storage middleware.
 
 ## Some history of the Strings API idea
 
