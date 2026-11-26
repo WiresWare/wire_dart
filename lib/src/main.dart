@@ -244,18 +244,18 @@ class Wire<T> {
   /// [WireData] is a data container to changes of which anyone can subscribe/unsubscribe.
   /// It's associated with string key.
   /// [WireData] can't be null and Wire.data(key) will always return WireData instance.
-  /// Initial value will be null and special property of [WireData] isSet equal to false until any value is set
-  /// If value is null then delete method of [WireData] will be called, object will be removed from system
-  /// To protect [WireData] from being set from unappropriated places the [WireDataLockToken] token introduced.
-  /// When only specific object want have rights to write/change value of [WireData] it can create [WireDataLockToken] object
-  /// and pass it to [Wire.data] method as option parameter `token` to validate the assign action.
+  /// Initial value will be null and the [WireData.isSet] property is false until a non-null value is set.
+  /// Passing a null [value] is a no-op; use `WireData.remove()` to clear the data.
+  /// To protect [WireData] from being changed from inappropriate places, use a [WireDataLockToken]:
+  /// create one and pass it to [Wire.put] as `lock`, or call `WireData.lock(token)` / `unlock(token)`.
   /// [WireData] API:
   /// ```
-  /// WireData subscribe(WireDataListener listener)
-  /// WireData unsubscribe([WireDataListener listener])
-  /// void setValue(T input, { DataModificationToken token })
-  /// void refresh()
-  /// void remove()
+  /// WireData<T> subscribe(WireDataListener<T?> listener)
+  /// Future<WireData<T>> unsubscribe({WireDataListener<T?>? listener, bool immediate = false})
+  /// T? value
+  /// Future<void> refresh([T? optionalValue])
+  /// Future<void> reset()
+  /// Future<void> remove({bool clean = false})
   /// ```
   /// Returns [WireData]
   static WireData<T> data<T>(String key, {dynamic value, WireDataGetter<T>? getter}) {
