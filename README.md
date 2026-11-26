@@ -14,6 +14,7 @@ Wire implements the ["Strings API"](https://medium.com/@vladimir.cores/introduct
 - [A few words about Flux](#a-few-words-about-flux)
 - [Wire in Flutter / `WireDataBuilder<T>`](#wire-in-flutter--wiredatabuildert)
 - [Wire API](#wire-api)
+- [API behavior and caveats](#api-behavior-and-caveats)
 - [Examples](#examples)
 - [License](#license)
 
@@ -521,6 +522,15 @@ abstract class WireMiddleware {
 The UML source is `uml/configuration.puml` (PlantUML). To regenerate `uml/configuration.png`, run `GRAPHVIZ_DOT=$(which dot) java -jar uml/plantuml.jar -tpng uml/configuration.puml` (Graphviz is required).
 
 You can also take a look online [here](https://t.ly/wire-plantuml-web) (link to PlantUML Web Server)
+
+## API behavior and caveats
+
+- `Wire.add(..., replies: N)` controls automatic removal: `0` (the default) means the wire responds indefinitely, while `N > 0` means it is removed after responding N times.
+- `Wire.data(key, getter: ...)` computes the value on demand from the supplied `WireDataGetter<T>` and locks that data. Passing both `getter:` and `value:` throws `ERROR__VALUE_IS_NOT_ALLOWED_TOGETHER_WITH_GETTER`, and calling `subscribe` or `unsubscribe` on a getter throws `ERROR__SUBSCRIBE_TO_DATA_GETTER`.
+- `WireDataLockToken` is created with `WireDataLockToken()` and passed to `Wire.put(instance, lock: token)` or to `WireData.lock(token)` / `unlock(token)`. While locked, only code holding the matching token can change the value; `Wire.put` uses it to protect a registered instance from being overwritten.
+- `Wire.data(key, value: null)` is a no-op: the source only updates the value when a non-null `value` is supplied. Use `Wire.data(key).remove()` to clear it.
+- `Wire.middleware(...)` throws `ERROR__MIDDLEWARE_EXISTS` when the same middleware instance is registered twice.
+- `WireData.remove(clean: true)` bypasses the lock guardian. In addition to resetting the value to null, `remove()` clears all listeners, the `onRemove`/`onReset`/`onError` callbacks, and the refresh queue — after removal the data instance no longer emits updates.
 
 ## Examples
 
