@@ -537,40 +537,50 @@ You can also take a look online [here](https://t.ly/wire-plantuml-web) (link to 
 ### 1. Counter (web)
 
 - Open IntelliJ IDEA.
-- Select the build target — Dart Web — pointing to `example/counter/index.html`.
+- Select the build target — Dart Web — pointing to `example/counter/web/index.html`.
 - Run Debug.
 
 ### 2. TodoMVC
 
 **2.1 Dart Web and HTML template (or commands)**
 
-![Todo web with Wire](/assets/wire_example_todo_web.gif)
+![Todo web with Wire](assets/wire_example_todo_web.gif)
 - Open IntelliJ IDEA.
-- Select the build target — Dart Web — pointing to `example/todo/index.html`.
-- Run Debug or `sh run_debug.sh`.
+- Select the build target — Dart Web — pointing to `example/todo/web/index.html`.
+- Run Debug.
 
 **2.2 TodoMVC and Flutter**
 
-![Todo Flutter with Wire](https://github.com/WiresWare/wire_flutter/blob/master/assets/wire_flutter_example_todo.gif)
+![Todo Flutter with Wire](https://raw.githubusercontent.com/WiresWare/wire_flutter/master/assets/wire_flutter_example_todo.gif)
 [repo](https://github.com/WiresWare/wire_flutter/tree/master/example/wire_flutter_todo)
 
-### 2.3 Todo Angular
+### 2.3 Todo Angular (deprecated)
 
-![Todo Example with AngularDart using shared code](/assets/wire_example_todo_angular.gif)
-- Open IntelliJ IDEA.
-- Create a symlink (or a junction on Windows) to the `_shared/todo` folder in `example`, and put the link in the `todo_angular/lib/src/_shared` folder.
-- Run the Dart Web configuration with `index.html`.
+![Todo Example with AngularDart using shared code](assets/wire_example_todo_angular.gif)
+
+AngularDart is no longer supported and this example has no null-safety support.
+- Import `example/_shared` and `example/todo-angular` as modules in IntelliJ IDEA and run `dart pub get` in both.
+- The `wire_example_shared` path dependency in `example/todo-angular/pubspec.yaml` resolves the shared code; no symlink is needed.
+- Run the Dart Web configuration with `example/todo-angular/web/index.html`.
+
+### 2.4 TodoMVC with commands
+
+The `example/todo-commands` project implements the same TodoMVC behaviour with command objects instead of a model.
+- Open `example/todo-commands` as a module and run `dart pub get`.
+- Select the build target — Dart Web — pointing to `example/todo-commands/web/index.html`.
+- Run Debug.
 
 ### 3. API call variations (console)
 
-- Open IntelliJ IDEA.
+- Run `dart pub get` once in the example folder you are using.
+- Open IntelliJ IDEA (or run the target with `dart run`).
 - Select the build target — Dart Command Line App — pointing to `example/api/wire_api_example.dart`.
 - Run Debug.
 
 ## License
 
 ```
-Copyright 2020-2022 Vladimir Cores (Minkin)
+Copyright 2020-2026 Vladimir Cores (Minkin)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
