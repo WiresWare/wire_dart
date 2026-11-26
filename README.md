@@ -310,7 +310,7 @@ TodoVO create(String text, String note, bool completed) {
 
 The UI can also have its own state — visual state — which might not need to be stored persistently at all, only temporarily. Examples include an accordion's open tab, a button's hover state, tooltips, input highlighting, and so on. These states might depend on domain data and are generated at runtime based on certain conditions. Yes, a view can contain logic — for example, branching conditions that depend on the data passed in (`WireDataGetter` can simplify multiple conditions involving `WireData`). With Wire, a view consumes data from the data-container layer via `Wire.data`, then subscribes to updates and re-renders itself when a change happens — `wireData.subscribe((value) async { ... })`. If domain data is meant to be changed in the view (e.g., forms), it's good practice to copy it and send the copy for processing after modification in the view.
 
-The `CounterDisplay` view shown in the counter example above is the concrete implementation: it subscribes to a data key and re-renders itself in `update`.
+The [`CounterDisplay`](example/counter/lib/mvc/view/components/counter_display.dart) view is shown in [Steps 2, 7 of the counter example](#steps-2-7--the-view-subscribes-to-data-changes-and-knows-how-to-update-itself): it subscribes to a data key and re-renders itself in `update`.
 
 This is what data distribution might look like in an app:
 
