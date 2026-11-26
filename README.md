@@ -49,8 +49,6 @@ Terms used throughout this document:
 
 "Box" in the examples means a logical component: a controller, model, view, or middleware.
 
-The snippets use symbols defined in the `example/` projects rather than in the library: `CounterDataKeys`/`CounterSignalsKeys`, `DomElement`, `DivElement`, `ButtonElement`, `SpanElement`, `DomElement.dom`, `ViewSignals`, `DataKeys`, `InputDTO`/`EditDTO`/`FilterValues`, `CountCompletedGetter`, `TodoModel`, `TodoVO`, the `Todo*Command` classes, `ApplicationView`, and `ArchSampleKeys`. Look them up under `example/counter/lib/mvc`, `example/todo-commands/lib/src`, and `example/_shared/lib/todo`; `WireDataWidgetBuilder` is part of `wire_flutter`.
-
 Wire has two layers:
 
 - **Communication layer** — "signals" (string keys) with associated handlers bound to a specific scope. Each `Wire` instance holds a scope, and many wires can share the same scope. Its main methods are `Wire.add` and `Wire.send`.
@@ -64,6 +62,8 @@ Wire has also been ported to:
 
 - [Wire Haxe](https://github.com/WiresWare/wire_haxe), which can compile — or, more precisely, transpile — reusable code to any of the following languages: **JavaScript, Java, C#, C++, HL (HashLink), Lua, PHP**.
 - [Wire TS](https://github.com/WiresWare/wire_ts), with a todo-commands example.
+
+The snippets use symbols defined in the `example/` projects rather than in the library: `CounterDataKeys`/`CounterSignalsKeys`, `DomElement`, `DivElement`, `ButtonElement`, `SpanElement`, `DomElement.dom`, `ViewSignals`, `DataKeys`, `InputDTO`/`EditDTO`/`FilterValues`, `CountCompletedGetter`, `TodoModel`, `TodoVO`, the `Todo*Command` classes, `ApplicationView`, and `ArchSampleKeys`. Look them up under `example/counter/lib/mvc`, `example/todo-commands/lib/src`, and `example/_shared/lib/todo`; `WireDataWidgetBuilder` is part of `wire_flutter`.
 
 ## Usage
 
