@@ -1,18 +1,25 @@
-const webpack = require('../webpack.config.js');
+import { fileURLToPath } from 'node:url';
 
-module.exports = {
-  webpackFinal: (config) => {
-    return { ...config, resolve: { ...webpack.resolve }};
-  },
+export default {
   stories: [
-    "../stories/**/*.stories.mdx",
-    "../stories/**/*.stories.@(js|jsx|ts|tsx)"
+    '../stories/**/*.stories.@(js|jsx|ts|tsx)',
   ],
+  framework: {
+    name: '@storybook/html-vite',
+    options: {},
+  },
   addons: [
-    "@storybook/addon-links",
-    '@storybook/addon-viewport',
-    // "@storybook/addon-essentials",
-    // '@storybook/addon-storysource',
-    '@whitespace/storybook-addon-html',
-  ]
-}
+    '@storybook/addon-links',
+  ],
+  viteFinal: (config) => {
+    config.resolve = {
+      ...config.resolve,
+      alias: {
+        '~~': fileURLToPath(new URL('../web/assets/templates', import.meta.url)),
+        '~': fileURLToPath(new URL('../stories', import.meta.url)),
+        ...config.resolve?.alias,
+      },
+    };
+    return config;
+  },
+};

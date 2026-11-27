@@ -1,4 +1,4 @@
-import * as LoginPage from '~~/pages/login.html';
+import LoginPage from '~~/pages/login.html?raw';
 
 export default {
   title: '\'Pages/LoginPage',
